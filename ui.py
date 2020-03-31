@@ -1,4 +1,21 @@
+from bpy import utils
 from bpy.types import Panel
+
+def widgets():
+    return (
+     BG_PT_SOC_select,
+     BG_PT_SOC_init,
+     BG_PT_SOC_export,
+    )
+
+def register():
+    for widget in widgets():
+        utils.register_class(widget)
+
+def unregister():
+    for widget in widgets():
+        utils.unregister_class(widget)
+
 
 
 class SOCutPanel:
