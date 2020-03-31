@@ -1,3 +1,4 @@
+import bpy
 from bpy import utils
 from bpy.types import Panel
 
@@ -32,13 +33,14 @@ class BG_PT_SOC_select(SOCutPanel, Panel):
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = True
-        soc = context.scene.so_cut
+
+        ao = bpy.context.active_object
 
         # Widgets
-        layout.prop(soc, "cut_type")
-        layout.prop(soc, "reference_frame")
-        layout.prop(soc, "cut_depth")
-        layout.prop(soc, "tool_diameter")
+        layout.prop(ao, "cut_type")
+        layout.prop(ao, "reference_frame")
+        layout.prop(ao, "cut_depth")
+        layout.prop(ao, "tool_diameter")
 
 
 class BG_PT_SOC_init(SOCutPanel, Panel):
