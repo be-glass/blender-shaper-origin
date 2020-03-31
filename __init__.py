@@ -1,7 +1,4 @@
-import bpy
-from bpy import utils
-from bpy.props import PointerProperty
-
+from . import ui, properties, operators
 
 bl_info = {
     "name": "SO Cutting Toolbox",
@@ -15,19 +12,13 @@ bl_info = {
     "category": "Mesh",
 }
 
-from . import ui, properties
+files = [ui, properties, operators]
 
 
 def register():
-    ui.register()
+    [file.register() for file in files]
 
-    # bpy.types.Scene.so_cut = PointerProperty(type=properties.SceneProperties)
-
-
-
-    properties.register()
 
 def unregister():
-    ui.unregister()
-    properties.unregister()
+    [file.unregister() for file in files]
 

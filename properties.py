@@ -2,15 +2,15 @@ import bpy
 from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty
 from bpy.types import PropertyGroup
 
+
 def register():
     bpy.utils.register_class(SceneProperties)
     bpy.types.Scene.so_cut = PointerProperty(type=SceneProperties)
-    pass
+
 
 def unregister():
     bpy.utils.unregister_class(SceneProperties)
     del bpy.types.Scene.so_cut
-    pass
 
 
 class SceneProperties(PropertyGroup):

@@ -1,21 +1,22 @@
 from bpy import utils
 from bpy.types import Panel
 
-def widgets():
+
+def panels():
     return (
-     BG_PT_SOC_select,
      BG_PT_SOC_init,
+     BG_PT_SOC_select,
      BG_PT_SOC_export,
     )
 
 def register():
-    for widget in widgets():
+    for widget in panels():
         utils.register_class(widget)
 
-def unregister():
-    for widget in widgets():
-        utils.unregister_class(widget)
 
+def unregister():
+    for widget in panels():
+        utils.unregister_class(widget)
 
 
 class SOCutPanel:
@@ -39,6 +40,7 @@ class BG_PT_SOC_select(SOCutPanel, Panel):
         layout.prop(soc, "cut_depth")
         layout.prop(soc, "tool_diameter")
 
+
 class BG_PT_SOC_init(SOCutPanel, Panel):
     bl_label = "Initialization"
 
@@ -49,6 +51,8 @@ class BG_PT_SOC_init(SOCutPanel, Panel):
         soc = context.scene.so_cut
 
         # Widgets
+        layout.operator("mesh.socut_create_materials", text="Create Materials")
+        layout.operator("mesh.socut_create_sheet", text="Create Sheet")
 
 
 class BG_PT_SOC_export(SOCutPanel, Panel):
@@ -65,7 +69,5 @@ class BG_PT_SOC_export(SOCutPanel, Panel):
         layout.prop(soc, "use_apply_scale")
         layout.prop(soc, "export_path")
 
-        layout.label(text="Scale To")
-        row = layout.row(align=True)
-        # layout.row.operator("mesh.print3d_scale_to_volume", text="Export Cuts")
+        layout.operator("mesh.socut_export_cuts", text="Export Cuts")
 
