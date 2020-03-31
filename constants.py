@@ -1,6 +1,6 @@
 prefix = "SO_"
 
-sheet_name = prefix + "sheet"
+sheet_name = prefix + "Work Area"
 
 cut_face_color = {'Interior': (1, 1, 1, 1),
                   'Exterior': (0, 0, 0, 1),

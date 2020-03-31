@@ -50,6 +50,6 @@ class MESH_OT_socut_create_sheet(Operator):
     bl_description = "Create sheet to define dimensions and orientation of output."
 
     def execute(self, context):
-        print("sheet")
+        op_initialization.create_sheet(context)
         return {'FINISHED'}
 
