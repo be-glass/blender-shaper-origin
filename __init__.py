@@ -1,9 +1,11 @@
 from . import ui, properties, operators
 
+# https://wiki.blender.org/wiki/Process/Addons/Guidelines/metainfo
+
 bl_info = {
     "name": "SO Cutting Toolbox",
     "author": "Boris Glass 8)",
-    "blender": (2, 82, 0),
+    "blender": (2, 80, 0),
     "version": (0, 0, 3),
     "location": "3D View > Sidebar",
     "description": "SVG Export Utilities for cutting lines",
@@ -13,6 +15,8 @@ bl_info = {
 }
 
 files = [ui, properties, operators]
+
+operators.bl_info = bl_info
 
 
 def register():

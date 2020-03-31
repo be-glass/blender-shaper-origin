@@ -15,9 +15,9 @@ cut_encoding = {'Interior': ('black', 'white'),
                 'Guide': ('blue', 'none')
                 }
 
-svg_header='''\
+svg_header_template= '''\
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Blender SVG Export by BG v{version})  -->
+<!-- Generator: Blender SVG Export by {author} v{version})  -->
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
 width="{width:.1f}{unit}" height="{height:.1f}{unit}"          
 viewBox="{x0:.2f} {y0:.2f} {w:.2f} {h:.2f}" 

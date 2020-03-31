@@ -2,7 +2,7 @@ import bpy
 from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty
 from bpy.types import PropertyGroup
 
-from . import constants
+from . import constant
 
 # https://github.com/zeffii/BlenderPythonRecipes/wiki/Properties
 
@@ -42,12 +42,10 @@ def update_cut_type(self, context: bpy.types.Context):
     # TODO adjust cut visualization
 
     obj = context.active_object
-
     obj.data.materials.clear()
-
     if obj.cut_type != 'None':
         obj.data.materials.append(
-            bpy.data.materials[constants.prefix + obj.cut_type])
+            bpy.data.materials[constant.prefix + obj.cut_type])
 
 
 
