@@ -38,7 +38,7 @@ class BG_PT_SOC_export(SOCutPanel, Panel):
         layout.prop(soc, "selected_only")
         layout.prop(soc, "use_apply_scale")
         layout.prop(soc, "export_path")
-
+        layout.prop(soc, "separate_files")
         layout.operator("mesh.socut_export_cuts", text="Export Cuts")
 
 

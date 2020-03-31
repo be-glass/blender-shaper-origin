@@ -63,9 +63,10 @@ class MESH_OT_socut_export_cuts(Operator):
                   op_export_svg.svg_footer()
 
         dir_name = context.scene.so_cut.export_path
-        file_name = context.active_object.name
+        obj_name = context.active_object.name
+        file_name = f'{dir_name}/{obj_name}.svg'    # TODO choose blender scene name if
 
-        file = open( f'{dir_name}/{file_name}', 'w' )
+        file = open(file_name, 'w')
         if file:
             file.write(content)
             file.close()

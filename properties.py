@@ -114,6 +114,12 @@ class SceneProperties(PropertyGroup):
         default=False,
         options={'HIDDEN'},
     )
+    separate_files: BoolProperty(
+        name="Separate Files",
+        description="Export each shape in a separate file",
+        default=False,
+        options={'HIDDEN'},
+    )
     export_path: StringProperty(
         name="Export Directory",
         description="Path to directory where the files are created",
