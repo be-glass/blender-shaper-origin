@@ -2,6 +2,8 @@ from bpy import utils
 from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 
+from . import op_initialization
+
 
 def operators():
     return (
@@ -30,14 +32,17 @@ class MESH_OT_socut_export_cuts(Operator):
         print("export")
         return {'FINISHED'}
 
+
 class MESH_OT_socut_create_materials(Operator):
     bl_idname = "mesh.socut_create_materials"
     bl_label = "SO Cuts Export"
     bl_description = "Create Materials to highlight cutting shapes"
 
     def execute(self, context):
-        print("materials")
+
+        op_initialization.create_materials(context)
         return {'FINISHED'}
+
 
 class MESH_OT_socut_create_sheet(Operator):
     bl_idname = "mesh.socut_create_sheet"
