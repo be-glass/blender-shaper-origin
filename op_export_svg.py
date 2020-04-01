@@ -48,28 +48,6 @@ def svg_path(obj, points, is_closed):
     return f'<path d="{source}"/>'
 
 
-
-
-
-# def svg_group_material(context, material_id):
-#     source = ''
-#
-#     for object in bpy.data.objects:
-#         if material_id in object.data.materials.keys():
-#             source += svg_group_object(context, object)
-#
-#     if source:
-#         id = material_id.replace(constant.prefix, '')
-#         attributes = svg_group_attributes(id)
-#         return f'<g id="{id}" class="material" {attributes}>{source}</g>\n'
-#     else:
-#         return ""
-
-
-
-
-
-
 def svg_polygon(obj, vertices, polygon):
     points = [vertices[i] for i in polygon.vertices]
     return svg_path(obj, points, is_closed=True)
@@ -83,13 +61,10 @@ def svg_mesh(obj):
 
 def svg_curve(obj):
     return ''.join([
-        svg_path(obj, s.points, is_closed=False) for s in obj.data.splines
+        svg_path(obj, s.points, is_closed=s.use_cyclic_u) for s in obj.data.splines
     ])
+    # TODO check if cyclic switch is working
 
-
-#         id = material_id.replace(constant.prefix, '')
-#         attributes = svg_group_attributes(id)
-#         return f'<g id="{id}" class="material" {attributes}>{source}</g>\n'
 
 def svg_material_attributes(id):
     (stroke, fill) = constant.cut_encoding[id]
