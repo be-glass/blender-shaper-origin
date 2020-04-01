@@ -10,14 +10,11 @@ def dimensions(context, selection):
     w = (x1-x0) * scale
     h = (y1-y0) * scale
 
-    helper.add_Empty_at(x0, y0, z0)
-    helper.add_Empty_at(x1, y1, z1)
-
-
-
+    # debug:
+    # helper.add_Empty_at(x0, y0, z0)
+    # helper.add_Empty_at(x1, y1, z1)
 
     return x0, y0, x1, y1, w, h
-
 
 
 def vector2string(vector):
@@ -39,11 +36,11 @@ def svg_footer():
     return '</svg>\n'
 
 
-def svg_path(matrix_world, points, is_closed):
+def svg_path(obj, points, is_closed):
     source = ''
     path_cmd = 'M'
     for point in points:
-        vector = matrix_world @ point.co
+        vector = helper.transform_if_needed(obj, point.co)
         source += path_cmd + vector2string(vector)
         path_cmd = 'L'
     if is_closed:
@@ -76,20 +73,20 @@ def svg_path(matrix_world, points, is_closed):
 
 
 
-def svg_polygon(matrix_world, vertices, polygon):
+def svg_polygon(obj, vertices, polygon):
     points = [vertices[i] for i in polygon.vertices]
-    return svg_path(matrix_world, points, is_closed=True)
+    return svg_path(obj, points, is_closed=True)
 
 
 def svg_mesh(obj):
     return ''.join([
-        svg_polygon(obj.matrix_world, obj.data.vertices, p) for p in obj.data.polygons
+        svg_polygon(obj, obj.data.vertices, p) for p in obj.data.polygons
     ])
 
 
 def svg_curve(obj):
     return ''.join([
-        svg_path(obj.matrix_world, s.points, is_closed=False) for s in obj.data.splines
+        svg_path(obj, s.points, is_closed=False) for s in obj.data.splines
     ])
 
 

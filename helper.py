@@ -58,7 +58,8 @@ def boundaries(object_list):
         for p in range(7):
 
             v_local = Vector([bb[p][0], bb[p][1], bb[p][2]])
-            v = mw @ v_local
+
+            v = transform_if_needed(obj, v_local)
 
             x.append(v[0])
             y.append(v[1])
@@ -68,5 +69,15 @@ def boundaries(object_list):
 
     return min(x), min(y), min(z), max(x), max(y), max(z)
 
+
 def add_Empty_at(*location):
     bpy.ops.object.add(type='EMPTY', location=(location))
+
+
+def transform_if_needed(obj, coordinates):
+    if obj.reference_frame == 'local':
+        return coordinates
+    elif obj.reference_frame == 'object':
+        return 'TODO'
+    else:  # 'global'
+        return obj.matrix_world @ coordinates

@@ -70,11 +70,11 @@ class ObjectProperties(PropertyGroup):
     reference_frame = EnumProperty(
         name="Reference",
         description="Reference",
-        items=[('lcl', "Local", "local Reference", "", 0),
-               ('glb', "Global", "global Reference", "", 1),
-               ('obj', "Object", "relative to object", "", 2),
+        items=[('local', "Local", "local Reference", "", 0),
+               ('global', "Global", "global Reference", "", 1),
+               ('object', "Object", "relative to object", "", 2),
                ],
-        default='lcl',
+        default='global',
         options={'HIDDEN'},
     )
 
