@@ -70,9 +70,8 @@ class ObjectProperties(PropertyGroup):
     reference_frame = EnumProperty(
         name="Reference",
         description="Reference",
-        items=[('local', "Local", "local Reference", "", 0),
-               ('global', "Global", "global Reference", "", 1),
-               ('object', "Object", "relative to object", "", 2),
+        items=[('global', "Global", "global Reference", "", 0),
+               ('local', "Local", "local Reference", "", 1),
                ],
         default='global',
         options={'HIDDEN'},
@@ -95,9 +94,9 @@ class ObjectProperties(PropertyGroup):
 
 class SceneProperties(PropertyGroup):
 
-    use_apply_scale: BoolProperty(
-        name="Apply Scale",
-        description="Apply scene scale setting on export",
+    use_transformations: BoolProperty(
+        name="Apply transformations",
+        description="Apply object transformations during export",
         default=True,
         options={'HIDDEN'},
     )

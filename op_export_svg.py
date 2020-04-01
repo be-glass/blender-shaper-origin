@@ -50,9 +50,6 @@ def svg_path(obj, points, is_closed):
 
 
 
-# def svg_group_attributes(id):
-#     (stroke, fill) = constant.cut_encoding[id]
-#     return f'stroke="{stroke}" fill="{fill}"'
 
 # def svg_group_material(context, material_id):
 #     source = ''
@@ -90,6 +87,15 @@ def svg_curve(obj):
     ])
 
 
+#         id = material_id.replace(constant.prefix, '')
+#         attributes = svg_group_attributes(id)
+#         return f'<g id="{id}" class="material" {attributes}>{source}</g>\n'
+
+def svg_material_attributes(id):
+    (stroke, fill) = constant.cut_encoding[id]
+    return f'stroke="{stroke}" fill="{fill}"'
+
+
 def svg_object(obj):
     if obj.type == 'MESH':
         content = svg_mesh(obj)
@@ -98,8 +104,10 @@ def svg_object(obj):
     else:
         return ''
 
+    attributes = svg_material_attributes(obj.cut_type)
+
     return \
-        f'<g id="{obj.name_full}" class="{obj.type}">' + \
+        f'<g id="{obj.name_full}" class="{obj.type}" {attributes}>' + \
         ''.join(content) + \
         '</g>'
 
