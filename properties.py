@@ -31,30 +31,16 @@ def unregister():
 
 def update_cut_depth(self, context):
     pass
-    # TODO adjust distance between shape and reference
-
 
 def update_tool_diameter(self, context):
     pass
-    # TODO adjust cut visualization
 
 def update_cut_type(self, context: bpy.types.Context):
-    # TODO adjust cut visualization
-
     obj = context.active_object
-
-
-    if helper.check_type(obj, constant.valid_types):
-
-
-
-
-        obj.data.materials.clear()
-        if obj.cut_type != 'None':
-            obj.data.materials.append(
-                bpy.data.materials[constant.prefix + obj.cut_type])
-
-
+    obj.data.materials.clear()
+    if obj.cut_type != 'None':
+        material = helper.get_material(obj.cut_type)
+        obj.data.materials.append(material)
 
 class ObjectProperties(PropertyGroup):
 

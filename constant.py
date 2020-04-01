@@ -20,7 +20,7 @@ svg_header_template= '''\
 <!-- Generator: Blender SVG Export by {author} v{version})  -->
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
 xml:space="preserve" style="background-color:#d0d0d0" stroke-width="3%"
-width="{width:.1f}{unit}" height="{height:.1f}{unit}"          
+width="{width:.2f}{unit}" height="{height:.2f}{unit}"          
 viewBox="{x0:.2f} {y0:.2f} {w:.2f} {h:.2f}">
 '''
 

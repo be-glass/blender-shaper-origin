@@ -1,23 +1,22 @@
 import bpy
 
-from . import constant
+from . import constant, helper
 
 
-def dimensions(scale):
-    if constant.sheet_name in bpy.data.objects.keys():
-        sheet = bpy.data.objects[constant.sheet_name]
-        (w, h, zz) = sheet.dimensions
-        (x0, y0, z0) = sheet.data.vertices[0].co
-        (x1, y1, z1) = sheet.data.vertices[3].co
-        # TODO: warn if Z is not zero
-    else:
-        (x0, y0, x1, y1) = (0, 0, 1000, 1000)
-        (w, h) = (300, 200)
-    return x0, y0, x1, y1, w*scale, h*scale
+def dimensions(context, selection):
+
+    x0, y0, z0, x1, y1, z1 = helper.boundaries(selection)
+    scale = context.scene.unit_settings.scale_length
+    w = (x1-x0) * scale
+    h = (y1-y0) * scale
+
+    helper.add_Empty_at(x0, y0, z0)
+    helper.add_Empty_at(x1, y1, z1)
 
 
-# def scale(context):
-#     return context.scene.unit_settings.scale_length
+
+
+    return x0, y0, x1, y1, w, h
 
 
 
@@ -25,13 +24,13 @@ def vector2string(vector):
     return constant.svg_coords.format(vector[0], vector[1])
 
 
-def svg_header(context, bl_info):
+def svg_header(context, selection, bl_info):
     version = '.'.join([str(i) for i in bl_info['version']])
-    (x0, y0, x1, y1, w, h) = dimensions(bpy.context.scene.unit_settings.scale_length)
+    (x0, y0, x1, y1, w, h) = dimensions(context, selection)
 
     return constant.svg_header_template.format(
-        x0=x0, w=x1-x0, y0=y0, h=y1-y0,
-        width=w, height=h, unit="m",   # TODO fix unit handling
+        x0=x0, w=x1-x0, y0=-y1, h=y1-y0,
+        width=w*1000, height=h*1000, unit="mm",
         version=version, author=bl_info['author'],
     )
 
@@ -40,11 +39,11 @@ def svg_footer():
     return '</svg>\n'
 
 
-def svg_path(context, points, is_closed):
+def svg_path(matrix_world, points, is_closed):
     source = ''
     path_cmd = 'M'
     for point in points:
-        vector = context.object.matrix_world @ point.co
+        vector = matrix_world @ point.co
         source += path_cmd + vector2string(vector)
         path_cmd = 'L'
     if is_closed:
@@ -77,28 +76,28 @@ def svg_path(context, points, is_closed):
 
 
 
-def svg_polygon(context, vertices, polygon):
+def svg_polygon(matrix_world, vertices, polygon):
     points = [vertices[i] for i in polygon.vertices]
-    return svg_path(context, points, is_closed=True)
+    return svg_path(matrix_world, points, is_closed=True)
 
 
-def svg_mesh(context, obj):
+def svg_mesh(obj):
     return ''.join([
-        svg_polygon(context, obj.data.vertices, p) for p in obj.data.polygons
+        svg_polygon(obj.matrix_world, obj.data.vertices, p) for p in obj.data.polygons
     ])
 
 
-def svg_curve(context, obj):
+def svg_curve(obj):
     return ''.join([
-        svg_path(context, s.points, is_closed=False) for s in obj.data.splines
+        svg_path(obj.matrix_world, s.points, is_closed=False) for s in obj.data.splines
     ])
 
 
-def svg_object(context, obj):
+def svg_object(obj):
     if obj.type == 'MESH':
-        content = svg_mesh(context, obj)
+        content = svg_mesh(obj)
     elif obj.type == 'CURVE':
-        content = svg_curve(context, obj)
+        content = svg_curve(obj)
     else:
         return ''
 
@@ -108,16 +107,16 @@ def svg_object(context, obj):
         '</g>'
 
 
-def svg_body(context, selection):
+def svg_body(selection):
     return \
         '<g transform="scale(1,-1)">' + \
         ''.join([
-            svg_object(context, obj) for obj in selection
+            svg_object(obj) for obj in selection
         ]) + '</g>'
 
 
 def svg_content(context, selection, bl_info):
     return \
-        svg_header(context, bl_info) + \
-        svg_body(context, selection) + \
+        svg_header(context, selection, bl_info) + \
+        svg_body(selection) + \
         svg_footer()
