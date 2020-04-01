@@ -23,3 +23,7 @@ xml:space="preserve" style="background-color:#d0d0d0" stroke-width="3%"
 width="{width:.1f}{unit}" height="{height:.1f}{unit}"          
 viewBox="{x0:.2f} {y0:.2f} {w:.2f} {h:.2f}">
 '''
+
+valid_types = ['MESH', 'CURVE']
+
+svg_coords = '{:.2f} {:.2f}'

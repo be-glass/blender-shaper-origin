@@ -1,10 +1,9 @@
 import bpy
-from bpy import utils
 from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 
+from . import helper, constant
 from . import op_initialization, op_export_svg
-
 
 bl_info = {
     "name": "n/a",
@@ -58,21 +57,25 @@ class MESH_OT_socut_export_cuts(Operator):
 
     def execute(self, context):
 
-        content = op_export_svg.svg_header(bl_info) + \
-                  op_export_svg.svg_body(context) + \
-                  op_export_svg.svg_footer()
-
         dir_name = context.scene.so_cut.export_path
-        obj_name = context.active_object.name
-        file_name = f'{dir_name}/{obj_name}.svg'    # TODO choose blender scene name if
 
-        file = open(file_name, 'w')
-        if file:
-            file.write(content)
-            file.close()
+
+        items = bpy.context.selected_objects if context.scene.so_cut.selected_only \
+            else bpy.context.scene.objects
+        valid_items = helper.filter_valid(items, constant.valid_types)
+
+        if context.scene.so_cut.separate_files:
+            selection_set = {}
+            for obj in valid_items:
+                name = obj.name
+                selection_set[obj.name] = [obj]
+        else:
+            name = helper.project_name()
+            selection_set = {name: valid_items}
+
+        for name, selection in selection_set.items():
+            content = op_export_svg.svg_content(context, selection, bl_info)
+            file_name = f'{dir_name}/{name}.svg'
+            helper.write(content, file_name)
 
         return {'FINISHED'}
-
-
-
-

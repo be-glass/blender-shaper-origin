@@ -68,9 +68,10 @@ class BG_PT_SOC_select(SOCutPanel, Panel):
 
         ao = bpy.context.active_object
 
-        # Widgets
-        layout.prop(ao, "cut_type")
-        layout.prop(ao, "reference_frame")
-        layout.prop(ao, "cut_depth")
-        layout.prop(ao, "tool_diameter")
+        if ao:
+            # Widgets
+            layout.prop(ao, "cut_type")
+            layout.prop(ao, "reference_frame")
+            layout.prop(ao, "cut_depth")
+            layout.prop(ao, "tool_diameter")
 
