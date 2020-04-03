@@ -43,6 +43,8 @@ def update_cut_type(self, context: bpy.types.Context):
         material = helper.get_material(obj.soc_cut_type)
         obj.data.materials.append(material)
 
+
+
 class ObjectProperties(PropertyGroup):
 
 

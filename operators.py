@@ -3,7 +3,7 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 
 from . import helper, constant
-from . import op_initialization, op_export_svg
+from . import op_export_svg
 
 bl_info = {
     "name": "n/a",
@@ -14,8 +14,6 @@ bl_info = {
 def operators():
     return (
         MESH_OT_socut_export_cuts,
-        MESH_OT_socut_create_materials,
-        MESH_OT_socut_create_sheet,
     )
 
 
@@ -27,27 +25,6 @@ def register():
 def unregister():
     for widget in operators():
         unregister_class(widget)
-
-
-class MESH_OT_socut_create_materials(Operator):
-    bl_idname = "mesh.socut_create_materials"
-    bl_label = "SO Cuts Export"
-    bl_description = "Create Materials to highlight cutting shapes"
-
-    def execute(self, context):
-
-        op_initialization.create_materials(context)
-        return {'FINISHED'}
-
-
-class MESH_OT_socut_create_sheet(Operator):
-    bl_idname = "mesh.socut_create_sheet"
-    bl_label = "SO Cuts Export"
-    bl_description = "Create sheet to define dimensions and orientation of output."
-
-    def execute(self, context):
-        op_initialization.create_sheet(context)
-        return {'FINISHED'}
 
 
 class MESH_OT_socut_export_cuts(Operator):
