@@ -82,7 +82,7 @@ class ObjectProperties(PropertyGroup):
         name="Cut Type",
         description="SO cut type",
         items=[('None', 'None', 'No Cut', '', 0),
-               ('Outline', 'Outline', "Outline of work piece", 1),
+               ('Perimeter', 'Perimeter', "Defines the outer perimeter of work piece", 1),
                ('Exterior', 'Exterior', 'Exterior Cut', '', 2),
                ('Cutout', 'Cutout', 'Cutout', 3),
                ('Interior', 'Interior', 'Interior Cut', '', 4),

@@ -75,9 +75,9 @@ def add_Empty_at(*location):
 
 
 def transform_if_needed(obj, coordinates):
-    if obj.reference_frame == 'local':
+    if obj.soc_reference_frame == 'local':
         return coordinates
-    elif obj.reference_frame == 'object':
+    elif obj.soc_reference_frame == 'object':
         return 'TODO'
     else:  # 'global'
         return obj.matrix_world @ coordinates

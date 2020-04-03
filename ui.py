@@ -70,9 +70,9 @@ class BG_PT_SOC_select(SOCutPanel, Panel):
 
         if ao:
             # Widgets
-            layout.prop(ao, "cut_type")
-            layout.prop(ao, "reference_frame")
-            layout.prop(ao, "cut_depth")
-            layout.prop(ao, "tool_diameter")
-            # layout.prop(ao, "simulate")
+            layout.prop(ao, "soc_cut_type")
+            layout.prop(ao, "soc_reference_frame")
+            layout.prop(ao, "soc_cut_depth")
+            layout.prop(ao, "soc_tool_diameter")
+            layout.prop(ao, "soc_simulate")
 
