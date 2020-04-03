@@ -6,7 +6,7 @@ from bpy.types import Panel
 def panels():
     return [
      BG_PT_SOC_export,
-     BG_PT_SOC_init,
+     # BG_PT_SOC_init,
      BG_PT_SOC_select,
     ]
 
@@ -44,18 +44,18 @@ class BG_PT_SOC_export(SOCutPanel, Panel):
 
 
 
-class BG_PT_SOC_init(SOCutPanel, Panel):
-    bl_label = "Initialization"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.use_property_split = True
-        layout.use_property_decorate = True
-        soc = context.scene.so_cut
-
-        # Widgets
-        layout.operator("mesh.socut_create_materials", text="Create Materials")
-        layout.operator("mesh.socut_create_sheet", text="Create Sheet")
+# class BG_PT_SOC_init(SOCutPanel, Panel):
+#     bl_label = "Initialization"
+#
+#     def draw(self, context):
+#         layout = self.layout
+#         layout.use_property_split = True
+#         layout.use_property_decorate = True
+#         soc = context.scene.so_cut
+#
+#         # Widgets
+#         layout.operator("mesh.socut_create_materials", text="Create Materials")
+#         layout.operator("mesh.socut_create_sheet", text="Create Sheet")
 
 
 class BG_PT_SOC_select(SOCutPanel, Panel):
@@ -74,4 +74,5 @@ class BG_PT_SOC_select(SOCutPanel, Panel):
             layout.prop(ao, "reference_frame")
             layout.prop(ao, "cut_depth")
             layout.prop(ao, "tool_diameter")
+            # layout.prop(ao, "simulate")
 

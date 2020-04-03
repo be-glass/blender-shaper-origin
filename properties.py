@@ -12,21 +12,22 @@ def register():
 
     bpy.types.Scene.so_cut = PointerProperty(type=SceneProperties)
 
-    bpy.types.Object.cut_depth = ObjectProperties.cut_depth
-    bpy.types.Object.tool_diameter = ObjectProperties.tool_diameter
-    bpy.types.Object.reference_frame = ObjectProperties.reference_frame
-    bpy.types.Object.cut_type = ObjectProperties.cut_type
-
+    bpy.types.Object.soc_cut_depth = ObjectProperties.cut_depth
+    bpy.types.Object.soc_tool_diameter = ObjectProperties.tool_diameter
+    bpy.types.Object.soc_reference_frame = ObjectProperties.reference_frame
+    bpy.types.Object.soc_cut_type = ObjectProperties.cut_type
+    bpy.types.Object.soc_simulate = ObjectProperties.simulate
 
 
 def unregister():
     bpy.utils.unregister_class(SceneProperties)
     del bpy.types.Scene.so_cut
 
-    del bpy.types.Object.cut_depth
-    del bpy.types.Object.tool_diameter
-    del bpy.types.Object.reference_frame
-    del bpy.types.Object.cut_type
+    del bpy.types.Object.soc_cut_depth
+    del bpy.types.Object.soc_tool_diameter
+    del bpy.types.Object.soc_reference_frame
+    del bpy.types.Object.soc_cut_type
+    del bpy.types.Object.soc_simulate
 
 
 def update_cut_depth(self, context):
@@ -38,8 +39,8 @@ def update_tool_diameter(self, context):
 def update_cut_type(self, context: bpy.types.Context):
     obj = context.active_object
     obj.data.materials.clear()
-    if obj.cut_type != 'None':
-        material = helper.get_material(obj.cut_type)
+    if obj.soc_cut_type != 'None':
+        material = helper.get_material(obj.soc_cut_type)
         obj.data.materials.append(material)
 
 class ObjectProperties(PropertyGroup):
@@ -81,14 +82,24 @@ class ObjectProperties(PropertyGroup):
         name="Cut Type",
         description="SO cut type",
         items=[('None', 'None', 'No Cut', '', 0),
-               ('Interior', 'Interior', 'Interior Cut', '', 1),
+               ('Outline', 'Outline', "Outline of work piece", 1),
                ('Exterior', 'Exterior', 'Exterior Cut', '', 2),
-               ('Online', 'On Line', 'On Line Cut', '', 3),
-               ('Pocket', 'Pocketing', 'Pocketing', '', 4),
-               ('Guide', 'Guide', '', 'Guide Line', 5)],
+               ('Cutout', 'Cutout', 'Cutout', 3),
+               ('Interior', 'Interior', 'Interior Cut', '', 4),
+               ('Pocket', 'Pocketing', 'Pocketing', '', 5),
+               ('Online', 'On Line', 'On Line Cut', '', 6),
+               ('Guide', 'Guide', '', 'Guide Line', 7),
+               ],
+
         default='None',
         options = {'HIDDEN'},
         update = update_cut_type
+    )
+    simulate = BoolProperty(
+        name="Simulate cut",
+        description="Simulate cut",
+        default=True,
+        options={'HIDDEN'},
     )
 
 

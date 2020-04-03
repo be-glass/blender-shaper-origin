@@ -79,7 +79,7 @@ def svg_object(obj):
     else:
         return ''
 
-    attributes = svg_material_attributes(obj.cut_type)
+    attributes = svg_material_attributes(obj.soc_cut_type)
 
     return \
         f'<g id="{obj.name_full}" class="{obj.type}" {attributes}>' + \
