@@ -36,15 +36,15 @@ def check_type(obj, valid_types):
     return True if remain else False
 
 
-def get_material(cut_type):
-    materials = bpy.data.materials
-    id = constant.prefix+cut_type
-    if id in materials.keys():
-        m = materials[id]
-    else:
-        m = materials.new(id)
-    m.diffuse_color = constant.cut_face_color[cut_type]
-    return m
+# def get_material(cut_type):
+#     materials = bpy.data.materials
+#     id = constant.prefix+cut_type
+#     if id in materials.keys():
+#         m = materials[id]
+#     else:
+#         m = materials.new(id)
+#     m.diffuse_color = constant.cut_face_color[cut_type]
+#     return m
 
 
 def boundaries(object_list):
@@ -81,3 +81,7 @@ def transform_if_needed(obj, coordinates):
         return 'TODO'
     else:  # 'global'
         return obj.matrix_world @ coordinates
+
+
+def find_collection(obj):
+    return [c for c in bpy.data.collections if obj.name in c.objects.keys()]

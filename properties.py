@@ -2,7 +2,7 @@ import bpy
 from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty
 from bpy.types import PropertyGroup
 
-from . import constant, helper
+from . import constant, helper, simulation
 
 # https://github.com/zeffii/BlenderPythonRecipes/wiki/Properties
 
@@ -31,19 +31,13 @@ def unregister():
 
 
 def update_cut_depth(self, context):
-    pass
+    simulation.update(context.active_object)
 
 def update_tool_diameter(self, context):
-    pass
+    simulation.update(context.active_object)
 
 def update_cut_type(self, context: bpy.types.Context):
-    obj = context.active_object
-    obj.data.materials.clear()
-    if obj.soc_cut_type != 'None':
-        material = helper.get_material(obj.soc_cut_type)
-        obj.data.materials.append(material)
-
-
+    simulation.setup(context.active_object)
 
 class ObjectProperties(PropertyGroup):
 
@@ -51,7 +45,7 @@ class ObjectProperties(PropertyGroup):
     cut_depth = FloatProperty(
         name="Cut Depth",
         description="Cut depth (mm)",
-        default=0.0,
+        default=5.0,
         min=-10.0,
         max=50.0,
         unit='LENGTH',
@@ -102,6 +96,7 @@ class ObjectProperties(PropertyGroup):
         description="Simulate cut",
         default=True,
         options={'HIDDEN'},
+        update = update_cut_type
     )
 
 
