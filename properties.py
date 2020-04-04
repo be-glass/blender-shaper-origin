@@ -13,8 +13,6 @@ def register():
     bpy.utils.register_class(SceneProperties)
 
     bpy.types.Scene.so_cut = PointerProperty(type=SceneProperties)
-    bpy.types.Scene.soc_cut_list = list()
-
 
     bpy.types.Object.soc_cut_depth = ObjectProperties.cut_depth
     bpy.types.Object.soc_tool_diameter = ObjectProperties.tool_diameter
@@ -25,17 +23,12 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(SceneProperties)
-    del bpy.types.Scene.so_cut_list
 
     del bpy.types.Object.soc_cut_depth
     del bpy.types.Object.soc_tool_diameter
     del bpy.types.Object.soc_reference_frame
     del bpy.types.Object.soc_cut_type
     del bpy.types.Object.soc_simulate
-
-    # del bpy.types.Collection.soc_perimeters
-    # del bpy.types.Collection.soc_curve_cuts
-    # del bpy.types.Collection.soc_mesh_cuts
 
 
 def update_cut_depth(self, context):
@@ -49,7 +42,8 @@ def update_tool_diameter(self, context):
 
 
 def update_cut_type(self, context):
-    simulation.rebuild(context)
+    simulation.update(context, reset=True)
+
 
 class ObjectProperties(PropertyGroup):
     cut_depth = FloatProperty(

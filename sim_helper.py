@@ -2,11 +2,6 @@ import bpy
 from . import helper, constant
 
 
-def delete_old_cuts(context, obj):
-    for cut in context.scene.soc_cut_list:
-        if cut.obj == obj:
-            cut.delete(context)
-
 
 def get_internal_collection(name, sibling):
     first_parent = helper.find_collection(sibling)[0]
@@ -42,3 +37,19 @@ def perimeter_thickness(obj):
 
     else:
         return 10.0  # TODO unit
+
+def delete_modifiers(obj):
+    for modifier in obj.modifiers:
+        if modifier.name.startswith(constant.prefix):
+            obj.modifiers.remove(modifier)
+
+def delete_internal_objects(obj):
+    collection = obj.users_collection[0]
+    if 'SOC_internal' in collection.children.keys():
+        internal_collection = collection.children['SOC_internal']
+        [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if
+         o.name.startswith("SOC_" + obj.name)]
+
+def cleanup(context, obj):
+    delete_modifiers(obj)
+    delete_internal_objects(obj)

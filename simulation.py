@@ -3,111 +3,57 @@ import bpy
 from . import constant, helper, sim_helper
 
 
-def rebuild(context):
-    active_obj = context.object
-    cut_objs = sim_helper.find_cut_objects(context)
-    bound_objs = [c.obj for c in context.scene.soc_cut_list]
+def update(context, reset=False):
+    obj = context.object
 
-    objects = ( set(cut_objs) - set(bound_objs) ) | set([active_obj])
-
-    for obj in objects:
-        create(context, obj)
-    helper.select_active(context, active_obj)
-
-
-def create(context, obj):
-
-    helper.select_active(context, obj)
-
-    sim_helper.delete_old_cuts(context, obj)
-
-    if not obj.soc_simulate:
+    if (not obj.soc_simulate) or (obj.soc_cut_type == 'None'):
+        sim_helper.cleanup(context, obj)
         return
 
     if obj.soc_cut_type == 'Perimeter':
-        Perimeter(context, obj)
-
-    elif obj.soc_cut_type in ['Exterior', 'Interior', 'Online']:
-        if obj.type != 'CURVE':
-            helper.error_msg("only curves here")
-            return()
-
-        CurveCut(context, obj)
-
-    elif obj.soc_cut_type in ['Cutout', 'Pocket']:
-        if obj.type != 'MESH':
-            helper.error_msg("only meshes here")
-            return ()
-
-        MeshCut(context, obj)
-
-    elif obj.soc_cut_type == 'None':
-        pass
-
+        Cut = Perimeter
+    elif obj.soc_cut_type in ['Exterior', 'Interior', 'Online'] and obj.type == 'CURVE':
+        Cut = CurveCut
+    elif obj.soc_cut_type in ['Cutout', 'Pocket'] and obj.type == 'MESH':
+        Cut = MeshCut
     else:
         helper.err_implementation()
+        return
 
+    cut = Cut(context, obj)
 
+    if reset:
+        cut.setup(context)
 
-
-def update(context):
-    obj = context.object
-    cuts = context.scene.soc_cut_list
-
-    [cut.update(context) for cut in cuts if cut.obj == obj]
-
-
-
+    cut.update(context)
+    helper.select_active(context, obj)
 
 
 class Simulation:
 
     def __init__(self, context=None, obj=None):
         self.obj = obj
-        context.scene.soc_cut_list.append(self)
         obj.display_type = 'TEXTURED'
-        self.delete_modifiers()
-        self.delete_internal_objects()
-
+        self.delete(context)
         self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', obj)
 
     def delete(self, context):
-        if self in context.scene.soc_cut_list:
-            context.scene.soc_cut_list.remove(self)
-        self.delete_modifiers()
-        self.delete_internal_objects()
-
-    def delete_modifiers(self):
-        for modifier in self.obj.modifiers:
-            if modifier.name.startswith(constant.prefix):
-                self.obj.modifiers.remove(modifier)
-
-    def delete_internal_objects(self):
-        name = f'SOC_{self.obj.name}.bevel'
-
-        # delete old object
-        collection = self.obj.users_collection[0]
-        if 'SOC_internal' in collection.children.keys():
-            internal_collection = collection.children['SOC_internal']
-            [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if
-             o.name.startswith("SOC_" + self.obj.name)]
+        sim_helper.delete_modifiers(self.obj)
+        sim_helper.delete_internal_objects(self.obj)
 
     def adjust_solidify_thickness(self, delta=0.0):
         if 'SOC_Solidify' in self.obj.modifiers:
             self.obj.modifiers['SOC_Solidify'].thickness = self.obj.soc_cut_depth + delta
 
-    def perimeters(self, context):
-        collection = context.object.users_collection[0]
-        all_perimeters = sim_helper.find_siblings_by_type(context.object, 'Perimeter')
-        perimeter_objs = [o for o in all_perimeters if o in collection.objects.keys()]
-        return [c for c in context.scene.soc_cut_list if isinstance(c, Perimeter)]
+    # def perimeters(self, context):
+    #     collection = context.object.users_collection[0]
+    #     all_perimeters = sim_helper.find_siblings_by_type(context.object, 'Perimeter')
+    #     perimeter_objs = [o for o in all_perimeters if o in collection.objects.keys()]
+    #     return [c for c in context.scene.soc_cut_list if isinstance(c, Perimeter)]
+    # TODO
+
 
 class Perimeter(Simulation):
-    def __init__(self, context, obj):
-        super().__init__(context, obj)
-        # obj.users_collection[0].soc_perimeters.append(self)
-        self.setup(context)
-
 
     def setup(self, context):
         self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
@@ -137,9 +83,6 @@ class Perimeter(Simulation):
 
 
 class CurveCut(Simulation):
-    def __init__(self, context, obj):
-        super().__init__(context, obj)
-        self.setup(context)
 
     def setup(self, context):
         bevel = self.create_bevel_object()
@@ -150,7 +93,8 @@ class CurveCut(Simulation):
 
         self.obj.display_type = 'WIRE'
         for perimeter in sim_helper.find_siblings_by_type(self.obj, ['Perimeter']):
-            perimeter.setup_booleans(context)  # need to rebuild the boolean modifiers
+            # perimeter.setup_booleans(context)  # need to rebuild the boolean modifiers
+            pass  # TODO
 
         self.update(context)
 
@@ -199,21 +143,19 @@ class CurveCut(Simulation):
         helper.select_active(context, self.obj)
 
         for perimeter in self.perimeters():
-            perimeter.adjust_boolean_modifiers(mesh)
+            # perimeter.adjust_boolean_modifiers(mesh)
+            pass  # TODO
 
 
 class MeshCut(Simulation):
-    def __init__(self, context, obj):
-        super().__init__(context, obj)
-        # context.object.users_collection[0].soc_mesh_cuts.append(self)
-        obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
-        self.setup(context)
 
     def setup(self, context):
         self.obj.display_type = 'WIRE'
+        self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
         for perimeter in self.perimeters(context):
-            perimeter.adjust_boolean_modifiers(self.obj)
+            # perimeter.adjust_boolean_modifiers(self.obj)
+            pass  # TODO
 
         self.update(context)
 
