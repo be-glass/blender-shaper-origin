@@ -1,8 +1,9 @@
 import bpy
-from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty
+from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty, CollectionProperty
 from bpy.types import PropertyGroup
 
-from . import constant, helper, simulation
+from . import constant, helper, cut_simulation
+
 
 # https://github.com/zeffii/BlenderPythonRecipes/wiki/Properties
 
@@ -11,6 +12,10 @@ def register():
     bpy.utils.register_class(SceneProperties)
 
     bpy.types.Scene.so_cut = PointerProperty(type=SceneProperties)
+
+    bpy.types.Collection.soc_perimeters = list()
+    bpy.types.Collection.soc_curve_cuts = list()
+    bpy.types.Collection.soc_mesh_cuts = list()
 
     bpy.types.Object.soc_cut_depth = ObjectProperties.cut_depth
     bpy.types.Object.soc_tool_diameter = ObjectProperties.tool_diameter
@@ -29,28 +34,35 @@ def unregister():
     del bpy.types.Object.soc_cut_type
     del bpy.types.Object.soc_simulate
 
+    del bpy.types.Collection.soc_perimeters
+    del bpy.types.Collection.soc_curve_cuts
+    del bpy.types.Collection.soc_mesh_cuts
+
 
 def update_cut_depth(self, context):
-    simulation.update(context, context.active_object)
+    # simulation.update(context, context.active_object)
+    pass
+
 
 def update_tool_diameter(self, context):
-    simulation.update(context, context.active_object)
+    # simulation.update(context, context.active_object)
+    pass
 
-def update_cut_type(self, context: bpy.types.Context):
-    simulation.setup(context, context.active_object)
+
+def update_cut_type(self, context):
+    cut_simulation.create(context)
+
 
 class ObjectProperties(PropertyGroup):
-
-
     cut_depth = FloatProperty(
         name="Cut Depth",
         description="Cut depth (mm)",
         default=5.0,
-        min=-10.0,
+        min=0.0,
         max=50.0,
         unit='LENGTH',
         options={'HIDDEN'},
-        update = update_cut_depth
+        update=update_cut_depth
     )
 
     tool_diameter = FloatProperty(
@@ -61,7 +73,7 @@ class ObjectProperties(PropertyGroup):
         max=25.0,
         unit='LENGTH',
         options={'HIDDEN'},
-        update = update_tool_diameter
+        update=update_tool_diameter
     )
 
     reference_frame = EnumProperty(
@@ -88,20 +100,19 @@ class ObjectProperties(PropertyGroup):
                ],
 
         default='None',
-        options = {'HIDDEN'},
-        update = update_cut_type
+        options={'HIDDEN'},
+        update=update_cut_type
     )
     simulate = BoolProperty(
         name="Simulate cut",
         description="Simulate cut",
         default=True,
         options={'HIDDEN'},
-        update = update_cut_type
+        update=update_cut_type
     )
 
 
 class SceneProperties(PropertyGroup):
-
     use_transformations: BoolProperty(
         name="Apply transformations",
         description="Apply object transformations during export",
@@ -128,5 +139,3 @@ class SceneProperties(PropertyGroup):
         subtype="DIR_PATH",
         options={'HIDDEN'},
     )
-
-
