@@ -18,6 +18,7 @@ def get_internal_collection(name, sibling):
     else:
         collection = bpy.data.collections.new(name)
         first_parent.children.link(collection)
+        collection.hide_viewport = True
         return collection
 
 
