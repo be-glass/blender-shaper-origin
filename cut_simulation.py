@@ -1,14 +1,12 @@
 import bpy
 
-import constant
-from cut_simulation_helpers import delete_old_cuts, get_internal_collection, find_siblings_by_type, perimeter_thickness
-from . import helper
+from . import constant, helper, sim_helper
 
 
 def create(context):
     obj = context.object
 
-    delete_old_cuts(obj)
+    sim_helper.delete_old_cuts(obj)
 
     if not obj.soc_simulate:
         return
@@ -37,7 +35,7 @@ class CutSimulation:
         self.delete_internal_objects()
 
         self.obj = obj
-        self.internal_collection = get_internal_collection(constant.prefix + 'internal', obj)
+        self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', obj)
 
     def delete(self):
         self.delete_modifiers()
@@ -63,7 +61,7 @@ class CutSimulation:
             self.obj.modifiers['SOC_Solidify'].thickness = self.obj.soc_cut_depth + delta
 
     def find_perimeters(self):
-        return find_siblings_by_type(self.obj, 'Perimeter')
+        return sim_helper.find_siblings_by_type(self.obj, 'Perimeter')
 
 
 class Perimeter(CutSimulation):
@@ -74,7 +72,7 @@ class Perimeter(CutSimulation):
     def setup(self, context):
         self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
-        for cut in find_siblings_by_type(self.obj, ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']):
+        for cut in sim_helper.find_siblings_by_type(self.obj, ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']):
             modifier_name = "SOC_Boolean." + cut.name
             boolean = self.obj.modifiers.new(modifier_name, 'BOOLEAN')
             boolean.operation = 'DIFFERENCE'
@@ -111,7 +109,7 @@ class CurveCut(CutSimulation):
         self.obj.data.bevel_object = None
 
         self.obj.display_type = 'WIRE'
-        for perimeter in find_siblings_by_type(self.obj, ['Perimeter']):
+        for perimeter in sim_helper.find_siblings_by_type(self.obj, ['Perimeter']):
             perimeter.setup_booleans(context)  # need to rebuild the boolean modifiers
 
         self.update(context)
@@ -150,7 +148,7 @@ class CurveCut(CutSimulation):
         mesh_name = constant.prefix + self.obj.name + '.mesh'
         helper.delete_object(mesh_name)
 
-        internal_collection = get_internal_collection(constant.prefix + 'internal', self.obj)
+        internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
 
         helper.select_active(context, self.obj)
         r = bpy.ops.object.convert(target='MESH', keep_original=True)
@@ -183,7 +181,7 @@ class MeshCut(CutSimulation):
         cut_type = self.obj.soc_cut_type
 
         if cut_type == 'Cutout':
-            self.obj.soc_cut_depth = perimeter_thickness(self.obj)
+            self.obj.soc_cut_depth = sim_helper.perimeter_thickness(self.obj)
             delta = 0.2
         elif cut_type == 'Pocket':
             delta = 0.1
