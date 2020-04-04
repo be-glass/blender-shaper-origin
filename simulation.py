@@ -34,10 +34,9 @@ class Simulation:
     def __init__(self, context=None, obj=None):
         self.obj = obj
         obj.display_type = 'TEXTURED'
-        self.delete(context)
         self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', obj)
 
-    def delete(self, context):
+    def cleanup(self):
         sim_helper.delete_modifiers(self.obj)
         sim_helper.delete_internal_objects(self.obj)
 
@@ -56,6 +55,7 @@ class Simulation:
 class Perimeter(Simulation):
 
     def setup(self, context):
+        self.cleanup()
         self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
         for cut in sim_helper.find_siblings_by_type(self.obj, ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']):
@@ -85,6 +85,7 @@ class Perimeter(Simulation):
 class CurveCut(Simulation):
 
     def setup(self, context):
+        self.cleanup()
         bevel = self.create_bevel_object()
         helper.move_object(bevel, self.internal_collection)
         self.obj.data.bevel_object = bevel
@@ -150,6 +151,7 @@ class CurveCut(Simulation):
 class MeshCut(Simulation):
 
     def setup(self, context):
+        self.cleanup()
         self.obj.display_type = 'WIRE'
         self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
