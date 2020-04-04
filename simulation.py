@@ -39,43 +39,57 @@ def setup(context, obj):
     if obj.soc_cut_type == 'Perimeter':
         for cut in find_siblings_by_type(obj, ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']):
             modifier_name = "SOC_Boolean." + cut.name
-            bool = obj.modifiers.new(modifier_name, 'BOOLEAN')
-            bool.operation = 'DIFFERENCE'
+            boolean = obj.modifiers.new(modifier_name, 'BOOLEAN')
+            boolean.operation = 'DIFFERENCE'
 
             if cut.soc_cut_type in ['Cutout', 'Pocket']:
-                bool.object = cut
+                boolean.object = cut
 
             elif cut.soc_cut_type in ['Exterior', 'Interior', 'Online']:
                 mesh_name = f'SOC_{cut.name}.mesh'
-                bool.object = helper.get_object_safely(mesh_name)
+                boolean.object = helper.get_object_safely(mesh_name)
             else:
                 helper.err_implementation()
-
-
 
     if obj.soc_cut_type in ['Exterior', 'Interior', 'Online']:
         if obj.type == 'CURVE':
             bevel = create_bevel_object(obj)
             helper.move_object(bevel, internal_collection)
             obj.data.bevel_object = bevel
-
-            helper.select_active(context, obj)
-            bpy.ops.object.convert(target = 'MESH', keep_original=True)
-            bpy.ops.object.shade_flat()
-
-            mesh = context.object
-            mesh.name = constant.prefix + obj.name + '.mesh'
-            helper.move_object(mesh, internal_collection)
-
-            helper.select_active(context, obj)
-
+            update_mesh(context, obj)
 
     if obj.soc_cut_type in ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']:
         obj.display_type = 'WIRE'
         for perimeter in find_siblings_by_type(obj, ['Perimeter']):
             setup(context, perimeter)  # need to rebuild the boolean modifiers
 
-    update(obj)
+    update(context, obj)
+
+
+def update_mesh(context, obj):
+    mesh_name = constant.prefix + obj.name + '.mesh'
+    helper.delete_object(mesh_name)
+
+    internal_collection = get_internal_collection(constant.prefix + 'internal', obj)
+
+    helper.select_active(context, obj)
+    r = bpy.ops.object.convert(target='MESH', keep_original=True)
+    bpy.ops.object.shade_flat()
+    mesh = context.object
+    mesh.name = mesh_name
+    helper.move_object(mesh, internal_collection)
+    helper.select_active(context, obj)
+
+    reset_boolean_reference(obj, mesh)
+
+
+def reset_boolean_reference(obj, target):
+    perimeters = find_siblings_by_type(obj, 'Perimeter')
+
+    modifier_name = f'SOC_Boolean.{obj.name}'
+
+    for perimeter in perimeters:
+        perimeter.modifiers[modifier_name].object = target
 
 
 def reset_curve(obj):
@@ -90,7 +104,8 @@ def delete_old_internals(obj):
     collection = obj.users_collection[0]
     if 'SOC_internal' in collection.children.keys():
         internal_collection = collection.children['SOC_internal']
-        [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if o.name.startswith("SOC_"+obj.name)]
+        [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if
+         o.name.startswith("SOC_" + obj.name)]
 
 
 def create_bevel_object(obj):
@@ -101,9 +116,12 @@ def create_bevel_object(obj):
     bevel = bpy.context.active_object
     bevel.name = name
 
+    # move object origin to upper edge
+    bevel.location = (0, -0.5, 0)
+    bpy.ops.object.transform_apply()
+
     # scale
     bevel.scale = (obj.soc_tool_diameter, obj.soc_cut_depth, 1)
-    # bpy.ops.object.transform_apply()
 
     # delete first face
     bpy.ops.object.mode_set(mode='EDIT')
@@ -116,7 +134,7 @@ def create_bevel_object(obj):
     return bevel
 
 
-def update(obj):
+def update(context, obj):
     cut_type = obj.soc_cut_type
 
     delta = 0.0  # margin for boolean modifier. TODO fix units
@@ -132,6 +150,11 @@ def update(obj):
 
     if 'SOC_Solidify' in obj.modifiers:
         obj.modifiers['SOC_Solidify'].thickness = obj.soc_cut_depth + delta
+
+    elif cut_type in ['Exterior', 'Interior', 'Online']:
+        bevel = helper.get_object_safely(f'SOC_{obj.name}.bevel')
+        bevel.scale = (obj.soc_tool_diameter, obj.soc_cut_depth, 1)
+        update_mesh(context, obj)
 
 
 def find_siblings_by_type(obj, cut_types):

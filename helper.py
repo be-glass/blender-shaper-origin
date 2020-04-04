@@ -127,3 +127,8 @@ def get_object_safely(obj_name):
         return bpy.data.objects[obj_name]
     else:
         error_msg("Cannot find (internal) object")
+
+def delete_object(obj_name):
+    if obj_name in bpy.data.objects:
+        obj = bpy.data.objects[obj_name]
+        bpy.data.objects.remove(obj, do_unlink=True)
