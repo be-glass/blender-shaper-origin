@@ -27,8 +27,17 @@ operators.bl_info = bl_info
 
 def register():
     [file.register() for file in files]
+    bpy.utils.register_class(Meshy)
 
 
 def unregister():
     [file.unregister() for file in files]
 
+
+####
+
+
+import bpy
+
+class Meshy(bpy.types.Object):
+    pass

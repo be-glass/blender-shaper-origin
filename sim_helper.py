@@ -2,22 +2,13 @@ import bpy
 from . import helper, constant
 
 
-def delete_old_cuts(obj):
-    for collection in bpy.data.collections:
-        for cut in all_cuts(collection):
-            if cut.obj == obj:
-                cut.delete()
-
-
-def all_cuts(collection):
-    return collection.soc_perimeters + \
-           collection.soc_mesh_cuts + \
-           collection.soc_curve_cuts
+def delete_old_cuts(context, obj):
+    for cut in context.scene.soc_cut_list:
+        if cut.obj == obj:
+            cut.delete(context)
 
 
 def get_internal_collection(name, sibling):
-    first_parent = sibling.users_collection
-
     first_parent = helper.find_collection(sibling)[0]
     if name in first_parent.children.keys():
         return first_parent.children[name]
@@ -29,10 +20,18 @@ def get_internal_collection(name, sibling):
 
 
 def find_siblings_by_type(obj, cut_types):
-    collections = helper.find_collection(obj)
-    collection = collections[0]
-    objects = collection.objects
-    return [o for o in objects if o.soc_cut_type in cut_types]
+    objs = find_cutables(obj)
+    return [o for o in objs if o.soc_cut_type in cut_types]
+
+
+def find_cutables(obj):
+    collection = obj.users_collection[0]
+    return [o for o in collection.objects if o.type in ['MESH', 'CURVE']]
+
+
+def find_cut_objects(context):
+    cutables = find_cutables(context.object)
+    return [o for o in cutables if o.soc_cut_type != 'None']
 
 
 def perimeter_thickness(obj):
@@ -43,4 +42,3 @@ def perimeter_thickness(obj):
 
     else:
         return 10.0  # TODO unit
-

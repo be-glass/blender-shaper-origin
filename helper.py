@@ -37,16 +37,6 @@ def check_type(obj, valid_types):
     return True if remain else False
 
 
-# def get_material(cut_type):
-#     materials = bpy.data.materials
-#     id = constant.prefix+cut_type
-#     if id in materials.keys():
-#         m = materials[id]
-#     else:
-#         m = materials.new(id)
-#     m.diffuse_color = constant.cut_face_color[cut_type]
-#     return m
-
 
 def boundaries(object_list):
     x = []
@@ -69,16 +59,6 @@ def boundaries(object_list):
 
 def add_Empty_at(*location):
     bpy.ops.object.add(type='EMPTY', location=(location))
-
-
-# def add_rectangle_curve_at():
-#     bpy.ops.mesh.primitive_plane_add(size=1.0)
-
-
-# howto create a curve:
-# https://blender.stackexchange.com/questions/61266/creating-curves-in-pythonc = bpy.data.curves.new('new1', type='CURVE')
-# curve = bpy.data.objects.new('curve1', c)
-# bpy.context.scene.collection.objects.link(curve)
 
 
 def transform_if_needed(obj, coordinates):
