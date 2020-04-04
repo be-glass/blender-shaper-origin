@@ -37,7 +37,7 @@ def update_tool_diameter(self, context):
     simulation.update(context.active_object)
 
 def update_cut_type(self, context: bpy.types.Context):
-    simulation.setup(context.active_object)
+    simulation.setup(context, context.active_object)
 
 class ObjectProperties(PropertyGroup):
 

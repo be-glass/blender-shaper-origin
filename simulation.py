@@ -21,7 +21,7 @@ def get_internal_collection(name, sibling):
         return collection
 
 
-def setup(obj):
+def setup(context, obj):
     obj.display_type = 'TEXTURED'
     delete_old_modifiers(obj)
     delete_old_internals(obj)
@@ -35,22 +35,44 @@ def setup(obj):
     if obj.soc_cut_type in ['Perimeter', 'Cutout', 'Pocket']:
         obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
-    if obj.soc_cut_type in ['Cutout', 'Pocket']:
-        obj.display_type = 'WIRE'
-        for perimeter in find_siblings_by_type(obj, ['Perimeter']):
-            setup(perimeter)  # need to rebuild the boolean modifiers
-
     if obj.soc_cut_type == 'Perimeter':
-        for cut in find_siblings_by_type(obj, ['Cutout', 'Pocket']):
+        for cut in find_siblings_by_type(obj, ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']):
             modifier_name = "SOC_Boolean." + cut.name
             bool = obj.modifiers.new(modifier_name, 'BOOLEAN')
             bool.operation = 'DIFFERENCE'
-            bool.object = cut
+
+            if cut.soc_cut_type in ['Cutout', 'Pocket']:
+                bool.object = cut
+
+            elif cut.soc_cut_type in ['Exterior', 'Interior', 'Online']:
+                mesh_name = f'SOC_{cut.name}.mesh'
+                bool.object = helper.get_object_safely(mesh_name)
+            else:
+                helper.err_implementation()
+
+
 
     if obj.soc_cut_type in ['Exterior', 'Interior', 'Online']:
-        bevel = create_bevel_object(obj)
-        helper.move_object(bevel, internal_collection)
-        obj.data.bevel_object = bevel
+        if obj.type == 'CURVE':
+            bevel = create_bevel_object(obj)
+            helper.move_object(bevel, internal_collection)
+            obj.data.bevel_object = bevel
+
+            helper.select_active(context, obj)
+            bpy.ops.object.convert(target = 'MESH', keep_original=True)
+            bpy.ops.object.shade_flat()
+
+            mesh = context.object
+            mesh.name = constant.prefix + obj.name + '.mesh'
+            helper.move_object(mesh, internal_collection)
+
+            helper.select_active(context, obj)
+
+
+    if obj.soc_cut_type in ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']:
+        obj.display_type = 'WIRE'
+        for perimeter in find_siblings_by_type(obj, ['Perimeter']):
+            setup(context, perimeter)  # need to rebuild the boolean modifiers
 
     update(obj)
 
@@ -67,7 +89,7 @@ def delete_old_internals(obj):
     collection = obj.users_collection[0]
     if 'SOC_internal' in collection.children.keys():
         internal_collection = collection.children['SOC_internal']
-        [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if o.name == name]
+        [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if o.name.startswith("SOC_"+obj.name)]
 
 
 def create_bevel_object(obj):
