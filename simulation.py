@@ -15,26 +15,42 @@ def create(context):
         Perimeter(context, obj)
 
     elif obj.soc_cut_type in ['Exterior', 'Interior', 'Online']:
+        if obj.type != 'CURVE':
+            helper.error_msg("only curves here")
+            return()
+
         CurveCut(context, obj)
 
     elif obj.soc_cut_type in ['Cutout', 'Pocket']:
+        if obj.type != 'MESH':
+            helper.error_msg("only meshes here")
+            return ()
+
         MeshCut(context, obj)
 
     elif obj.soc_cut_type == 'None':
-        pass
+        return()
 
     else:
         helper.err_implementation()
 
 
-class CutSimulation:
+def update(context):
+    obj = context.object
+    cuts = [c for c in sim_helper.all_cuts(obj.users_collection[0])]
+    cuts[0].update(context)
+
+
+
+
+class Simulation:
 
     def __init__(self, context, obj):
+        self.obj = obj
         obj.display_type = 'TEXTURED'
         self.delete_modifiers()
         self.delete_internal_objects()
 
-        self.obj = obj
         self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', obj)
 
     def delete(self):
@@ -64,9 +80,10 @@ class CutSimulation:
         return sim_helper.find_siblings_by_type(self.obj, 'Perimeter')
 
 
-class Perimeter(CutSimulation):
+class Perimeter(Simulation):
     def __init__(self, context, obj):
-        super().__init__(obj)
+        super().__init__(context, obj)
+        obj.users_collection[0].soc_perimeters.append(self)
         self.setup(context)
 
     def setup(self, context):
@@ -96,9 +113,10 @@ class Perimeter(CutSimulation):
         self.obj.modifiers[modifier_name].object = target
 
 
-class CurveCut(CutSimulation):
+class CurveCut(Simulation):
     def __init__(self, context, obj):
         super().__init__(context, obj)
+        context.users_collection[0].soc_curve_cuts.append(self)
         self.setup(context)
 
     def setup(self, context):
@@ -162,9 +180,10 @@ class CurveCut(CutSimulation):
             perimeter.adjust_boolean_modifiers(mesh)
 
 
-class MeshCut(CutSimulation):
+class MeshCut(Simulation):
     def __init__(self, context, obj):
-        super().__init__(obj)
+        super().__init__(context, obj)
+        context.users_collection[0].soc_mesh_cuts.append(self)
         obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
         self.setup()
 
