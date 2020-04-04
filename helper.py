@@ -74,6 +74,20 @@ def add_Empty_at(*location):
     bpy.ops.object.add(type='EMPTY', location=(location))
 
 
+# def add_rectangle_curve_at():
+#     bpy.ops.mesh.primitive_plane_add(size=1.0)
+
+
+
+
+
+# howto create a curve:
+# https://blender.stackexchange.com/questions/61266/creating-curves-in-pythonc = bpy.data.curves.new('new1', type='CURVE')
+# curve = bpy.data.objects.new('curve1', c)
+# bpy.context.scene.collection.objects.link(curve)
+
+
+
 def transform_if_needed(obj, coordinates):
     if obj.soc_reference_frame == 'local':
         return coordinates
@@ -84,4 +98,9 @@ def transform_if_needed(obj, coordinates):
 
 
 def find_collection(obj):
-    return [c for c in bpy.data.collections if obj.name in c.objects.keys()]
+    # return [c for c in bpy.data.collections if obj.name in c.objects.keys()]
+    return obj.users_collection
+
+def move_object(obj, collection):
+    [c.objects.unlink(obj) for c in obj.users_collection]
+    collection.objects.link(obj)

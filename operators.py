@@ -9,7 +9,8 @@ bl_info = {
     "name": "n/a",
     "author": "n/a",
     "version": (0, 0, 0),
-}   # to be filled by __init__
+}  # to be filled by __init__
+
 
 def operators():
     return (
@@ -35,7 +36,6 @@ class MESH_OT_socut_export_cuts(Operator):
     def execute(self, context):
 
         dir_name = context.scene.so_cut.export_path
-
 
         items = bpy.context.selected_objects if context.scene.so_cut.selected_only \
             else bpy.context.scene.objects

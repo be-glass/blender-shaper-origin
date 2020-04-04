@@ -5,10 +5,11 @@ from bpy.types import Panel
 
 def panels():
     return [
-     BG_PT_SOC_export,
-     # BG_PT_SOC_init,
-     BG_PT_SOC_select,
+        BG_PT_SOC_export,
+        # BG_PT_SOC_init,
+        BG_PT_SOC_select,
     ]
+
 
 def register():
     for widget in panels():
@@ -25,6 +26,7 @@ class SOCutPanel:
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
 
+
 class BG_PT_SOC_export(SOCutPanel, Panel):
     bl_label = "Export"
 
@@ -40,8 +42,6 @@ class BG_PT_SOC_export(SOCutPanel, Panel):
         layout.prop(soc, "export_path")
         layout.prop(soc, "separate_files")
         layout.operator("mesh.socut_export_cuts", text="Export Cuts")
-
-
 
 
 # class BG_PT_SOC_init(SOCutPanel, Panel):
@@ -75,4 +75,3 @@ class BG_PT_SOC_select(SOCutPanel, Panel):
             layout.prop(ao, "soc_cut_depth")
             layout.prop(ao, "soc_tool_diameter")
             layout.prop(ao, "soc_simulate")
-

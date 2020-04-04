@@ -9,47 +9,106 @@ def delete_old_modifiers(obj):
             obj.modifiers.remove(modifier)
 
 
-def setup(obj):
+def get_internal_collection(name, sibling):
+    first_parent = sibling.users_collection
 
+    first_parent = helper.find_collection(sibling)[0]
+    if name in first_parent.children.keys():
+        return first_parent.children[name]
+    else:
+        collection = bpy.data.collections.new(name)
+        first_parent.children.link(collection)
+        return collection
+
+
+def setup(obj):
     obj.display_type = 'TEXTURED'
     delete_old_modifiers(obj)
+    delete_old_internals(obj)
+    reset_curve(obj)
 
+    internal_collection = get_internal_collection(constant.prefix + 'internal', obj)
 
     if not obj.soc_simulate:
         return
 
-    if obj.soc_cut_type in ['Perimeter', 'Cutout']:
+    if obj.soc_cut_type in ['Perimeter', 'Cutout', 'Pocket']:
         obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
-
-    if obj.soc_cut_type in ['Cutout']:
+    if obj.soc_cut_type in ['Cutout', 'Pocket']:
         obj.display_type = 'WIRE'
         for perimeter in find_siblings_by_type(obj, ['Perimeter']):
             setup(perimeter)  # need to rebuild the boolean modifiers
 
     if obj.soc_cut_type == 'Perimeter':
-        for cut in find_siblings_by_type(obj, ['Cutout']):
+        for cut in find_siblings_by_type(obj, ['Cutout', 'Pocket']):
             modifier_name = "SOC_Boolean." + cut.name
             bool = obj.modifiers.new(modifier_name, 'BOOLEAN')
             bool.operation = 'DIFFERENCE'
             bool.object = cut
 
+    if obj.soc_cut_type in ['Exterior', 'Interior', 'Online']:
+        bevel = create_bevel_object(obj)
+        helper.move_object(bevel, internal_collection)
+        obj.data.bevel_object = bevel
+
     update(obj)
 
 
-def update(obj):
+def reset_curve(obj):
+    if obj.type == 'CURVE':
+        obj.data.bevel_object = None
 
+
+def delete_old_internals(obj):
+    name = f'SOC_{obj.name}.bevel'
+
+    # delete old object
+    collection = obj.users_collection[0]
+    if 'SOC_internal' in collection.children.keys():
+        internal_collection = collection.children['SOC_internal']
+        [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if o.name == name]
+
+
+def create_bevel_object(obj):
+    name = f'SOC_{obj.name}.bevel'
+
+    # create new one
+    bpy.ops.mesh.primitive_plane_add(size=1.0)
+    bevel = bpy.context.active_object
+    bevel.name = name
+
+    # scale
+    bevel.scale = (obj.soc_tool_diameter, obj.soc_cut_depth, 1)
+    # bpy.ops.object.transform_apply()
+
+    # delete first face
+    bpy.ops.object.mode_set(mode='EDIT')
+    bevel.data.polygons[0].select = True
+    bpy.ops.mesh.delete(type='ONLY_FACE')
+    bpy.ops.object.mode_set(mode='OBJECT')
+
+    bpy.ops.object.convert(target='CURVE')
+
+    return bevel
+
+
+def update(obj):
     cut_type = obj.soc_cut_type
+
+    delta = 0.0  # margin for boolean modifier. TODO fix units
 
     if cut_type == 'Perimeter':
         if obj.soc_cut_depth < 0.0:
             obj.soc_cut_depth = 0.0
-
     elif cut_type == 'Cutout':
-        obj.soc_cut_depth = perimeter_thickness(obj) + 0.2    # adding margin for boolean modifier
+        obj.soc_cut_depth = perimeter_thickness(obj)
+        delta = 0.2
+    elif cut_type == 'Pocket':
+        delta = 0.1
 
     if 'SOC_Solidify' in obj.modifiers:
-        obj.modifiers['SOC_Solidify'].thickness = obj.soc_cut_depth
+        obj.modifiers['SOC_Solidify'].thickness = obj.soc_cut_depth + delta
 
 
 def find_siblings_by_type(obj, cut_types):
@@ -58,17 +117,12 @@ def find_siblings_by_type(obj, cut_types):
     objects = collection.objects
     return [o for o in objects if o.soc_cut_type in cut_types]
 
-def perimeter_thickness(obj):
 
+def perimeter_thickness(obj):
     perimeters = find_siblings_by_type(obj, ['Perimeter'])
 
     if perimeters:
         return perimeters[0].soc_cut_depth
 
     else:
-        return 10.0 # TODO unit
-
-
-
-
-
+        return 10.0  # TODO unit
