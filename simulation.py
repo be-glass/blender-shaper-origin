@@ -116,7 +116,7 @@ class Perimeter(Simulation):
 class CurveCut(Simulation):
     def __init__(self, context, obj):
         super().__init__(context, obj)
-        context.users_collection[0].soc_curve_cuts.append(self)
+        context.object.users_collection[0].soc_curve_cuts.append(self)
         self.setup(context)
 
     def setup(self, context):
@@ -183,9 +183,9 @@ class CurveCut(Simulation):
 class MeshCut(Simulation):
     def __init__(self, context, obj):
         super().__init__(context, obj)
-        context.users_collection[0].soc_mesh_cuts.append(self)
+        context.object.users_collection[0].soc_mesh_cuts.append(self)
         obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
-        self.setup()
+        self.setup(context)
 
     def setup(self, context):
         self.obj.display_type = 'WIRE'
