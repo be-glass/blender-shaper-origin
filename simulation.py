@@ -31,7 +31,7 @@ def update(context, reset=False):
 
 class Simulation:
 
-    def __init__(self, context=None, obj=None):
+    def __init__(self, context, obj):
         self.obj = obj
         self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', obj)
 
@@ -56,6 +56,10 @@ class Perimeter(Simulation):
     def update(self, context):
         self.adjust_solidify_thickness()
 
+        cutouts = sim_helper.find_siblings_by_type(context.object, 'Cutout')
+        for cut in cutouts:
+            cut_sim = MeshCut(context, cut)
+            cut_sim.update(context)
 
 class CurveCut(Simulation):
 

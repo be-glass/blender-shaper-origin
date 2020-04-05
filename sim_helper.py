@@ -97,3 +97,5 @@ def rebuild_boolean_modifier(obj, cut):
         boolean.object = helper.get_object_safely(mesh_name)
     else:
         helper.err_implementation()
+
+
