@@ -52,7 +52,7 @@ class Perimeter(Simulation):
         self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
         for cut in sim_helper.find_siblings_by_type(self.obj, ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']):
-            sim_helper.rebuild_boolean_modifier(self, cut)
+            sim_helper.rebuild_boolean_modifier(self.obj, cut)
 
     def update(self):
         self.adjust_solidify_thickness()
@@ -137,7 +137,10 @@ class MeshCut(Simulation):
         cut_type = self.obj.soc_cut_type
 
         if cut_type == 'Cutout':
-            self.obj.soc_cut_depth = sim_helper.perimeter_thickness(self.obj) + 1.0
+
+            cutout_depth = sim_helper.perimeter_thickness(self.obj) + 1.0
+            if self.obj.soc_cut_depth != cutout_depth:
+                self.obj.soc_cut_depth = cutout_depth
             delta = 0.0
         elif cut_type == 'Pocket':
             delta = 0.1

@@ -70,8 +70,8 @@ def perimeters(context):
 
 
 def adjust_boolean_modifiers(context, target_obj):
-    for perimeter in perimeters(context):
-        rebuild_boolean_modifier(perimeter, target_obj)
+    for perimeter_obj in perimeters(context):
+        rebuild_boolean_modifier(perimeter_obj, target_obj)
 
 
 def boolean_modifier_name(cut_obj):
