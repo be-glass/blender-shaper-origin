@@ -3,8 +3,8 @@ import bpy
 from . import constant, helper, sim_helper
 
 
-def update(context, reset=False):
-    obj = context.object
+def update(context, obj, reset=False):
+    active = context.object
 
     if (not obj.soc_simulate) or (obj.soc_cut_type == 'None'):
         sim_helper.cleanup(context, obj)
@@ -26,7 +26,7 @@ def update(context, reset=False):
         simulation.setup()
 
     simulation.update()
-    helper.select_active(context, obj)
+    helper.select_active(context, active)
 
 
 class Simulation:
@@ -59,8 +59,7 @@ class Perimeter(Simulation):
 
         cutouts = sim_helper.find_siblings_by_type(self.context.object, 'Cutout')
         for cut in cutouts:
-            cut_sim = MeshCut(self.context, cut)
-            cut_sim.update()
+            cut.soc_cut_depth = self.obj.soc_cut_depth + 1.0   # TODO unit
 
 class CurveCut(Simulation):
 

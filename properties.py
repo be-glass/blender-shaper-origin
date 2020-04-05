@@ -32,17 +32,17 @@ def unregister():
 
 
 def update_cut_depth(self, context):
-    simulation.update(context)
+    simulation.update(context, self)
     pass
 
 
 def update_tool_diameter(self, context):
-    simulation.update(context)
+    simulation.update(context, self)
     pass
 
 
 def update_cut_type(self, context):
-    simulation.update(context, reset=True)
+    simulation.update(context, self, reset=True)
 
 
 class ObjectProperties(PropertyGroup):
