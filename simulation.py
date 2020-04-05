@@ -23,9 +23,9 @@ def update(context, reset=False):
     simulation = cut(context, obj)
 
     if reset:
-        simulation.setup(context)
+        simulation.setup()
 
-    simulation.update(context)
+    simulation.update()
     helper.select_active(context, obj)
 
 
@@ -33,6 +33,7 @@ class Simulation:
 
     def __init__(self, context, obj):
         self.obj = obj
+        self.context = context
         self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', obj)
 
     def cleanup(self):
@@ -46,46 +47,46 @@ class Simulation:
 
 class Perimeter(Simulation):
 
-    def setup(self, context):
+    def setup(self):
         self.cleanup()
         self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
         for cut in sim_helper.find_siblings_by_type(self.obj, ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']):
             sim_helper.rebuild_boolean_modifier(self, cut)
 
-    def update(self, context):
+    def update(self):
         self.adjust_solidify_thickness()
 
-        cutouts = sim_helper.find_siblings_by_type(context.object, 'Cutout')
+        cutouts = sim_helper.find_siblings_by_type(self.context.object, 'Cutout')
         for cut in cutouts:
-            cut_sim = MeshCut(context, cut)
-            cut_sim.update(context)
+            cut_sim = MeshCut(self.context, cut)
+            cut_sim.update()
 
 class CurveCut(Simulation):
 
-    def setup(self, context):
+    def setup(self):
         self.cleanup()
         bevel = self.create_bevel_object()
         helper.move_object(bevel, self.internal_collection)
         self.obj.data.bevel_object = bevel
-        self.update_mesh(context)
+        self.update_mesh()
         self.obj.data.bevel_object = None
 
         self.obj.display_type = 'WIRE'
         for perimeter in sim_helper.find_siblings_by_type(self.obj, ['Perimeter']):
-            perimeter.setup_booleans(context)
+            perimeter.setup_booleans(self.context)
 
-    def update(self, context):
+    def update(self):
         bevel = helper.get_object_safely(f'SOC_{self.obj.name}.bevel')
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
-        self.update_mesh(context, self.obj)
+        self.update_mesh()
 
     def create_bevel_object(self):
         name = f'SOC_{self.obj.name}.bevel'
 
         # create new one
         bpy.ops.mesh.primitive_plane_add(size=1.0)
-        bevel = bpy.context.active_object
+        bevel = self.context.active_object
         bevel.name = name
 
         # move object origin to upper edge
@@ -105,33 +106,33 @@ class CurveCut(Simulation):
 
         return bevel
 
-    def update_mesh(self, context):
+    def update_mesh(self):
         mesh_name = constant.prefix + self.obj.name + '.mesh'
         helper.delete_object(mesh_name)
 
         internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
 
-        helper.select_active(context, self.obj)
-        r = bpy.ops.object.convert(target='MESH', keep_original=True)
+        helper.select_active(self.context, self.obj)
+        bpy.ops.object.convert(target='MESH', keep_original=True)
         bpy.ops.object.shade_flat()
-        mesh = context.object
+        mesh = self.context.object
         mesh.name = mesh_name
         helper.move_object(mesh, internal_collection)
-        helper.select_active(context, self.obj)
+        helper.select_active(self.context, self.obj)
 
-        sim_helper.adjust_boolean_modifiers(context, mesh)
+        sim_helper.adjust_boolean_modifiers(self.context, mesh)
 
 
 class MeshCut(Simulation):
 
-    def setup(self, context):
+    def setup(self):
         self.cleanup()
         self.obj.display_type = 'WIRE'
         self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
-        sim_helper.adjust_boolean_modifiers(context, self.obj)
+        sim_helper.adjust_boolean_modifiers(self.context, self.obj)
 
-    def update(self, context):
+    def update(self):
 
         cut_type = self.obj.soc_cut_type
 
