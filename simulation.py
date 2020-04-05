@@ -11,21 +11,21 @@ def update(context, reset=False):
         return
 
     if obj.soc_cut_type == 'Perimeter':
-        Cut = Perimeter
+        cut = Perimeter
     elif obj.soc_cut_type in ['Exterior', 'Interior', 'Online'] and obj.type == 'CURVE':
-        Cut = CurveCut
+        cut = CurveCut
     elif obj.soc_cut_type in ['Cutout', 'Pocket'] and obj.type == 'MESH':
-        Cut = MeshCut
+        cut = MeshCut
     else:
         helper.err_implementation()
         return
 
-    cut = Cut(context, obj)
+    simulation = cut(context, obj)
 
     if reset:
-        cut.setup(context)
+        simulation.setup(context)
 
-    cut.update(context)
+    simulation.update(context)
     helper.select_active(context, obj)
 
 
@@ -33,7 +33,6 @@ class Simulation:
 
     def __init__(self, context=None, obj=None):
         self.obj = obj
-        obj.display_type = 'TEXTURED'
         self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', obj)
 
     def cleanup(self):
@@ -44,13 +43,6 @@ class Simulation:
         if 'SOC_Solidify' in self.obj.modifiers:
             self.obj.modifiers['SOC_Solidify'].thickness = self.obj.soc_cut_depth + delta
 
-    # def perimeters(self, context):
-    #     collection = context.object.users_collection[0]
-    #     all_perimeters = sim_helper.find_siblings_by_type(context.object, 'Perimeter')
-    #     perimeter_objs = [o for o in all_perimeters if o in collection.objects.keys()]
-    #     return [c for c in context.scene.soc_cut_list if isinstance(c, Perimeter)]
-    # TODO
-
 
 class Perimeter(Simulation):
 
@@ -59,27 +51,10 @@ class Perimeter(Simulation):
         self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
         for cut in sim_helper.find_siblings_by_type(self.obj, ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']):
-            modifier_name = "SOC_Boolean." + cut.name
-            boolean = self.obj.modifiers.new(modifier_name, 'BOOLEAN')
-            boolean.operation = 'DIFFERENCE'
-
-            if cut.soc_cut_type in ['Cutout', 'Pocket']:
-                boolean.object = cut
-
-            elif cut.soc_cut_type in ['Exterior', 'Interior', 'Online']:
-                mesh_name = f'SOC_{cut.name}.mesh'
-                boolean.object = helper.get_object_safely(mesh_name)
-            else:
-                helper.err_implementation()
-
-        self.update(context)
+            sim_helper.rebuild_boolean_modifier(self, cut)
 
     def update(self, context):
         self.adjust_solidify_thickness()
-
-    def adjust_boolean_modifiers(self, target_obj):
-        modifier_name = f'SOC_Boolean.{target_obj.name}'
-        self.obj.modifiers[modifier_name].object = target_obj
 
 
 class CurveCut(Simulation):
@@ -94,10 +69,7 @@ class CurveCut(Simulation):
 
         self.obj.display_type = 'WIRE'
         for perimeter in sim_helper.find_siblings_by_type(self.obj, ['Perimeter']):
-            # perimeter.setup_booleans(context)  # need to rebuild the boolean modifiers
-            pass  # TODO
-
-        self.update(context)
+            perimeter.setup_booleans(context)
 
     def update(self, context):
         bevel = helper.get_object_safely(f'SOC_{self.obj.name}.bevel')
@@ -143,9 +115,7 @@ class CurveCut(Simulation):
         helper.move_object(mesh, internal_collection)
         helper.select_active(context, self.obj)
 
-        for perimeter in self.perimeters():
-            # perimeter.adjust_boolean_modifiers(mesh)
-            pass  # TODO
+        sim_helper.adjust_boolean_modifiers(context, mesh)
 
 
 class MeshCut(Simulation):
@@ -155,11 +125,7 @@ class MeshCut(Simulation):
         self.obj.display_type = 'WIRE'
         self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
-        for perimeter in self.perimeters(context):
-            # perimeter.adjust_boolean_modifiers(self.obj)
-            pass  # TODO
-
-        self.update(context)
+        sim_helper.adjust_boolean_modifiers(context, self.obj)
 
     def update(self, context):
 
