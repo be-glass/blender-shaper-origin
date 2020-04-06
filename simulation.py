@@ -61,7 +61,7 @@ class Perimeter(Simulation):
 
         cutouts = sim_helper.find_siblings_by_type(self.context.object, 'Cutout')
         for cut in cutouts:
-            cut.soc_cut_depth = self.obj.soc_cut_depth + 1.0  # TODO unit
+            cut.soc_cut_depth = self.obj.soc_cut_depth + helper.length('1mm')
 
 
 class CurveCut(Simulation):
@@ -152,13 +152,18 @@ class MeshCut(Simulation):
 
         if cut_type == 'Cutout':
 
-            cutout_depth = sim_helper.perimeter_thickness(self.obj) + 1.0
+            perimeter_thickness = sim_helper.perimeter_thickness(self.obj)
+            if perimeter_thickness:
+                cutout_depth =  perimeter_thickness + helper.length('1mm')
+            else:
+                cutout_depth = helper.length('1cm')
+
             if self.obj.soc_cut_depth != cutout_depth:
                 self.obj.soc_cut_depth = cutout_depth
             delta = 0.0
         elif cut_type == 'Pocket':
-            delta = 0.1
+            delta = helper.length('0.1mm')
         else:
-            delta = 0.0  # TODO check units
+            delta = 0.0
 
         self.adjust_solidify_thickness(delta=delta)

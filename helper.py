@@ -64,7 +64,7 @@ def transform_if_needed(obj, coordinates):
     if obj.soc_reference_frame == 'local':
         return coordinates
     elif obj.soc_reference_frame == 'object':
-        return 'TODO'
+        return 'TODO'      # a feature missing implementation. TODO will be printed into the SVG file
     else:  # 'global'
         return obj.matrix_world @ coordinates
 
@@ -121,8 +121,14 @@ def repair_mesh(context, obj):
 
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.mesh.dissolve_degenerate(threshold=0.1)  # TODO unit
-    bpy.ops.mesh.normals_make_consistent(inside=False)
+
+    # approach 1
+    # bpy.ops.mesh.dissolve_degenerate(threshold=0.1)  # TODO unit
+    # bpy.ops.mesh.normals_make_consistent(inside=False)
+
+    # approach 2
+    bpy.ops.mesh.separate(type='LOOSE')
+
     bpy.ops.object.editmode_toggle()
     bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -133,3 +139,12 @@ def repair_mesh(context, obj):
 def shade_mesh_flat(obj):
     for f in obj.data.polygons:
         f.use_smooth = False
+
+
+def length(magnitude_with_unit):
+
+    return bpy.utils.units.to_value(
+        'METRIC',
+        'LENGTH',
+        magnitude_with_unit
+    ) / 0.001 # mm # TODO , get scale_length, but how?

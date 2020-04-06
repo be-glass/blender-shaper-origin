@@ -29,7 +29,7 @@ def perimeter_thickness(obj):
         return perimeters[0].soc_cut_depth
 
     else:
-        return 10.0  # TODO unit
+        return None
 
 
 def delete_modifier(obj, name):
