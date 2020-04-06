@@ -37,7 +37,6 @@ def check_type(obj, valid_types):
     return True if remain else False
 
 
-
 def boundaries(object_list):
     x = []
     y = []
@@ -70,18 +69,12 @@ def transform_if_needed(obj, coordinates):
         return obj.matrix_world @ coordinates
 
 
-def find_collection(obj):
-    # return [c for c in bpy.data.collections if obj.name in c.objects.keys()]
-    return obj.users_collection
-
-
 def move_object(obj, collection):
     [c.objects.unlink(obj) for c in obj.users_collection]
     collection.objects.link(obj)
 
 
 def select_active(context, obj):
-
     for o in context.selected_objects:
         o.select_set(False)
 
@@ -89,16 +82,15 @@ def select_active(context, obj):
     context.view_layer.objects.active = obj
 
 
-
-
-def error_msg(message, context = bpy.context):
+def error_msg(message, context=bpy.context):
     def msg(self, text):
         self.layout.label(text="Something went wrong!")
+
     context.window_manager.popup_menu(msg, title="Error", icon='ERROR')
     print("DEBUG me")
 
 
-def err_implementation(context = bpy.context):
+def err_implementation(context=bpy.context):
     error_msg("missing implementation", context)
 
 
@@ -108,6 +100,7 @@ def get_object_safely(obj_name):
     else:
         error_msg("Cannot find (internal) object")
 
+
 def delete_object(obj_name):
     if obj_name in bpy.data.objects:
         obj = bpy.data.objects[obj_name]
@@ -116,6 +109,7 @@ def delete_object(obj_name):
 
 def apply_scale():
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+
 
 def apply_transformations():
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
@@ -139,4 +133,3 @@ def repair_mesh(context, obj):
 def shade_mesh_flat(obj):
     for f in obj.data.polygons:
         f.use_smooth = False
-

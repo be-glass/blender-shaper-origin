@@ -34,14 +34,14 @@ class Simulation:
     def __init__(self, context, obj):
         self.obj = obj
         self.context = context
-        self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', obj)
+        self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
 
     def cleanup(self):
         sim_helper.delete_modifiers(self.obj)
         sim_helper.delete_internal_objects(self.obj)
 
     def adjust_solidify_thickness(self, delta=0.0):
-        modifier_name = constant.prefix+'Solidify'
+        modifier_name = constant.prefix + 'Solidify'
         if modifier_name in self.obj.modifiers:
             self.obj.modifiers[modifier_name].thickness = self.obj.soc_cut_depth + delta
 
@@ -81,7 +81,6 @@ class CurveCut(Simulation):
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
         mesh_obj = self.update_mesh()
 
-
         collection = self.obj.users_collection[0]
 
         sim_helper.adjust_boolean_modifiers(self.context, collection, mesh_obj)
@@ -89,13 +88,11 @@ class CurveCut(Simulation):
     def create_bevel_object(self):
         name = f'{constant.prefix}{self.obj.name}.bevel'
 
-
         # normalize curve radii
         helper.apply_scale()
         for spline in self.obj.data.splines:
             for p in spline.bezier_points:
                 p.radius = 1.0
-
 
         # create new one
         bpy.ops.mesh.primitive_plane_add(size=1.0)
@@ -124,7 +121,6 @@ class CurveCut(Simulation):
         helper.delete_object(mesh_name)
         internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
 
-
         # create a MESH version of the curve object
         depsgraph = self.context.evaluated_depsgraph_get()
         object_evaluated = self.obj.evaluated_get(depsgraph)
@@ -136,24 +132,6 @@ class CurveCut(Simulation):
         helper.shade_mesh_flat(mesh_obj)
         helper.repair_mesh(self.context, mesh_obj)
 
-
-        # old version, delete soon:
-        #     helper.select_active(self.context, self.obj)
-        #     bpy.ops.object.convert(target='MESH', keep_original=True)
-        #     bpy.ops.object.mode_set(mode='EDIT')
-        #     bpy.ops.mesh.select_all(action='SELECT')
-        #     bpy.ops.mesh.dissolve_degenerate(threshold=0.1)   # TODO unit
-        #     bpy.ops.mesh.normals_make_consistent(inside=False)
-        #     bpy.ops.object.editmode_toggle()
-        #     bpy.ops.object.shade_flat()
-        #     mesh = self.context.object
-        #     mesh.name = mesh_name
-        #     helper.move_object(mesh, internal_collection)
-        #     helper.select_active(self.context, self.obj)
-
-
-
-
         return mesh_obj
 
 
@@ -163,7 +141,6 @@ class MeshCut(Simulation):
         self.cleanup()
         self.obj.display_type = 'WIRE'
         self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
-
 
         collection = self.obj.users_collection[0]
 
