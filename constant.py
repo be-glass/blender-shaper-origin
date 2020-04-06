@@ -1,12 +1,12 @@
 prefix = "SOC_"
 
-sheet_name = prefix + "Work Area"
+# sheet_name = prefix + "Work Area"
 
-cut_face_color = {'Interior': (1, 1, 1, 1),
-                  'Exterior': (0, 0, 0, 1),
-                  'Online': (1, 0, 1, 1),
-                  'Pocket': (.5, .5, .5, 1),
-                  'Guide': (0, 0, 1, 1)}
+# cut_face_color = {'Interior': (1, 1, 1, 1),
+#                   'Exterior': (0, 0, 0, 1),
+#                   'Online': (1, 0, 1, 1),
+#                   'Pocket': (.5, .5, .5, 1),
+#                   'Guide': (0, 0, 1, 1)}
 
 cut_encoding = {'Interior': ('black', 'white'),
                 'Exterior': ('black', 'black'),

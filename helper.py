@@ -112,3 +112,30 @@ def delete_object(obj_name):
     if obj_name in bpy.data.objects:
         obj = bpy.data.objects[obj_name]
         bpy.data.objects.remove(obj, do_unlink=True)
+
+
+def apply_scale():
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+
+def apply_transformations():
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+
+
+def repair_mesh(context, obj):
+    active = context.object
+    select_active(context, obj)
+
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.dissolve_degenerate(threshold=0.1)  # TODO unit
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.object.editmode_toggle()
+    bpy.ops.object.mode_set(mode='OBJECT')
+
+    if active:
+        select_active(context, active)
+
+
+def shade_mesh_flat(obj):
+    for f in obj.data.polygons:
+        f.use_smooth = False

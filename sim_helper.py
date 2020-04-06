@@ -51,10 +51,10 @@ def delete_modifiers(obj):
 
 def delete_internal_objects(obj):
     collection = obj.users_collection[0]
-    if 'SOC_internal' in collection.children.keys():
-        internal_collection = collection.children['SOC_internal']
+    if constant.prefix + 'internal' in collection.children.keys():
+        internal_collection = collection.children[constant.prefix+'internal']
         [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if
-         o.name.startswith("SOC_" + obj.name)]
+         o.name.startswith(constant.prefix + obj.name)]
 
 
 def cleanup(context, obj):
@@ -62,6 +62,10 @@ def cleanup(context, obj):
     delete_internal_objects(obj)
     obj.display_type = 'TEXTURED'
     cleanup_boolean_modifiers(context, obj)
+
+    if obj.type == 'CURVE':
+        obj.data.bevel_object = None
+
 
 def perimeters(context):
     collection = context.object.users_collection[0]
@@ -75,7 +79,7 @@ def adjust_boolean_modifiers(context, target_obj):
 
 
 def boolean_modifier_name(cut_obj):
-    return "SOC_Boolean." + cut_obj.name
+    return constant.prefix+"Boolean." + cut_obj.name
 
 def cleanup_boolean_modifiers(context, target_obj):
     for perimeter in perimeters(context):
@@ -93,8 +97,7 @@ def rebuild_boolean_modifier(obj, cut):
         boolean.object = cut
 
     elif cut.soc_cut_type in ['Exterior', 'Interior', 'Online']:
-        mesh_name = f'SOC_{cut.name}.mesh'
-        boolean.object = helper.get_object_safely(mesh_name)
+        boolean.object = helper.get_object_safely(cut.name)
     else:
         helper.err_implementation()
 

@@ -55,4 +55,5 @@ class MESH_OT_socut_export_cuts(Operator):
             file_name = f'{dir_name}/{name}.svg'
             helper.write(content, file_name)
 
+        self.report({'INFO'}, "OK")
         return {'FINISHED'}
