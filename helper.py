@@ -139,3 +139,4 @@ def repair_mesh(context, obj):
 def shade_mesh_flat(obj):
     for f in obj.data.polygons:
         f.use_smooth = False
+

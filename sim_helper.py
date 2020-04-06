@@ -61,20 +61,21 @@ def cleanup(context, obj):
     delete_modifiers(obj)
     delete_internal_objects(obj)
     obj.display_type = 'TEXTURED'
+
+
     cleanup_boolean_modifiers(context, obj)
 
     if obj.type == 'CURVE':
         obj.data.bevel_object = None
 
 
-def perimeters(context):
-    collection = context.object.users_collection[0]
-    all_perimeters = find_siblings_by_type(context.object, 'Perimeter')
+def perimeters(context, collection):
+    all_perimeters = find_siblings_by_type(context.object, 'Perimeter', collection)
     return [o for o in all_perimeters if o.name in collection.objects.keys()]
 
 
-def adjust_boolean_modifiers(context, target_obj):
-    for perimeter_obj in perimeters(context):
+def adjust_boolean_modifiers(context, collection, target_obj):
+    for perimeter_obj in perimeters(context, collection):
         rebuild_boolean_modifier(perimeter_obj, target_obj)
 
 
@@ -82,7 +83,9 @@ def boolean_modifier_name(cut_obj):
     return constant.prefix+"Boolean." + cut_obj.name
 
 def cleanup_boolean_modifiers(context, target_obj):
-    for perimeter in perimeters(context):
+
+    collection = target_obj.users_collection[0]
+    for perimeter in perimeters(context, collection):
         delete_modifier(perimeter, boolean_modifier_name(target_obj))
 
 

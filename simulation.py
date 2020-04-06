@@ -81,7 +81,10 @@ class CurveCut(Simulation):
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
         mesh_obj = self.update_mesh()
 
-        sim_helper.adjust_boolean_modifiers(self.context, mesh_obj)
+
+        collection = self.obj.users_collection[0]
+
+        sim_helper.adjust_boolean_modifiers(self.context, collection, mesh_obj)
 
     def create_bevel_object(self):
         name = f'{constant.prefix}{self.obj.name}.bevel'
@@ -160,7 +163,11 @@ class MeshCut(Simulation):
         self.cleanup()
         self.obj.display_type = 'WIRE'
         self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
-        sim_helper.adjust_boolean_modifiers(self.context, self.obj)
+
+
+        collection = self.obj.users_collection[0]
+
+        sim_helper.adjust_boolean_modifiers(self.context, collection, self.obj)
 
     def update(self):
 
