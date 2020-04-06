@@ -19,6 +19,7 @@ def register():
     bpy.types.Object.soc_reference_frame = ObjectProperties.reference_frame
     bpy.types.Object.soc_cut_type = ObjectProperties.cut_type
     bpy.types.Object.soc_simulate = ObjectProperties.simulate
+    bpy.types.Object.soc_dogbone = ObjectProperties.dogbone
 
 
 def unregister():
@@ -102,6 +103,13 @@ class ObjectProperties(PropertyGroup):
         default=True,
         options={'HIDDEN'},
         update=update_cut_type
+    )
+    dogbone = BoolProperty(
+        name="Dogbone Fillet",
+        description="Create dogbone fillets on inner corners",
+        default=False,
+        options={'HIDDEN'},
+        update=update_cut_type   # TODO reset or not?
     )
 
 

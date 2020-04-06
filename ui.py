@@ -75,3 +75,4 @@ class BG_PT_SOC_select(SOCutPanel, Panel):
             layout.prop(ao, "soc_cut_depth")
             layout.prop(ao, "soc_tool_diameter")
             layout.prop(ao, "soc_simulate")
+            layout.prop(ao, "soc_dogbone")
