@@ -34,11 +34,13 @@ def unregister():
 
 def update_cut_depth(self, context):
     simulation.update(context, self)
+    # TODO: check limits
     pass
 
 
 def update_tool_diameter(self, context):
     simulation.update(context, self)
+    # TODO: check limits
     pass
 
 
