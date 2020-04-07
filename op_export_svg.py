@@ -67,8 +67,21 @@ def svg_curve(obj):
 
 
 def svg_material_attributes(id):
-    (stroke, fill) = constant.cut_encoding[id]
+
+    style_map = {
+        'Perimeter':    'Exterior',
+        'Exterior':     'Exterior',
+        'Cutout':       'Pocket',
+        'Interior':     'Interior',
+        'Pocket':       'Pocket',
+        'Online':       'Online',
+        'Guid':         'Guide',
+    }
+
+    style = style_map[id]
+    (stroke, fill) = constant.cut_encoding[style]
     return f'stroke="{stroke}" fill="{fill}"'
+
 
 
 def svg_object(obj):

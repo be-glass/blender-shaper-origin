@@ -28,27 +28,30 @@ def unregister():
         unregister_class(widget)
 
 
+def list_export_items(context):
+    if context.scene.so_cut.selected_only:
+        items = context.selected_objects
+    else:
+        items = context.scene.objects
+    return [o for o in items if o.soc_cut_type != 'None']
+
 class MESH_OT_socut_export_cuts(Operator):
     bl_idname = "mesh.socut_export_cuts"
     bl_label = "SO Cuts Export"
     bl_description = "Export shapes to SVG for cutting with SO"
 
     def execute(self, context):
-
         dir_name = context.scene.so_cut.export_path
-
-        items = bpy.context.selected_objects if context.scene.so_cut.selected_only \
-            else bpy.context.scene.objects
-        valid_items = helper.filter_valid(items, constant.valid_types)
+        items = list_export_items(context)
 
         if context.scene.so_cut.separate_files:
             selection_set = {}
-            for obj in valid_items:
+            for obj in items:
                 name = obj.name
                 selection_set[obj.name] = [obj]
         else:
             name = helper.project_name()
-            selection_set = {name: valid_items}
+            selection_set = {name: items}
 
         for name, selection in selection_set.items():
             content = op_export_svg.svg_content(context, selection, bl_info)
