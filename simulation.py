@@ -79,10 +79,9 @@ class CurveCut(Simulation):
     def update(self):
         bevel = helper.get_object_safely(f'{constant.prefix}{self.obj.name}.bevel')
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
+
         mesh_obj = self.update_mesh()
-
         collection = self.obj.users_collection[0]
-
         sim_helper.adjust_boolean_modifiers(self.context, collection, mesh_obj)
 
     def create_bevel_object(self):
@@ -127,6 +126,7 @@ class CurveCut(Simulation):
         mesh = bpy.data.meshes.new_from_object(object_evaluated)
         mesh_obj = bpy.data.objects.new(mesh_name, mesh)
         mesh_obj.matrix_world = self.obj.matrix_world
+        sim_helper.cleanup_meshes(self.obj, mesh_name)
         self.obj.users_collection[0].objects.link(mesh_obj)
         helper.move_object(mesh_obj, internal_collection)
         helper.shade_mesh_flat(mesh_obj)

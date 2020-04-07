@@ -50,6 +50,12 @@ def delete_internal_objects(obj):
         [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if
          o.name.startswith(constant.prefix + obj.name)]
 
+def cleanup_meshes(source_obj, mesh_name):
+    collection = source_obj.users_collection[0]
+    internal_collection = collection.children[constant.prefix + 'internal']
+    for o in internal_collection.objects:
+        if o.name.startswith(mesh_name):
+            bpy.data.objects.remove(o, do_unlink=True)
 
 def cleanup(context, obj):
     delete_modifiers(obj)
@@ -60,6 +66,9 @@ def cleanup(context, obj):
 
     if obj.type == 'CURVE':
         obj.data.bevel_object = None
+
+
+
 
 
 def find_perimeters(context, collection):
