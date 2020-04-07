@@ -7,10 +7,10 @@ def get_internal_collection(name, sibling):
 
     if name in collection.children.keys():
         return collection.children[name]
-    else:
+    else:   # create one
         internal_collection = bpy.data.collections.new(name)
         collection.children.link(internal_collection)
-        internal_collection.hide_viewport = True
+        # internal_collection.hide_viewport = True
         return internal_collection
 
 
