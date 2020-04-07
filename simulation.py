@@ -35,7 +35,7 @@ class Simulation:
         self.obj = obj
         self.context = context
         self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
-        # self.internal_collection.hide_set(True)   #
+        # self.internal_collection.hide_set(True)   # not want we want
 
     def cleanup(self):
         sim_helper.delete_modifiers(self.obj)
@@ -45,6 +45,11 @@ class Simulation:
         modifier_name = constant.prefix + 'Solidify'
         if modifier_name in self.obj.modifiers:
             self.obj.modifiers[modifier_name].thickness = self.obj.soc_cut_depth + delta
+
+    def length(self, quantity_with_unit):
+        return helper.length(self.context, quantity_with_unit)
+
+
 
 
 class Perimeter(Simulation):
@@ -62,7 +67,7 @@ class Perimeter(Simulation):
 
         cutouts = sim_helper.find_siblings_by_type(self.context.object, 'Cutout')
         for cut in cutouts:
-            cut.soc_cut_depth = self.obj.soc_cut_depth + helper.length('1mm')
+            cut.soc_cut_depth = self.obj.soc_cut_depth + self.length('1mm')
 
 
 class CurveCut(Simulation):
@@ -157,15 +162,15 @@ class MeshCut(Simulation):
 
             perimeter_thickness = sim_helper.perimeter_thickness(self.obj)
             if perimeter_thickness:
-                cutout_depth =  perimeter_thickness + helper.length('1mm')
+                cutout_depth =  perimeter_thickness + self.length('1mm')
             else:
-                cutout_depth = helper.length('1cm')
+                cutout_depth = self.length('1cm')
 
             if self.obj.soc_cut_depth != cutout_depth:
                 self.obj.soc_cut_depth = cutout_depth
             delta = 0.0
         elif cut_type == 'Pocket':
-            delta = helper.length('0.1mm')
+            delta = self.length('0.1mm')
         else:
             delta = 0.0
 

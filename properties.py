@@ -32,16 +32,32 @@ def unregister():
     del bpy.types.Object.soc_simulate
 
 
+def minmax(context, property_name):
+    d0, dd, d1 = constant.defaults[property_name]
+    return helper.length(context, d0), \
+           helper.length(context, d1)
+
+
 def update_cut_depth(self, context):
-    simulation.update(context, self)
-    # TODO: check limits
-    pass
+    minimum, maximum = minmax(context, 'cut_depth')
+
+    if context.object.soc_cut_depth < minimum:
+        context.object.soc_cut_depth = minimum
+    elif context.object.soc_cut_depth > maximum:
+        context.object.soc_cut_depth = maximum
+    else:
+        simulation.update(context, self)
 
 
 def update_tool_diameter(self, context):
-    simulation.update(context, self)
-    # TODO: check limits
-    pass
+    minimum, maximum = minmax(context, 'tool_diameter')
+
+    if context.object.soc_tool_diameter < minimum:
+        context.object.soc_tool_diameter = minimum
+    elif context.object.soc_tool_diameter > maximum:
+        context.object.soc_tool_diameter = maximum
+    else:
+        simulation.update(context, self)
 
 
 def update_cut_type(self, context):
@@ -49,13 +65,12 @@ def update_cut_type(self, context):
 
 
 class ObjectProperties(PropertyGroup):
-
     cut_depth = FloatProperty(
         name="Cut Depth",
         description="Cut depth (mm)",
-        default=helper.length('18 mm'),
-        min=0.0,
-        max=helper.length('50mm'),
+        default=0,
+        min=0,
+        max=float('inf'),
         unit='LENGTH',
         options={'HIDDEN'},
         update=update_cut_depth
@@ -64,9 +79,9 @@ class ObjectProperties(PropertyGroup):
     tool_diameter = FloatProperty(
         name="Tool Diameter",
         description="Tool diameter (mm)",
-        default=helper.length('3 mm'),
-        min=helper.length('0.1 mm'),
-        max=helper.length('25 mm'),
+        default=0,
+        min=0,
+        max=float('inf'),
         unit='LENGTH',
         options={'HIDDEN'},
         update=update_tool_diameter
@@ -111,7 +126,7 @@ class ObjectProperties(PropertyGroup):
         description="Create dogbone fillets on inner corners",
         default=False,
         options={'HIDDEN'},
-        update=update_cut_type   # TODO reset or not?
+        update=update_cut_type  # TODO reset or not?
     )
 
 

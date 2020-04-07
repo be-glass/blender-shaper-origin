@@ -141,13 +141,7 @@ def shade_mesh_flat(obj):
         f.use_smooth = False
 
 
-def length(magnitude_with_unit):
 
-    return bpy.utils.units.to_value(
-        'METRIC',
-        'LENGTH',
-        magnitude_with_unit
-    ) / 0.001 # mm # TODO , get scale_length, but how?
 
 
 def hide_objects(name):
@@ -155,3 +149,6 @@ def hide_objects(name):
         if obj.name.startswith(name):
             obj.hide_set(True)
 
+
+def length(context, quantity_with_unit):
+    return bpy.utils.units.to_value('METRIC', 'LENGTH', quantity_with_unit) / context.scene.unit_settings.scale_length
