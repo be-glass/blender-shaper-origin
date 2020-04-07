@@ -35,6 +35,7 @@ class Simulation:
         self.obj = obj
         self.context = context
         self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
+        # self.internal_collection.hide_set(True)   #
 
     def cleanup(self):
         sim_helper.delete_modifiers(self.obj)
@@ -110,8 +111,9 @@ class CurveCut(Simulation):
         bevel.data.polygons[0].select = True
         bpy.ops.mesh.delete(type='ONLY_FACE')
         bpy.ops.object.mode_set(mode='OBJECT')
-
         bpy.ops.object.convert(target='CURVE')
+
+
 
         return bevel
 
@@ -131,6 +133,7 @@ class CurveCut(Simulation):
         helper.move_object(mesh_obj, internal_collection)
         helper.shade_mesh_flat(mesh_obj)
         helper.repair_mesh(self.context, mesh_obj)
+        helper.hide_objects(mesh_obj.name)
 
         return mesh_obj
 

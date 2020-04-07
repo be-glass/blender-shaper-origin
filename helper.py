@@ -148,3 +148,10 @@ def length(magnitude_with_unit):
         'LENGTH',
         magnitude_with_unit
     ) / 0.001 # mm # TODO , get scale_length, but how?
+
+
+def hide_objects(name):
+    for obj in bpy.data.objects:
+        if obj.name.startswith(name):
+            obj.hide_set(True)
+
