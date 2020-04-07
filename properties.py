@@ -44,40 +44,37 @@ def default(context, property_name):
 def update_cut_depth(self, context):
     minimum, maximum = minmax(context, 'cut_depth')
 
-    if context.object.soc.initialized:
+    if context.object.soc_initialized:
         if context.object.soc_cut_depth < minimum:
             context.object.soc_cut_depth = minimum
         elif context.object.soc_cut_depth > maximum:
             context.object.soc_cut_depth = maximum
         else:
             simulation.update(context, self)
-    else:
-        context.object.soc_cut_depth = 0
 
 
 
 def update_tool_diameter(self, context):
     minimum, maximum = minmax(context, 'tool_diameter')
 
-    if context.object.soc.initialized:
+    if context.object.soc_initialized:
         if context.object.soc_tool_diameter < minimum:
             context.object.soc_tool_diameter = minimum
         elif context.object.soc_tool_diameter > maximum:
             context.object.soc_tool_diameter = maximum
         else:
             simulation.update(context, self)
-    else:
-        context.object.soc_tool_diameter = 0
 
 
 def update_cut_type(self, context):
     obj = context.object
-    if obj.soc_initialized:
-        simulation.update(context, self, reset=True)
-    else:
+
+    if not obj.soc_initialized:
         obj.soc_cut_depth = default(context, 'cut_depth')
         obj.soc_tool_diameter = default(context, 'tool_diameter')
         obj.soc_initialized = True
+
+    simulation.update(context, self, reset=True)
 
 
 class ObjectProperties(PropertyGroup):
