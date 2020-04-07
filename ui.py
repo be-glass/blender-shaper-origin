@@ -44,20 +44,6 @@ class BG_PT_SOC_export(SOCutPanel, Panel):
         layout.operator("mesh.socut_export_cuts", text="Export Cuts")
 
 
-# class BG_PT_SOC_init(SOCutPanel, Panel):
-#     bl_label = "Initialization"
-#
-#     def draw(self, context):
-#         layout = self.layout
-#         layout.use_property_split = True
-#         layout.use_property_decorate = True
-#         soc = context.scene.so_cut
-#
-#         # Widgets
-#         layout.operator("mesh.socut_create_materials", text="Create Materials")
-#         layout.operator("mesh.socut_create_sheet", text="Create Sheet")
-
-
 class BG_PT_SOC_select(SOCutPanel, Panel):
     bl_label = "Select"
 
@@ -71,11 +57,13 @@ class BG_PT_SOC_select(SOCutPanel, Panel):
         if ao:
             # Widgets
             layout.prop(ao, "soc_cut_type")
-            layout.prop(ao, "soc_reference_frame")
-            layout.prop(ao, "soc_cut_depth")
-            layout.prop(ao, "soc_tool_diameter")
-            layout.prop(ao, "soc_simulate")
-            layout.prop(ao, "soc_dogbone")
+
+            if ao.soc_cut_type != 'None':
+                layout.prop(ao, "soc_reference_frame")
+                layout.prop(ao, "soc_cut_depth")
+                layout.prop(ao, "soc_tool_diameter")
+                layout.prop(ao, "soc_simulate")
+                layout.prop(ao, "soc_dogbone")
 
 
 
