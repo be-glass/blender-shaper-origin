@@ -19,7 +19,7 @@ def register():
     bpy.types.Object.soc_reference_frame = ObjectProperties.reference_frame
     bpy.types.Object.soc_cut_type = ObjectProperties.cut_type
     bpy.types.Object.soc_simulate = ObjectProperties.simulate
-    bpy.types.Object.soc_dogbone = ObjectProperties.dogbone
+    bpy.types.Object.soc_initialized= ObjectProperties.initialized
 
 
 def unregister():
@@ -30,38 +30,54 @@ def unregister():
     del bpy.types.Object.soc_reference_frame
     del bpy.types.Object.soc_cut_type
     del bpy.types.Object.soc_simulate
-
+    del bpy.types.Object.soc_initialized
 
 def minmax(context, property_name):
     d0, dd, d1 = constant.defaults[property_name]
     return helper.length(context, d0), \
            helper.length(context, d1)
 
+def default(context, property_name):
+    d0, dd, d1 = constant.defaults[property_name]
+    return helper.length(context, dd)
 
 def update_cut_depth(self, context):
     minimum, maximum = minmax(context, 'cut_depth')
 
-    if context.object.soc_cut_depth < minimum:
-        context.object.soc_cut_depth = minimum
-    elif context.object.soc_cut_depth > maximum:
-        context.object.soc_cut_depth = maximum
+    if context.object.soc.initialized:
+        if context.object.soc_cut_depth < minimum:
+            context.object.soc_cut_depth = minimum
+        elif context.object.soc_cut_depth > maximum:
+            context.object.soc_cut_depth = maximum
+        else:
+            simulation.update(context, self)
     else:
-        simulation.update(context, self)
+        context.object.soc_cut_depth = 0
+
 
 
 def update_tool_diameter(self, context):
     minimum, maximum = minmax(context, 'tool_diameter')
 
-    if context.object.soc_tool_diameter < minimum:
-        context.object.soc_tool_diameter = minimum
-    elif context.object.soc_tool_diameter > maximum:
-        context.object.soc_tool_diameter = maximum
+    if context.object.soc.initialized:
+        if context.object.soc_tool_diameter < minimum:
+            context.object.soc_tool_diameter = minimum
+        elif context.object.soc_tool_diameter > maximum:
+            context.object.soc_tool_diameter = maximum
+        else:
+            simulation.update(context, self)
     else:
-        simulation.update(context, self)
+        context.object.soc_tool_diameter = 0
 
 
 def update_cut_type(self, context):
-    simulation.update(context, self, reset=True)
+    obj = context.object
+    if obj.soc_initialized:
+        simulation.update(context, self, reset=True)
+    else:
+        obj.soc_cut_depth = default(context, 'cut_depth')
+        obj.soc_tool_diameter = default(context, 'tool_diameter')
+        obj.soc_initialized = True
 
 
 class ObjectProperties(PropertyGroup):
@@ -121,12 +137,11 @@ class ObjectProperties(PropertyGroup):
         options={'HIDDEN'},
         update=update_cut_type
     )
-    dogbone = BoolProperty(
-        name="Dogbone Fillet",
-        description="Create dogbone fillets on inner corners",
+    initialized = BoolProperty(
+        name="Object initialized",
+        description="Object is initialized (for internal use)",
         default=False,
         options={'HIDDEN'},
-        update=update_cut_type  # TODO reset or not?
     )
 
 
