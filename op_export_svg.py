@@ -87,12 +87,12 @@ def svg_material_attributes(id):
 def svg_object(obj):
     if obj.type == 'MESH':
         content = svg_mesh(obj)
+        attributes = svg_material_attributes(obj.soc_mesh_cut_type)
     elif obj.type == 'CURVE':
         content = svg_curve(obj)
+        attributes = svg_material_attributes(obj.soc_curve_cut_type)
     else:
         return ''
-
-    attributes = svg_material_attributes(obj.soc_cut_type)
 
     return \
         f'<g id="{obj.name_full}" class="{obj.type}" {attributes}>' + \

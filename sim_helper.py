@@ -19,7 +19,7 @@ def find_siblings_by_type(obj, cut_types, collection=None):
         collection = obj.users_collection[0]
 
     cutables = [o for o in collection.objects if o.type in ['MESH', 'CURVE']]
-    return [o for o in cutables if o.soc_cut_type in cut_types]
+    return [o for o in cutables if (o.soc_mesh_cut_type in cut_types) or (o.soc_curve_cut_type in cut_types)]
 
 
 def perimeter_thickness(obj):

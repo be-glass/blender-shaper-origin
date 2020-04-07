@@ -33,7 +33,7 @@ def list_export_items(context):
         items = context.selected_objects
     else:
         items = context.scene.objects
-    return [o for o in items if o.soc_cut_type != 'None']
+    return [o for o in items if (o.soc_mesh_cut_type != 'None' or o.soc_curve_cut_type != 'None')]
 
 class MESH_OT_socut_export_cuts(Operator):
     bl_idname = "mesh.socut_export_cuts"

@@ -17,7 +17,8 @@ def register():
     bpy.types.Object.soc_cut_depth = ObjectProperties.cut_depth
     bpy.types.Object.soc_tool_diameter = ObjectProperties.tool_diameter
     bpy.types.Object.soc_reference_frame = ObjectProperties.reference_frame
-    bpy.types.Object.soc_cut_type = ObjectProperties.cut_type
+    bpy.types.Object.soc_mesh_cut_type = ObjectProperties.mesh_cut_type
+    bpy.types.Object.soc_curve_cut_type = ObjectProperties.curve_cut_type
     bpy.types.Object.soc_simulate = ObjectProperties.simulate
     bpy.types.Object.soc_initialized= ObjectProperties.initialized
 
@@ -28,7 +29,8 @@ def unregister():
     del bpy.types.Object.soc_cut_depth
     del bpy.types.Object.soc_tool_diameter
     del bpy.types.Object.soc_reference_frame
-    del bpy.types.Object.soc_cut_type
+    del bpy.types.Object.soc_mesh_cut_type
+    del bpy.types.Object.soc_curve_cut_type
     del bpy.types.Object.soc_simulate
     del bpy.types.Object.soc_initialized
 
@@ -110,17 +112,28 @@ class ObjectProperties(PropertyGroup):
         options={'HIDDEN'},
     )
 
-    cut_type = EnumProperty(
+    curve_cut_type = EnumProperty(
+        name="Cut Type",
+        description="SO cut type",
+        items=[('None', 'None', 'No Cut', '', 0),
+               ('Exterior', 'Exterior', 'Exterior Cut', '', 2),
+               ('Interior', 'Interior', 'Interior Cut', '', 4),
+               ('Online', 'On Line', 'On Line Cut', '', 6),
+               ('GuidePath', 'Guide Path', '', 'Guide Line', 7),
+               ],
+
+        default='None',
+        options={'HIDDEN'},
+        update=update_cut_type
+    )
+    mesh_cut_type = EnumProperty(
         name="Cut Type",
         description="SO cut type",
         items=[('None', 'None', 'No Cut', '', 0),
                ('Perimeter', 'Perimeter', "Defines the outer perimeter of work piece", 1),
-               ('Exterior', 'Exterior', 'Exterior Cut', '', 2),
                ('Cutout', 'Cutout', 'Cutout', 3),
-               ('Interior', 'Interior', 'Interior Cut', '', 4),
                ('Pocket', 'Pocketing', 'Pocketing', '', 5),
-               ('Online', 'On Line', 'On Line Cut', '', 6),
-               ('Guide', 'Guide', '', 'Guide Line', 7),
+               ('GuideArea', 'Guide Area', '', 'Guide Line', 7),
                ],
 
         default='None',

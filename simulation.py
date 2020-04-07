@@ -6,15 +6,15 @@ from . import constant, helper, sim_helper
 def update(context, obj, reset=False):
     active = context.object
 
-    if (not obj.soc_simulate) or (obj.soc_cut_type == 'None'):
+    if (not obj.soc_simulate) or (obj.soc_curve_cut_type == 'None' and obj.soc_mesh_cut_type == 'None'):
         sim_helper.cleanup(context, obj)
         return
 
-    if obj.soc_cut_type == 'Perimeter':
+    if obj.soc_mesh_cut_type == 'Perimeter':
         cut = Perimeter
-    elif obj.soc_cut_type in ['Exterior', 'Interior', 'Online'] and obj.type == 'CURVE':
+    elif obj.soc_curve_cut_type in ['Exterior', 'Interior', 'Online'] and obj.type == 'CURVE':
         cut = CurveCut
-    elif obj.soc_cut_type in ['Cutout', 'Pocket'] and obj.type == 'MESH':
+    elif obj.soc_mesh_cut_type in ['Cutout', 'Pocket'] and obj.type == 'MESH':
         cut = MeshCut
     else:
         helper.err_implementation()
@@ -156,7 +156,7 @@ class MeshCut(Simulation):
 
     def update(self):
 
-        cut_type = self.obj.soc_cut_type
+        cut_type = self.obj.soc_mesh_cut_type
 
         if cut_type == 'Cutout':
 

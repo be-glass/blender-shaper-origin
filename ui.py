@@ -55,10 +55,12 @@ class BG_PT_SOC_select(SOCutPanel, Panel):
         ao = bpy.context.active_object
 
         if ao:
-            # Widgets
-            layout.prop(ao, "soc_cut_type")
+            if ao.type == 'MESH':
+                layout.prop(ao, "soc_mesh_cut_type")
+            elif ao.type == 'CURVE':
+                layout.prop(ao, "soc_curve_cut_type")
 
-            if ao.soc_cut_type != 'None':
+            if ao.soc_mesh_cut_type != 'None' or ao.soc_curve_cut_type != 'None':
                 layout.prop(ao, "soc_reference_frame")
                 layout.prop(ao, "soc_cut_depth")
                 layout.prop(ao, "soc_tool_diameter")
