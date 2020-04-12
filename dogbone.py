@@ -3,7 +3,7 @@ from math import pi
 import mathutils
 from mathutils import Vector
 
-from . import constant, helper
+from . import constant, helper, sim_helper
 
 
 def update(context, obj, reset=False):
@@ -11,7 +11,7 @@ def update(context, obj, reset=False):
         return
 
     dogbone = Dogbone(obj, obj.soc_tool_diameter)
-    ct = obj.soc_cut_type
+    ct = obj.soc_mesh_cut_type
 
     if not obj.soc_dogbone:
         dogbone.delete()
@@ -32,17 +32,18 @@ class Dogbone:
         self.radius = tool_diameter / 2
         self.polygon = self.obj.data.polygons[0]
         self.resolution = constant.dogbone_resolution
-        self.create()
 
     def delete(self):
         pass
 
     def create(self, outside=False):
         dogbone = []
+        name = self.obj.name + ".dogbone"
+        collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
 
         for shift in range(self.corner_count()):
             dogbone += self.regular_polygon(shift, outside)
-        dogbone_obj = helper.create_object(self.obj.users_collection[0], dogbone, "Dogbone")
+        dogbone_obj = helper.create_object(collection, dogbone, name)
         dogbone_obj.matrix_world = self.obj.matrix_world
         return dogbone_obj
 
@@ -84,10 +85,9 @@ class Dogbone:
     def regular_polygon(self, corner_index, outside=False):
         A, B, C = self.corner_vectors(corner_index)
 
-        poly_normal = self.polygon.normal
         abc_normal = mathutils.geometry.normal([A, B, C])
 
-        corner_sense = self.is_inside(A, B, C, poly_normal)
+        corner_sense = self.is_inside(A, B, C)
         if (corner_sense <= 0 and not outside) or (corner_sense >= 0 and outside):
             return [B]
 

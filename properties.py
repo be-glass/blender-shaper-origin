@@ -2,7 +2,7 @@ import bpy
 from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty, CollectionProperty
 from bpy.types import PropertyGroup
 
-from . import constant, helper, simulation
+from . import constant, helper, simulation, dogbone
 
 
 # https://github.com/zeffii/BlenderPythonRecipes/wiki/Properties
@@ -163,6 +163,7 @@ class ObjectProperties(PropertyGroup):
         description="Add dogbone fillets to cut",
         default=False,
         options={'HIDDEN'},
+        update=update_cut_type
     )
 
 

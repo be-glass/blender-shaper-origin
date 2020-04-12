@@ -154,7 +154,7 @@ def hide_objects(name):
 def length(context, quantity_with_unit):
     return bpy.utils.units.to_value('METRIC', 'LENGTH', quantity_with_unit) / context.scene.unit_settings.scale_length
 
-def create_object(self, collection, polygon, name):
+def create_object(collection, polygon, name):
     bm = bmesh.new()
     [bm.verts.new(v) for v in polygon]
     bm.faces.new(bm.verts)
