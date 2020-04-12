@@ -2,6 +2,9 @@ import bpy, math
 
 from . import constant, helper, sim_helper
 
+from .dogbone import Dogbone
+
+
 
 def update(context, obj, reset=False, dogbone_obj = None):
     active = context.object
@@ -35,7 +38,10 @@ class Simulation:
         self.obj = obj
         self.context = context
         self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
-        # self.internal_collection.hide_set(True)   # not want we want
+
+        dog_bone = Dogbone(obj)
+        if dog_bone.is_valid():
+            self.obj = dog_bone.get_obj()
 
     def cleanup(self):
         sim_helper.delete_modifiers(self.obj)

@@ -6,10 +6,10 @@ from mathutils import Vector
 from . import constant, helper, sim_helper
 
 
-def update(context, obj, reset=False):
+def update(context, obj):
     if obj.type == 'MESH':
         ct = obj.soc_mesh_cut_type
-        dogbone = Dogbone(obj, obj.soc_tool_diameter)
+        dogbone = Dogbone(obj)
 
         if not obj.soc_dogbone:
             dogbone.delete()
@@ -17,23 +17,32 @@ def update(context, obj, reset=False):
             dogbone.delete()
 
         elif ct in ['Cutout', 'Pocket']:
-            return dogbone.create()
+            dogbone.create()
         elif ct == 'Perimeter':
-            return dogbone.create(outside=True)
+            dogbone.create(outside=True)
         else:
             helper.err_implementation(context)
-
-    return obj  # instead of dogbone
 
 
 class Dogbone:
 
-    def __init__(self, obj, tool_diameter):
+    def __init__(self, obj):
         self.obj = obj
-        self.radius = tool_diameter / 2
+        self.radius = obj.soc_tool_diameter / 2
         self.polygon = self.obj.data.polygons[0]
         self.resolution = constant.dogbone_resolution
         self.name = self.obj.name + ".dogbone"
+
+    def is_valid(self):
+        if self.obj.soc_dogbone and \
+                self.obj.type == 'MESH' and \
+                self.obj.soc_mesh_cut_type in ['Cutout', 'Pocket', 'Perimeter']:
+            return True
+        else:
+            return False
+
+    def get_obj(self):
+        return helper.get_object_safely(self.name)
 
     def delete(self):
         helper.delete_object(self.name)

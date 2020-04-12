@@ -22,7 +22,7 @@ def register():
     bpy.types.Object.soc_curve_cut_type = ObjectProperties.curve_cut_type
     bpy.types.Object.soc_simulate = ObjectProperties.simulate
     bpy.types.Object.soc_initialized= ObjectProperties.initialized
-    bpy.types.Object.soc_dogbone= ObjectProperties.dogbone
+    bpy.types.Object.soc_dogbone = ObjectProperties.dogbone
 
 
 def unregister():
@@ -78,8 +78,8 @@ def update_cut_type(obj, context):
         obj.soc_tool_diameter = default(context, 'tool_diameter')
         obj.soc_initialized = True
 
-    dogbone_obj = dogbone.update(context, obj, reset=True)
-    simulation.update(context, obj, reset=True, dogbone_obj = dogbone_obj)
+    dogbone.update(context, obj)
+    simulation.update(context, obj, reset=True)
 
 # Definition
 
@@ -91,7 +91,6 @@ class ObjectProperties(PropertyGroup):
         min=0,
         max=float('inf'),
         unit='LENGTH',
-        options={'HIDDEN'},
         update=update_cut_depth
     )
 
@@ -102,7 +101,6 @@ class ObjectProperties(PropertyGroup):
         min=0,
         max=float('inf'),
         unit='LENGTH',
-        options={'HIDDEN'},
         update=update_tool_diameter
     )
 
