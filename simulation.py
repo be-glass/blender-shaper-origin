@@ -1,4 +1,4 @@
-import bpy
+import bpy, math
 
 from . import constant, helper, sim_helper
 
@@ -166,7 +166,7 @@ class MeshCut(Simulation):
             else:
                 cutout_depth = self.length('1cm')
 
-            if self.obj.soc_cut_depth != cutout_depth:
+            if math.isclose(self.obj.soc_cut_depth, cutout_depth, abs_tol=self.length('0.01mm')):
                 self.obj.soc_cut_depth = cutout_depth
             delta = 0.0
         elif cut_type == 'Pocket':

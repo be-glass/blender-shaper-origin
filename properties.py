@@ -2,12 +2,13 @@ import bpy
 from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty, CollectionProperty
 from bpy.types import PropertyGroup
 
-from . import simulation
 from . import constant, helper, simulation
 
 
 # https://github.com/zeffii/BlenderPythonRecipes/wiki/Properties
 
+##################################################################################3
+# Initialization
 
 def register():
     bpy.utils.register_class(SceneProperties)
@@ -21,6 +22,7 @@ def register():
     bpy.types.Object.soc_curve_cut_type = ObjectProperties.curve_cut_type
     bpy.types.Object.soc_simulate = ObjectProperties.simulate
     bpy.types.Object.soc_initialized= ObjectProperties.initialized
+    bpy.types.Object.soc_dogbone= ObjectProperties.dogbone
 
 
 def unregister():
@@ -33,6 +35,9 @@ def unregister():
     del bpy.types.Object.soc_curve_cut_type
     del bpy.types.Object.soc_simulate
     del bpy.types.Object.soc_initialized
+    del bpy.types.Object.soc_dogbone
+
+# Update
 
 def minmax(context, property_name):
     d0, dd, d1 = constant.defaults[property_name]
@@ -54,8 +59,6 @@ def update_cut_depth(self, context):
         else:
             simulation.update(context, self)
 
-
-
 def update_tool_diameter(self, context):
     minimum, maximum = minmax(context, 'tool_diameter')
 
@@ -76,8 +79,10 @@ def update_cut_type(self, context):
         obj.soc_tool_diameter = default(context, 'tool_diameter')
         obj.soc_initialized = True
 
+    dogbone.update(context, self, reset=True)
     simulation.update(context, self, reset=True)
 
+# Definition
 
 class ObjectProperties(PropertyGroup):
     cut_depth = FloatProperty(
@@ -150,6 +155,12 @@ class ObjectProperties(PropertyGroup):
     initialized = BoolProperty(
         name="Object initialized",
         description="Object is initialized (for internal use)",
+        default=False,
+        options={'HIDDEN'},
+    )
+    dogbone = BoolProperty(
+        name="Dogbone Fillets",
+        description="Add dogbone fillets to cut",
         default=False,
         options={'HIDDEN'},
     )

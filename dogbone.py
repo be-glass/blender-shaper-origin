@@ -6,6 +6,25 @@ from mathutils import Vector
 from . import constant, helper
 
 
+def update(context, obj, reset=False):
+    if obj.type != 'MESH':
+        return
+
+    dogbone = Dogbone(obj, obj.soc_tool_diameter)
+    ct = obj.soc_cut_type
+
+    if not obj.soc_dogbone:
+        dogbone.delete()
+    elif ct in ['None', 'Guide']:
+        dogbone.delete()
+    elif ct == 'Perimeter':
+        dogbone.create(outside=True)
+    elif ct == 'Cutout':
+        dogbone.create()
+    elif ct == 'Pocket':
+        dogbone.create()
+
+
 class Dogbone:
 
     def __init__(self, obj, tool_diameter):
@@ -15,11 +34,14 @@ class Dogbone:
         self.resolution = constant.dogbone_resolution
         self.create()
 
-    def create(self):
+    def delete(self):
+        pass
+
+    def create(self, outside=False):
         dogbone = []
 
         for shift in range(self.corner_count()):
-            dogbone += self.regular_polygon(shift)
+            dogbone += self.regular_polygon(shift, outside)
         dogbone_obj = helper.create_object(self.obj.users_collection[0], dogbone, "Dogbone")
         dogbone_obj.matrix_world = self.obj.matrix_world
         return dogbone_obj
