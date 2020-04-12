@@ -5,10 +5,8 @@ from bpy.types import PropertyGroup
 from . import constant, helper, simulation, dogbone
 
 
-# https://github.com/zeffii/BlenderPythonRecipes/wiki/Properties
-
-##################################################################################3
 # Initialization
+
 
 def register():
     bpy.utils.register_class(SceneProperties)

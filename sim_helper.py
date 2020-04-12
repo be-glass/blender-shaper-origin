@@ -1,6 +1,7 @@
 import bpy
 from . import helper
 from .constant import Prefix
+from .dogbone import Dogbone
 
 
 def get_internal_collection(name, sibling):
@@ -11,7 +12,6 @@ def get_internal_collection(name, sibling):
     else:   # create one
         internal_collection = bpy.data.collections.new(name)
         collection.children.link(internal_collection)
-        # internal_collection.hide_viewport = True
         return internal_collection
 
 
@@ -25,10 +25,8 @@ def find_siblings_by_type(obj, cut_types, collection=None):
 
 def perimeter_thickness(obj):
     perimeters = find_siblings_by_type(obj, ['Perimeter'])
-
     if perimeters:
         return perimeters[0].soc_cut_depth
-
     else:
         return None
 
@@ -72,14 +70,9 @@ def cleanup(context, obj):
 
 
 
-def find_perimeters(context, collection):
-    all_perimeters = find_siblings_by_type(context.object, 'Perimeter', collection)
+def find_perimeters(obj, collection):
+    all_perimeters = find_siblings_by_type(obj, 'Perimeter', collection)
     return [o for o in all_perimeters if o.name in collection.objects.keys()]
-
-
-def adjust_boolean_modifiers(context, collection, target_obj):
-    for perimeter_obj in find_perimeters(context, collection):
-        rebuild_boolean_modifier(perimeter_obj, target_obj)
 
 
 def boolean_modifier_name(cut_obj):
@@ -92,9 +85,10 @@ def cleanup_boolean_modifiers(context, target_obj):
         delete_modifier(perimeter, boolean_modifier_name(target_obj))
 
 
-def rebuild_boolean_modifier(obj, target_obj):
-    modifier_name = boolean_modifier_name(target_obj)
-    delete_modifier(obj, modifier_name)
-    boolean = obj.modifiers.new(modifier_name, 'BOOLEAN')
+def rebuild_boolean_modifier(perimeter_obj, master_obj, target_obj):
+
+    modifier_name = boolean_modifier_name(master_obj)
+    delete_modifier(perimeter_obj, modifier_name)
+    boolean = perimeter_obj.modifiers.new(modifier_name, 'BOOLEAN')
     boolean.operation = 'DIFFERENCE'
     boolean.object = helper.get_object_safely(target_obj.name)

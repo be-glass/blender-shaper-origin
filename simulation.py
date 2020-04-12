@@ -1,6 +1,8 @@
 import bpy, math
 
-from . import constant, helper, sim_helper
+
+from . import helper, sim_helper
+from .sim_helper import find_perimeters, rebuild_boolean_modifier
 
 from .dogbone import Dogbone
 from .constant import Prefix
@@ -45,19 +47,23 @@ class Simulation:
         sim_helper.delete_modifiers(self.obj)
         sim_helper.delete_internal_objects(self.obj)
 
-    def adjust_solidify_thickness(self, delta=0.0, obj=None):
-        if not obj:
-            obj = self.obj
+    def adjust_solidify_thickness(self, delta=0.0, revision=None):
+        master = self.obj
+        if not revision:
+            revision = master
 
 
         modifier_name = Prefix + 'Solidify'
-        if modifier_name in self.obj.modifiers:
-            self.obj.modifiers[modifier_name].thickness = self.obj.soc_cut_depth + delta
+        if modifier_name in revision.modifiers:
+            t = master.soc_cut_depth + delta
+            revision.modifiers[modifier_name].thickness = master.soc_cut_depth + delta
 
     def length(self, quantity_with_unit):
         return helper.length(self.context, quantity_with_unit)
 
-
+    def adjust_boolean_modifiers(self, collection, target_obj):
+        for perimeter_obj in find_perimeters(self.context, collection):
+            rebuild_boolean_modifier(perimeter_obj, self.obj, target_obj)
 
 
 class Perimeter(Simulation):
@@ -68,7 +74,13 @@ class Perimeter(Simulation):
         self.obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
         for cut in sim_helper.find_siblings_by_type(self.obj, ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']):
-            sim_helper.rebuild_boolean_modifier(self.obj, cut)
+
+            dogbone = Dogbone(cut)
+            if dogbone.is_valid():
+                cut = dogbone.get_obj()
+
+            rebuild_boolean_modifier(self.obj, cut)
+
 
     def update(self):
         self.adjust_solidify_thickness()
@@ -96,7 +108,7 @@ class CurveCut(Simulation):
 
         mesh_obj = self.update_mesh()
         collection = self.obj.users_collection[0]
-        sim_helper.adjust_boolean_modifiers(self.context, collection, mesh_obj)
+        self.adjust_boolean_modifiers(collection, mesh_obj)
 
     def create_bevel_object(self):
         name = f'{Prefix}{self.obj.name}.bevel'
@@ -153,8 +165,8 @@ class CurveCut(Simulation):
 
 class MeshCut(Simulation):
 
-    def setup(self):
-        self.cleanup()
+    def __init__(self, context, obj):
+        super().__init__(context, obj)
 
         dog_bone = Dogbone(self.obj)
         if dog_bone.is_valid():
@@ -162,16 +174,15 @@ class MeshCut(Simulation):
         else:
             self.revision = self.obj
 
-
-
+    def setup(self):
+        self.cleanup()
 
         self.obj.display_type = 'WIRE'
         self.revision.display_type = 'WIRE'
         self.revision.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
-        # collection = self.revision.users_collection[0]
-
-        # sim_helper.adjust_boolean_modifiers(self.context, collection, self.revision)
+        collection = self.revision.users_collection[0]
+        self.adjust_boolean_modifiers(collection, self.revision)
 
     def update(self):
 
@@ -185,12 +196,16 @@ class MeshCut(Simulation):
             else:
                 cutout_depth = self.length('1cm')
 
-            if math.isclose(self.obj.soc_cut_depth, cutout_depth, abs_tol=self.length('0.01mm')):
+            if not math.isclose(self.obj.soc_cut_depth, cutout_depth, abs_tol=self.length('0.01mm')):
                 self.obj.soc_cut_depth = cutout_depth
+                return
+
             delta = 0.0
         elif cut_type == 'Pocket':
             delta = self.length('0.1mm')
         else:
             delta = 0.0
 
-        self.adjust_solidify_thickness(delta=delta, obj=self.revision)
+        self.adjust_solidify_thickness(delta=delta, revision=self.revision)
+
+
