@@ -1,8 +1,11 @@
 import bpy
-from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty, CollectionProperty
+from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty
 from bpy.types import PropertyGroup
 
-from . import constant, helper, simulation, dogbone
+from . import dogbone, simulation
+from .constant import defaults
+from .helper import length
+from .sim_helper import cleanup
 
 
 # Initialization
@@ -39,14 +42,14 @@ def unregister():
 # Update
 
 def minmax(context, property_name):
-    d0, dd, d1 = constant.defaults[property_name]
-    return helper.length(context, d0), \
-           helper.length(context, d1)
+    d0, dd, d1 = defaults[property_name]
+    return length(context, d0), \
+           length(context, d1)
 
 
 def default(context, property_name):
-    d0, dd, d1 = constant.defaults[property_name]
-    return helper.length(context, dd)
+    d0, dd, d1 = defaults[property_name]
+    return length(context, dd)
 
 
 def update_cut_depth(obj, context):
@@ -79,6 +82,7 @@ def update_cut_type(obj, context):
         obj.soc_tool_diameter = default(context, 'tool_diameter')
         obj.soc_initialized = True
 
+    cleanup(context, obj)
     dogbone.update(context, obj)
     simulation.update(context, obj, reset=True)
 

@@ -1,7 +1,8 @@
 import bpy, math
 
 from . import helper, sim_helper
-from .sim_helper import find_perimeters, rebuild_boolean_modifier
+from .sim_helper import find_perimeters, rebuild_boolean_modifier, cleanup, get_internal_collection, delete_modifiers, \
+    delete_internal_objects, find_siblings_by_type, cleanup_meshes
 
 from .dogbone import Dogbone
 from .constant import Prefix
@@ -11,7 +12,6 @@ def update(context, obj, reset=False, dogbone_obj=None):
     active = context.object
 
     if (not obj.soc_simulate) or (obj.soc_curve_cut_type == 'None' and obj.soc_mesh_cut_type == 'None'):
-        sim_helper.cleanup(context, obj)
         return
 
     if obj.soc_mesh_cut_type == 'Perimeter':
@@ -38,11 +38,22 @@ class Simulation:
     def __init__(self, context, obj):
         self.obj = obj
         self.context = context
-        self.internal_collection = sim_helper.get_internal_collection(Prefix + 'internal', self.obj)
+        self.internal_collection = get_internal_collection(self.obj)
+        self.set_dogbone()
+
+
+    def set_dogbone(self):
+        dog_bone = Dogbone(self.obj)
+        if dog_bone.is_valid():
+            self.revision = dog_bone.get_obj()
+            self.dogbone_valid = True
+        else:
+            self.revision = self.obj
+            self.dogbone_valid = False
 
     def cleanup(self):
-        sim_helper.delete_modifiers(self.obj)
-        sim_helper.delete_internal_objects(self.obj)
+        delete_modifiers(self.obj)
+        delete_internal_objects(self.obj)
 
     def adjust_solidify_thickness(self, delta=0.0, revision=None):
         master = self.obj
@@ -65,14 +76,20 @@ class Simulation:
 class Perimeter(Simulation):
 
     def setup(self):
-        self.cleanup()
+        # self.cleanup()
         modifier_name = Prefix + 'Solidify'
-        self.obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
-        for cut in sim_helper.find_siblings_by_type(
-                ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online'],
-                sibling=self.obj
-        ):
+        if self.dogbone_valid:
+            # self.obj.display_type = 'WIRE'
+            self.revision  = Dogbone(self.obj).get_obj()
+        else:
+            self.revision = self.obj
+
+        self.revision.modifiers.new(modifier_name, 'SOLIDIFY')
+
+
+        types = ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']
+        for cut in find_siblings_by_type(types, sibling=self.obj):
 
             dogbone = Dogbone(cut)
             if dogbone.is_valid():
@@ -81,9 +98,9 @@ class Perimeter(Simulation):
             rebuild_boolean_modifier(self.obj, cut)
 
     def update(self):
-        self.adjust_solidify_thickness()
+        self.adjust_solidify_thickness(revision=self.revision)
 
-        cutouts = sim_helper.find_siblings_by_type('Cutout', sibling=self.context.object)
+        cutouts = find_siblings_by_type('Cutout', sibling=self.context.object)
         for cut in cutouts:
             cut.soc_cut_depth = self.obj.soc_cut_depth + self.length('1mm')
 
@@ -91,7 +108,7 @@ class Perimeter(Simulation):
 class CurveCut(Simulation):
 
     def setup(self):
-        self.cleanup()
+        # self.cleanup()
         bevel = self.create_bevel_object()
         helper.move_object(bevel, self.internal_collection)
         self.obj.data.bevel_object = bevel
@@ -141,7 +158,7 @@ class CurveCut(Simulation):
     def update_mesh(self):
         mesh_name = Prefix + self.obj.name + '.mesh'
         helper.delete_object(mesh_name)
-        internal_collection = sim_helper.get_internal_collection(Prefix + 'internal', self.obj)
+        internal_collection = get_internal_collection(self.obj)
 
         # create a MESH version of the curve object
         depsgraph = self.context.evaluated_depsgraph_get()
@@ -149,7 +166,7 @@ class CurveCut(Simulation):
         mesh = bpy.data.meshes.new_from_object(object_evaluated)
         mesh_obj = bpy.data.objects.new(mesh_name, mesh)
         mesh_obj.matrix_world = self.obj.matrix_world
-        sim_helper.cleanup_meshes(self.obj, mesh_name)
+        cleanup_meshes(self.obj, mesh_name)
         self.obj.users_collection[0].objects.link(mesh_obj)
         helper.move_object(mesh_obj, internal_collection)
         helper.shade_mesh_flat(mesh_obj)
@@ -159,19 +176,15 @@ class CurveCut(Simulation):
         return mesh_obj
 
 
+
 class MeshCut(Simulation):
 
     def __init__(self, context, obj):
         super().__init__(context, obj)
 
-        dog_bone = Dogbone(self.obj)
-        if dog_bone.is_valid():
-            self.revision = dog_bone.get_obj()
-        else:
-            self.revision = self.obj
 
     def setup(self):
-        self.cleanup()
+        # self.cleanup()
 
         self.obj.display_type = 'WIRE'
         self.revision.display_type = 'WIRE'

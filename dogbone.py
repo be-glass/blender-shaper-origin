@@ -31,7 +31,7 @@ class Dogbone:
         self.radius = obj.soc_tool_diameter / 2
         self.polygon = self.obj.data.polygons[0]
         self.resolution = constant.dogbone_resolution
-        self.name = self.obj.name + ".dogbone"
+        self.name = Prefix + self.obj.name + ".dogbone"
 
     def is_valid(self):
         if self.obj.soc_dogbone and \
@@ -49,12 +49,15 @@ class Dogbone:
 
     def create(self, outside=False):
         dogbone = []
-        collection = sim_helper.get_internal_collection(Prefix + 'internal', self.obj)
+        collection = sim_helper.get_internal_collection(self.obj)
 
         for shift in range(self.corner_count()):
             dogbone += self.regular_polygon(shift, outside)
         dogbone_obj = helper.create_object(collection, dogbone, self.name)
         dogbone_obj.matrix_world = self.obj.matrix_world
+
+        self.obj.display_type = 'WIRE'
+
         return dogbone_obj
 
     def polygon_angles(self):
