@@ -3,6 +3,7 @@ import bpy, math
 from . import constant, helper, sim_helper
 
 from .dogbone import Dogbone
+from .constant import Prefix
 
 
 
@@ -37,18 +38,19 @@ class Simulation:
     def __init__(self, context, obj):
         self.obj = obj
         self.context = context
-        self.internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
+        self.internal_collection = sim_helper.get_internal_collection(Prefix + 'internal', self.obj)
 
-        dog_bone = Dogbone(obj)
-        if dog_bone.is_valid():
-            self.obj = dog_bone.get_obj()
 
     def cleanup(self):
         sim_helper.delete_modifiers(self.obj)
         sim_helper.delete_internal_objects(self.obj)
 
-    def adjust_solidify_thickness(self, delta=0.0):
-        modifier_name = constant.prefix + 'Solidify'
+    def adjust_solidify_thickness(self, delta=0.0, obj=None):
+        if not obj:
+            obj = self.obj
+
+
+        modifier_name = Prefix + 'Solidify'
         if modifier_name in self.obj.modifiers:
             self.obj.modifiers[modifier_name].thickness = self.obj.soc_cut_depth + delta
 
@@ -62,7 +64,7 @@ class Perimeter(Simulation):
 
     def setup(self):
         self.cleanup()
-        modifier_name = constant.prefix + 'Solidify'
+        modifier_name = Prefix + 'Solidify'
         self.obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
         for cut in sim_helper.find_siblings_by_type(self.obj, ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']):
@@ -85,11 +87,11 @@ class CurveCut(Simulation):
         self.obj.data.bevel_object = bevel
 
         self.obj.display_type = 'WIRE'
-        modifier_name = constant.prefix + 'Solidify'
+        modifier_name = Prefix + 'Solidify'
         self.obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
     def update(self):
-        bevel = helper.get_object_safely(f'{constant.prefix}{self.obj.name}.bevel')
+        bevel = helper.get_object_safely(f'{Prefix}{self.obj.name}.bevel')
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
 
         mesh_obj = self.update_mesh()
@@ -97,7 +99,7 @@ class CurveCut(Simulation):
         sim_helper.adjust_boolean_modifiers(self.context, collection, mesh_obj)
 
     def create_bevel_object(self):
-        name = f'{constant.prefix}{self.obj.name}.bevel'
+        name = f'{Prefix}{self.obj.name}.bevel'
 
         # normalize curve radii
         helper.apply_scale()
@@ -129,9 +131,9 @@ class CurveCut(Simulation):
         return bevel
 
     def update_mesh(self):
-        mesh_name = constant.prefix + self.obj.name + '.mesh'
+        mesh_name = Prefix + self.obj.name + '.mesh'
         helper.delete_object(mesh_name)
-        internal_collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
+        internal_collection = sim_helper.get_internal_collection(Prefix + 'internal', self.obj)
 
         # create a MESH version of the curve object
         depsgraph = self.context.evaluated_depsgraph_get()
@@ -153,12 +155,23 @@ class MeshCut(Simulation):
 
     def setup(self):
         self.cleanup()
+
+        dog_bone = Dogbone(self.obj)
+        if dog_bone.is_valid():
+            self.revision = dog_bone.get_obj()
+        else:
+            self.revision = self.obj
+
+
+
+
         self.obj.display_type = 'WIRE'
-        self.obj.modifiers.new("SOC_Solidify", 'SOLIDIFY')
+        self.revision.display_type = 'WIRE'
+        self.revision.modifiers.new("SOC_Solidify", 'SOLIDIFY')
 
-        collection = self.obj.users_collection[0]
+        # collection = self.revision.users_collection[0]
 
-        sim_helper.adjust_boolean_modifiers(self.context, collection, self.obj)
+        # sim_helper.adjust_boolean_modifiers(self.context, collection, self.revision)
 
     def update(self):
 
@@ -180,4 +193,4 @@ class MeshCut(Simulation):
         else:
             delta = 0.0
 
-        self.adjust_solidify_thickness(delta=delta)
+        self.adjust_solidify_thickness(delta=delta, obj=self.revision)

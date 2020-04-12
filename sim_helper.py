@@ -1,5 +1,6 @@
 import bpy
-from . import helper, constant
+from . import helper
+from .constant import Prefix
 
 
 def get_internal_collection(name, sibling):
@@ -39,20 +40,20 @@ def delete_modifier(obj, name):
 
 def delete_modifiers(obj):
     for modifier in obj.modifiers:
-        if modifier.name.startswith(constant.prefix):
+        if modifier.name.startswith(Prefix):
             obj.modifiers.remove(modifier)
 
 
 def delete_internal_objects(obj):
     collection = obj.users_collection[0]
-    if constant.prefix + 'internal' in collection.children.keys():
-        internal_collection = collection.children[constant.prefix + 'internal']
+    if Prefix + 'internal' in collection.children.keys():
+        internal_collection = collection.children[Prefix + 'internal']
         [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if
-         o.name.startswith(constant.prefix + obj.name)]
+         o.name.startswith(Prefix + obj.name)]
 
 def cleanup_meshes(source_obj, mesh_name):
     collection = source_obj.users_collection[0]
-    internal_collection = collection.children[constant.prefix + 'internal']
+    internal_collection = collection.children[Prefix + 'internal']
     for o in internal_collection.objects:
         if o.name.startswith(mesh_name):
             bpy.data.objects.remove(o, do_unlink=True)
@@ -82,7 +83,7 @@ def adjust_boolean_modifiers(context, collection, target_obj):
 
 
 def boolean_modifier_name(cut_obj):
-    return constant.prefix + "Boolean." + cut_obj.name
+    return Prefix + "Boolean." + cut_obj.name
 
 
 def cleanup_boolean_modifiers(context, target_obj):

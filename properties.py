@@ -21,7 +21,7 @@ def register():
     bpy.types.Object.soc_mesh_cut_type = ObjectProperties.mesh_cut_type
     bpy.types.Object.soc_curve_cut_type = ObjectProperties.curve_cut_type
     bpy.types.Object.soc_simulate = ObjectProperties.simulate
-    bpy.types.Object.soc_initialized= ObjectProperties.initialized
+    bpy.types.Object.soc_initialized = ObjectProperties.initialized
     bpy.types.Object.soc_dogbone = ObjectProperties.dogbone
 
 
@@ -37,6 +37,7 @@ def unregister():
     del bpy.types.Object.soc_initialized
     del bpy.types.Object.soc_dogbone
 
+
 # Update
 
 def minmax(context, property_name):
@@ -44,9 +45,11 @@ def minmax(context, property_name):
     return helper.length(context, d0), \
            helper.length(context, d1)
 
+
 def default(context, property_name):
     d0, dd, d1 = constant.defaults[property_name]
     return helper.length(context, dd)
+
 
 def update_cut_depth(obj, context):
     minimum, maximum = minmax(context, 'cut_depth')
@@ -58,6 +61,7 @@ def update_cut_depth(obj, context):
             obj.soc_cut_depth = maximum
         else:
             simulation.update(context, obj)
+
 
 def update_tool_diameter(obj, context):
     minimum, maximum = minmax(context, 'tool_diameter')
@@ -72,7 +76,6 @@ def update_tool_diameter(obj, context):
 
 
 def update_cut_type(obj, context):
-
     if not obj.soc_initialized:
         obj.soc_cut_depth = default(context, 'cut_depth')
         obj.soc_tool_diameter = default(context, 'tool_diameter')
@@ -80,6 +83,7 @@ def update_cut_type(obj, context):
 
     dogbone.update(context, obj)
     simulation.update(context, obj, reset=True)
+
 
 # Definition
 

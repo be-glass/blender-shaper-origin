@@ -1,10 +1,10 @@
 import math
 from math import pi
 import mathutils
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 from . import constant, helper, sim_helper
-
+from .constant import Prefix
 
 def update(context, obj):
     if obj.type == 'MESH':
@@ -49,7 +49,7 @@ class Dogbone:
 
     def create(self, outside=False):
         dogbone = []
-        collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
+        collection = sim_helper.get_internal_collection(Prefix + 'internal', self.obj)
 
         for shift in range(self.corner_count()):
             dogbone += self.regular_polygon(shift, outside)
@@ -160,10 +160,10 @@ class Dogbone:
         r_polygon = self.regular_polygon_radius_factor()
         p = []
 
-        axis_plane_normal = mathutils.Matrix.Rotation(pi / 2, 4, normal) @ boundary_axis
+        axis_plane_normal = Matrix.Rotation(pi / 2, 4, normal) @ boundary_axis
 
         for i in range(self.resolution):
-            rotation = mathutils.Matrix.Rotation(a_step * (i + 0.5) + start_angle, 4, normal)
+            rotation = Matrix.Rotation(a_step * (i + 0.5) + start_angle, 4, normal)
 
             point = center_point - r_polygon * rotation @ center_of_first_segment
 
