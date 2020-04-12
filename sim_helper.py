@@ -15,16 +15,21 @@ def get_internal_collection(name, sibling):
         return internal_collection
 
 
-def find_siblings_by_type(obj, cut_types, collection=None):
+def find_siblings_by_type(cut_types, sibling = None, collection=None):
+
+    if not (sibling or collection):
+        return []
+
+
     if not collection:
-        collection = obj.users_collection[0]
+        collection = sibling.users_collection[0]
 
     cutables = [o for o in collection.objects if o.type in ['MESH', 'CURVE']]
     return [o for o in cutables if (o.soc_mesh_cut_type in cut_types) or (o.soc_curve_cut_type in cut_types)]
 
 
 def perimeter_thickness(obj):
-    perimeters = find_siblings_by_type(obj, ['Perimeter'])
+    perimeters = find_siblings_by_type(['Perimeter'], sibling = obj)
     if perimeters:
         return perimeters[0].soc_cut_depth
     else:
@@ -70,8 +75,8 @@ def cleanup(context, obj):
 
 
 
-def find_perimeters(obj, collection):
-    all_perimeters = find_siblings_by_type(obj, 'Perimeter', collection)
+def find_perimeters(collection):
+    all_perimeters = find_siblings_by_type('Perimeter', collection=collection)
     return [o for o in all_perimeters if o.name in collection.objects.keys()]
 
 
@@ -81,7 +86,7 @@ def boolean_modifier_name(cut_obj):
 
 def cleanup_boolean_modifiers(context, target_obj):
     collection = target_obj.users_collection[0]
-    for perimeter in find_perimeters(context, collection):
+    for perimeter in find_perimeters(collection):
         delete_modifier(perimeter, boolean_modifier_name(target_obj))
 
 
