@@ -9,7 +9,7 @@ from .constant import Prefix
 def update(context, obj):
     if obj.type == 'MESH':
         ct = obj.soc_mesh_cut_type
-        dogbone = Dogbone(obj)
+        dogbone = Fillet(obj)
 
         if not obj.soc_dogbone:
             dogbone.delete()
@@ -24,7 +24,7 @@ def update(context, obj):
             helper.err_implementation(context)
 
 
-class Dogbone:
+class Fillet:
 
     def __init__(self, obj):
         self.obj = obj

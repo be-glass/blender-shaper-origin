@@ -4,14 +4,18 @@ from . import helper, sim_helper
 from .sim_helper import find_perimeters, rebuild_boolean_modifier, cleanup, get_internal_collection, delete_modifiers, \
     delete_internal_objects, find_siblings_by_type, cleanup_meshes
 
-from .dogbone import Dogbone
+from .fillet import Fillet
 from .constant import Prefix
 
 
 def update(context, obj, reset=False, dogbone_obj=None):
     active = context.object
 
-    if (not obj.soc_simulate) or (obj.soc_curve_cut_type == 'None' and obj.soc_mesh_cut_type == 'None'):
+    cleanup(context, obj)
+
+    if not obj.soc_simulate:
+        return
+    if obj.soc_curve_cut_type == 'None' and obj.soc_mesh_cut_type == 'None':
         return
 
     if obj.soc_mesh_cut_type == 'Perimeter':
@@ -24,91 +28,125 @@ def update(context, obj, reset=False, dogbone_obj=None):
         helper.err_implementation()
         return
 
-    simulation = cut(context, obj)
+    generator = cut(context, obj)
 
     if reset:
-        simulation.setup()
+        generator.setup()
 
-    simulation.update()
+    generator.update()
     helper.select_active(context, active)
 
 
-class Simulation:
+class Generator:
 
     def __init__(self, context, obj):
         self.obj = obj
         self.context = context
         self.internal_collection = get_internal_collection(self.obj)
-        self.set_dogbone()
+        self.fillet = Fillet(obj)
 
-
-    def set_dogbone(self):
-        dog_bone = Dogbone(self.obj)
-        if dog_bone.is_valid():
-            self.revision = dog_bone.get_obj()
-            self.dogbone_valid = True
-        else:
-            self.revision = self.obj
-            self.dogbone_valid = False
+    def setup(self):
+        self.obj.display_type = 'WIRE'
+        self.revision.display_type = 'WIRE'
 
     def cleanup(self):
         delete_modifiers(self.obj)
         delete_internal_objects(self.obj)
 
-    def adjust_solidify_thickness(self, delta=0.0, revision=None):
+    def adjust_solidify_thickness(self, delta=0.0):
         master = self.obj
-        if not revision:
-            revision = master
+        revision = self.fillet.get_obj()
 
         modifier_name = Prefix + 'Solidify'
         if modifier_name in revision.modifiers:
-            t = master.soc_cut_depth + delta
             revision.modifiers[modifier_name].thickness = master.soc_cut_depth + delta
 
     def length(self, quantity_with_unit):
         return helper.length(self.context, quantity_with_unit)
 
-    def adjust_boolean_modifiers(self, collection, target_obj):
+    def adjust_boolean_modifiers(self, collection):
         for perimeter_obj in find_perimeters(collection):
-            rebuild_boolean_modifier(perimeter_obj, self.obj, target_obj)
+            rebuild_boolean_modifier(perimeter_obj, self.obj, self.fillet)
 
 
-class Perimeter(Simulation):
+class Perimeter(Generator):
 
     def setup(self):
-        # self.cleanup()
+        super().setup()
+
+        self.fillet.create(outside=True)
+
+
+        # self.obj.display_type = 'WIRE'
+
         modifier_name = Prefix + 'Solidify'
-
-        if self.dogbone_valid:
-            # self.obj.display_type = 'WIRE'
-            self.revision  = Dogbone(self.obj).get_obj()
-        else:
-            self.revision = self.obj
-
-        self.revision.modifiers.new(modifier_name, 'SOLIDIFY')
-
+        revision = self.fillet.get_obj()
+        revision.modifiers.new(modifier_name, 'SOLIDIFY')
 
         types = ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']
         for cut in find_siblings_by_type(types, sibling=self.obj):
 
-            dogbone = Dogbone(cut)
-            if dogbone.is_valid():
-                cut = dogbone.get_obj()
+            fillet = Fillet(cut)
+            if fillet.is_valid():
+                cut = fillet.get_obj()
 
             rebuild_boolean_modifier(self.obj, cut)
 
     def update(self):
-        self.adjust_solidify_thickness(revision=self.revision)
+        self.adjust_solidify_thickness()
 
         cutouts = find_siblings_by_type('Cutout', sibling=self.context.object)
         for cut in cutouts:
             cut.soc_cut_depth = self.obj.soc_cut_depth + self.length('1mm')
 
 
-class CurveCut(Simulation):
+class MeshCut(Generator):
 
     def setup(self):
-        # self.cleanup()
+        super().setup()
+
+        self.fillet.create()
+
+        modifier_name = Prefix + 'Solidify'
+        revision = self.fillet.get_obj()
+        revision.modifiers.new(modifier_name, 'SOLIDIFY')
+
+
+        collection = self.obj.users_collection[0]
+        self.adjust_boolean_modifiers(collection)
+
+    def update(self):
+
+        cut_type = self.obj.soc_mesh_cut_type
+
+        if cut_type == 'Cutout':
+
+            perimeter_thickness = sim_helper.perimeter_thickness(self.obj)
+            if perimeter_thickness:
+                cutout_depth = perimeter_thickness + self.length('1mm')
+            else:
+                cutout_depth = self.length('1cm')
+
+            if not math.isclose(self.obj.soc_cut_depth, cutout_depth, abs_tol=self.length('0.01mm')):
+                self.obj.soc_cut_depth = cutout_depth
+                return
+
+            delta = 0.0
+        elif cut_type == 'Pocket':
+            delta = self.length('0.1mm')
+        else:
+            delta = 0.0
+
+        self.adjust_solidify_thickness(delta=delta)
+
+
+class CurveCut(Generator):
+
+    def setup(self):
+        super().setup()
+
+        self.fillet = None
+
         bevel = self.create_bevel_object()
         helper.move_object(bevel, self.internal_collection)
         self.obj.data.bevel_object = bevel
@@ -177,42 +215,3 @@ class CurveCut(Simulation):
 
 
 
-class MeshCut(Simulation):
-
-    def __init__(self, context, obj):
-        super().__init__(context, obj)
-
-
-    def setup(self):
-        # self.cleanup()
-
-        self.obj.display_type = 'WIRE'
-        self.revision.display_type = 'WIRE'
-        self.revision.modifiers.new("SOC_Solidify", 'SOLIDIFY')
-
-        collection = self.obj.users_collection[0]
-        self.adjust_boolean_modifiers(collection, self.revision)
-
-    def update(self):
-
-        cut_type = self.obj.soc_mesh_cut_type
-
-        if cut_type == 'Cutout':
-
-            perimeter_thickness = sim_helper.perimeter_thickness(self.obj)
-            if perimeter_thickness:
-                cutout_depth = perimeter_thickness + self.length('1mm')
-            else:
-                cutout_depth = self.length('1cm')
-
-            if not math.isclose(self.obj.soc_cut_depth, cutout_depth, abs_tol=self.length('0.01mm')):
-                self.obj.soc_cut_depth = cutout_depth
-                return
-
-            delta = 0.0
-        elif cut_type == 'Pocket':
-            delta = self.length('0.1mm')
-        else:
-            delta = 0.0
-
-        self.adjust_solidify_thickness(delta=delta, revision=self.revision)

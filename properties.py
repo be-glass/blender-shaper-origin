@@ -2,7 +2,7 @@ import bpy
 from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty
 from bpy.types import PropertyGroup
 
-from . import dogbone, simulation
+from . import fillet, generator
 from .constant import defaults
 from .helper import length
 from .sim_helper import cleanup
@@ -61,7 +61,7 @@ def update_cut_depth(obj, context):
         elif obj.soc_cut_depth > maximum:
             obj.soc_cut_depth = maximum
         else:
-            simulation.update(context, obj)
+            generator.update(context, obj)
 
 
 def update_tool_diameter(obj, context):
@@ -73,7 +73,7 @@ def update_tool_diameter(obj, context):
         elif obj.soc_tool_diameter > maximum:
             obj.soc_tool_diameter = maximum
         else:
-            simulation.update(context, obj)
+            generator.update(context, obj)
 
 
 def update_cut_type(obj, context):
@@ -82,9 +82,9 @@ def update_cut_type(obj, context):
         obj.soc_tool_diameter = default(context, 'tool_diameter')
         obj.soc_initialized = True
 
-    cleanup(context, obj)
-    dogbone.update(context, obj)
-    simulation.update(context, obj, reset=True)
+    # cleanup(context, obj)
+    # dogbone.update(context, obj)
+    generator.update(context, obj, reset=True)
 
 
 # Definition
