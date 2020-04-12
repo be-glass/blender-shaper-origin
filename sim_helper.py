@@ -1,10 +1,10 @@
 import bpy
 from . import helper
 from .constant import Prefix
-from .dogbone import Dogbone
 
 
-def get_internal_collection(name, sibling):
+def get_internal_collection(sibling):
+    name = Prefix + 'internal'
     collection = sibling.users_collection[0]
 
     if name in collection.children.keys():

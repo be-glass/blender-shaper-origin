@@ -96,7 +96,7 @@ def err_implementation(context=bpy.context):
 
 
 def get_object_safely(obj_name):
-    if obj_name in bpy.data.objects:
+    if obj_name in bpy.data.objects.keys():
         return bpy.data.objects[obj_name]
     else:
         error_msg("Cannot find (internal) object")
