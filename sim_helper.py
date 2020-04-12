@@ -7,19 +7,21 @@ def get_internal_collection(sibling):
     name = Prefix + 'internal'
     collection = sibling.users_collection[0]
 
-    if name in collection.children.keys():
-        return collection.children[name]
-    else:   # create one
+    existing = [c for c in collection.children.keys() if c.startswith(name)]
+    if existing:
+        return existing[0]
+
+    # if name in collection.children.keys():
+    #     return collection.children[name]
+    else:  # create one
         internal_collection = bpy.data.collections.new(name)
         collection.children.link(internal_collection)
         return internal_collection
 
 
-def find_siblings_by_type(cut_types, sibling = None, collection=None):
-
+def find_siblings_by_type(cut_types, sibling=None, collection=None):
     if not (sibling or collection):
         return []
-
 
     if not collection:
         collection = sibling.users_collection[0]
@@ -29,7 +31,7 @@ def find_siblings_by_type(cut_types, sibling = None, collection=None):
 
 
 def perimeter_thickness(obj):
-    perimeters = find_siblings_by_type(['Perimeter'], sibling = obj)
+    perimeters = find_siblings_by_type(['Perimeter'], sibling=obj)
     if perimeters:
         return perimeters[0].soc_cut_depth
     else:
@@ -49,17 +51,18 @@ def delete_modifiers(obj):
 
 def delete_internal_objects(obj):
     collection = obj.users_collection[0]
-    if Prefix + 'internal' in collection.children.keys():
-        internal_collection = collection.children[Prefix + 'internal']
-        [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if
-         o.name.startswith(Prefix + obj.name)]
+    internal_collection = get_internal_collection()
+    [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if
+     o.name.startswith(Prefix + obj.name)]
+
 
 def cleanup_meshes(source_obj, mesh_name):
     collection = source_obj.users_collection[0]
-    internal_collection = collection.children[Prefix + 'internal']
+    internal_collection = get_internal_collection()
     for o in internal_collection.objects:
         if o.name.startswith(mesh_name):
             bpy.data.objects.remove(o, do_unlink=True)
+
 
 def cleanup(context, obj):
     delete_modifiers(obj)
@@ -70,9 +73,6 @@ def cleanup(context, obj):
 
     if obj.type == 'CURVE':
         obj.data.bevel_object = None
-
-
-
 
 
 def find_perimeters(collection):
@@ -91,7 +91,6 @@ def cleanup_boolean_modifiers(context, target_obj):
 
 
 def rebuild_boolean_modifier(perimeter_obj, master_obj, target_obj):
-
     modifier_name = boolean_modifier_name(master_obj)
     delete_modifier(perimeter_obj, modifier_name)
     boolean = perimeter_obj.modifiers.new(modifier_name, 'BOOLEAN')
