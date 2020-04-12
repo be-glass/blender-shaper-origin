@@ -32,3 +32,5 @@ defaults = {
     'cut_depth': ['0', '18 mm', '50 mm'],
     'tool_diameter': ['0.1 mm', '3 mm', '25 mm'],
 }
+
+dogbone_resolution = 8

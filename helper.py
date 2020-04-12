@@ -1,5 +1,6 @@
 from math import inf
 
+import bmesh
 import bpy
 import itertools
 from . import constant
@@ -152,3 +153,14 @@ def hide_objects(name):
 
 def length(context, quantity_with_unit):
     return bpy.utils.units.to_value('METRIC', 'LENGTH', quantity_with_unit) / context.scene.unit_settings.scale_length
+
+def create_object(self, collection, polygon, name):
+    bm = bmesh.new()
+    [bm.verts.new(v) for v in polygon]
+    bm.faces.new(bm.verts)
+    bm.normal_update()
+    me = bpy.data.meshes.new("")
+    bm.to_mesh(me)
+    obj = bpy.data.objects.new(name, me)
+    collection.objects.link(obj)
+    return obj
