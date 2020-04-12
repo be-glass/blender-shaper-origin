@@ -32,18 +32,19 @@ class Dogbone:
         self.radius = tool_diameter / 2
         self.polygon = self.obj.data.polygons[0]
         self.resolution = constant.dogbone_resolution
+        self.name = self.obj.name + ".dogbone"
 
     def delete(self):
-        pass
+        if self.name:
+            helper.delete_object(self.name)
 
     def create(self, outside=False):
         dogbone = []
-        name = self.obj.name + ".dogbone"
         collection = sim_helper.get_internal_collection(constant.prefix + 'internal', self.obj)
 
         for shift in range(self.corner_count()):
             dogbone += self.regular_polygon(shift, outside)
-        dogbone_obj = helper.create_object(collection, dogbone, name)
+        dogbone_obj = helper.create_object(collection, dogbone, self.name)
         dogbone_obj.matrix_world = self.obj.matrix_world
         return dogbone_obj
 
