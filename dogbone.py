@@ -7,22 +7,23 @@ from . import constant, helper, sim_helper
 
 
 def update(context, obj, reset=False):
-    if obj.type != 'MESH':
-        return
+    if obj.type == 'MESH':
+        ct = obj.soc_mesh_cut_type
+        dogbone = Dogbone(obj, obj.soc_tool_diameter)
 
-    dogbone = Dogbone(obj, obj.soc_tool_diameter)
-    ct = obj.soc_mesh_cut_type
+        if not obj.soc_dogbone:
+            dogbone.delete()
+        elif ct in ['None', 'Guide']:
+            dogbone.delete()
 
-    if not obj.soc_dogbone:
-        dogbone.delete()
-    elif ct in ['None', 'Guide']:
-        dogbone.delete()
-    elif ct == 'Perimeter':
-        dogbone.create(outside=True)
-    elif ct == 'Cutout':
-        dogbone.create()
-    elif ct == 'Pocket':
-        dogbone.create()
+        elif ct in ['Cutout', 'Pocket']:
+            return dogbone.create()
+        elif ct == 'Perimeter':
+            return dogbone.create(outside=True)
+        else:
+            helper.err_implementation(context)
+
+    return obj  # instead of dogbone
 
 
 class Dogbone:
@@ -35,8 +36,7 @@ class Dogbone:
         self.name = self.obj.name + ".dogbone"
 
     def delete(self):
-        if self.name:
-            helper.delete_object(self.name)
+        helper.delete_object(self.name)
 
     def create(self, outside=False):
         dogbone = []

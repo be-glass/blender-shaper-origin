@@ -3,7 +3,7 @@ import bpy, math
 from . import constant, helper, sim_helper
 
 
-def update(context, obj, reset=False):
+def update(context, obj, reset=False, dogbone_obj = None):
     active = context.object
 
     if (not obj.soc_simulate) or (obj.soc_curve_cut_type == 'None' and obj.soc_mesh_cut_type == 'None'):

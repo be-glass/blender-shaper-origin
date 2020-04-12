@@ -48,39 +48,38 @@ def default(context, property_name):
     d0, dd, d1 = constant.defaults[property_name]
     return helper.length(context, dd)
 
-def update_cut_depth(self, context):
+def update_cut_depth(obj, context):
     minimum, maximum = minmax(context, 'cut_depth')
 
-    if context.object.soc_initialized:
-        if context.object.soc_cut_depth < minimum:
-            context.object.soc_cut_depth = minimum
-        elif context.object.soc_cut_depth > maximum:
-            context.object.soc_cut_depth = maximum
+    if obj.soc_initialized:
+        if obj.soc_cut_depth < minimum:
+            obj.soc_cut_depth = minimum
+        elif obj.soc_cut_depth > maximum:
+            obj.soc_cut_depth = maximum
         else:
-            simulation.update(context, self)
+            simulation.update(context, obj)
 
-def update_tool_diameter(self, context):
+def update_tool_diameter(obj, context):
     minimum, maximum = minmax(context, 'tool_diameter')
 
-    if context.object.soc_initialized:
-        if context.object.soc_tool_diameter < minimum:
-            context.object.soc_tool_diameter = minimum
-        elif context.object.soc_tool_diameter > maximum:
-            context.object.soc_tool_diameter = maximum
+    if obj.soc_initialized:
+        if obj.soc_tool_diameter < minimum:
+            obj.soc_tool_diameter = minimum
+        elif obj.soc_tool_diameter > maximum:
+            obj.soc_tool_diameter = maximum
         else:
-            simulation.update(context, self)
+            simulation.update(context, obj)
 
 
-def update_cut_type(self, context):
-    obj = context.object
+def update_cut_type(obj, context):
 
     if not obj.soc_initialized:
         obj.soc_cut_depth = default(context, 'cut_depth')
         obj.soc_tool_diameter = default(context, 'tool_diameter')
         obj.soc_initialized = True
 
-    dogbone.update(context, self, reset=True)
-    simulation.update(context, self, reset=True)
+    dogbone_obj = dogbone.update(context, obj, reset=True)
+    simulation.update(context, obj, reset=True, dogbone_obj = dogbone_obj)
 
 # Definition
 
