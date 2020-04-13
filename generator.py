@@ -8,10 +8,11 @@ from .fillet import Fillet
 from .constant import Prefix
 
 
-def update(context, obj, reset=False, dogbone_obj=None):
+def update(context, obj, reset=True):
     active = context.object
 
-    cleanup(context, obj)
+    if reset:
+        cleanup(context, obj)
 
     if not obj.soc_simulate:
         return

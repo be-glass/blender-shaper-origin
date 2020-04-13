@@ -34,4 +34,4 @@ defaults = {
     'tool_diameter': ['0.1 mm', '3 mm', '25 mm'],
 }
 
-dogbone_resolution = 8
+fillet_resolution = 8

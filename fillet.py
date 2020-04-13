@@ -13,24 +13,11 @@ class Fillet:
         self.obj = obj
         self.radius = obj.soc_tool_diameter / 2
         self.polygon = self.obj.data.polygons[0]
-        self.resolution = constant.dogbone_resolution
+        self.resolution = constant.fillet_resolution
         self.name = Prefix + self.obj.name + ".fillets"
 
     def get_obj(self):
         return helper.get_object_safely(self.name)
-
-    def create(self, outside=False):
-        fillet = []
-        collection = sim_helper.get_internal_collection(self.obj)
-
-        for shift in range(self.corner_count()):
-            fillet += self.regular_polygon(shift, outside)
-        fillet_obj = helper.create_object(collection, fillet, self.name)
-        fillet_obj.matrix_world = self.obj.matrix_world
-
-        self.obj.display_type = 'WIRE'
-
-        return fillet_obj
 
     def corner_count(self):
         return len(self.polygon.vertices)
@@ -47,18 +34,63 @@ class Fillet:
         y = x[0:3]
         return y
 
-    def is_inside(self, A, B, C):
+    def is_inside(self, corner):
+        A, B, C = corner
         abc_normal = (B - A).cross(C - B)
-        return abc_normal.dot(self.polygon.normal)  # > 0 if inside, = 0 if straight
+        d = abc_normal.dot(self.polygon.normal)
+        return d > 0  # > 0 if inside, = 0 if straight
 
-    def regular_polygon(self, corner_index, outside=False):
-        A, B, C = self.corner_vectors(corner_index)
+    def create(self, outside=False):
+        fillet = []
+        collection = sim_helper.get_internal_collection(self.obj)
+
+        for shift in range(self.corner_count()):
+            corner = self.corner_vectors(shift)
+            fillet += self.corner_fillet(corner, outside)
+
+        fillet_obj = helper.create_object(collection, fillet, self.name)
+        fillet_obj.matrix_world = self.obj.matrix_world
+
+        self.obj.display_type = 'WIRE'
+        return fillet_obj
+
+    def corner_angle(self, corner):
+        A, B, C = corner
+        return (B - A).angle(C - B)
+
+    def rounded(self, corner):
+        A, B, C = corner
+
+        ang_ABC = self.corner_angle(corner)
+        k = self.radius / math.sin(ang_ABC)
+        M = B + k * ((A - B).normalized() + (C - B).normalized())
+
+        P = []
+        MB1 = (B - M).normalized()
+        for i in range(self.resolution):
+            ang =  - ang_ABC * (i / self.resolution - 0.5)
+            rotation = Matrix.Rotation(ang, 4, self.polygon.normal)
+            P.append(M + self.radius * rotation @ MB1)
+        return P
+
+    def corner_fillet(self, corner, outside):
+        corner_point = corner[1:2]
+
+        if self.corner_angle(corner) < math.radians(5):
+            return corner_point
+
+        if self.is_inside(corner) ^ outside:
+            if self.obj.soc_dogbone:
+                return self.dogbone(corner)
+            else:
+                return self.rounded(corner)
+        else:
+            return corner_point
+
+    def dogbone(self, corner):
+        A, B, C = corner
 
         abc_normal = mathutils.geometry.normal([A, B, C])
-
-        corner_sense = self.is_inside(A, B, C)
-        if (corner_sense <= 0 and not outside) or (corner_sense >= 0 and outside):
-            return [B]
 
         D = B + (C - B).normalized() + (A - B).normalized()
 
