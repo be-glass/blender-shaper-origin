@@ -170,3 +170,10 @@ def create_object(collection, polygon, name):
     obj = bpy.data.objects.new(name, me)
     collection.objects.link(obj)
     return obj
+
+
+def translate_local(obj, vector):
+    rotation = obj.rotation_euler.to_matrix()
+    rotation.invert()
+    global_translation = vector @ rotation
+    obj.location += global_translation

@@ -1,9 +1,9 @@
-import bpy
+import mathutils
 from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
-
-from . import helper, constant
-from . import op_export_svg
+from mathutils import Vector
+from mathutils.geometry import distance_point_to_plane
+from . import op_export_svg, helper, sim_helper
 
 bl_info = {
     "name": "n/a",
@@ -15,6 +15,7 @@ bl_info = {
 def operators():
     return (
         MESH_OT_socut_export_cuts,
+        MESH_OT_socut_align_object,
     )
 
 
@@ -60,3 +61,28 @@ class MESH_OT_socut_export_cuts(Operator):
 
         self.report({'INFO'}, "OK")
         return {'FINISHED'}
+
+class MESH_OT_socut_align_object(Operator):
+    bl_idname = "mesh.socut_align_object"
+    bl_label = "Align with Perimeter"
+    bl_description = "Align a cut with the perimeter"
+
+    def execute(self, context):
+
+        obj = context.object
+        collection = obj.users_collection[0]
+        perimeters = sim_helper.find_perimeters(collection)
+
+        if not perimeters:
+            self.report({'ERROR'}, "No perimeter found.")
+            return {'CANCELLED'}
+
+        obj.matrix_world = perimeters[0].matrix_world
+        d = distance_point_to_plane(obj.location, perimeters[0].location, perimeters[0].data.polygons[0].normal)
+
+
+        helper.translate_local(obj, mathutils.Vector((0, 0, d + 1.0)))
+
+        self.report({'INFO'}, "OK")
+        return {'FINISHED'}
+
