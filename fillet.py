@@ -52,6 +52,7 @@ class Fillet:
         fillet_obj.matrix_world = self.obj.matrix_world
 
         self.obj.display_type = 'WIRE'
+        fillet_obj.hide_select = True
         return fillet_obj
 
     def corner_angle(self, corner):
