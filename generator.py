@@ -8,11 +8,10 @@ from .fillet import Fillet
 from .constant import Prefix
 
 
-def update(context, obj, reset=True):
+def update(context, obj):
     active = context.object
 
-    if reset:
-        cleanup(context, obj)
+    cleanup(context, obj)
 
     if not obj.soc_simulate:
         return
@@ -30,10 +29,7 @@ def update(context, obj, reset=True):
         return
 
     generator = cut(context, obj)
-
-    if reset:
-        generator.setup()
-
+    generator.setup()
     generator.update()
     helper.select_active(context, active)
 

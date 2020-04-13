@@ -82,10 +82,9 @@ def initialize_object(obj, context):
 
 
 def update_cut_type(obj, context):
-    cleanup(context, obj)
     if not obj.soc_initialized:
         initialize_object(obj, context)
-    generator.update(context, obj, reset=True)
+    generator.update(context, obj)
 
 
 # Definition
