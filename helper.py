@@ -1,10 +1,10 @@
-from math import inf
-
 import bmesh
 import bpy
 import itertools
-from . import constant
+
 from mathutils import Vector
+
+from .constant import Prefix
 
 
 def write(content, file_name):
@@ -177,3 +177,57 @@ def translate_local(obj, vector):
     rotation.invert()
     global_translation = vector @ rotation
     obj.location += global_translation
+
+
+def add_plane(context, name, size, collection=None):
+    bpy.ops.mesh.primitive_plane_add(size=size)
+
+    # delete face
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.context.object.data.polygons[0].select = True
+    bpy.ops.mesh.delete(type='ONLY_FACE')
+    bpy.ops.object.mode_set(mode='OBJECT')
+    select_active(context, context.object)    # TODO
+
+    obj = context.active_object
+    obj.name = name
+
+    if collection:
+        for c in obj.users_collection:
+            c.objects.unlink(obj)
+        collection.objects.link(obj)
+    return obj
+
+
+
+
+def get_collection(context, name, parent):
+    if name in bpy.data.collections.keys():
+        return bpy.data.collections[name]
+    else:
+        collection = bpy.data.collections.new(name)
+        parent.children.link(collection)
+        return collection
+
+
+def get_soc_collection(context):
+    return get_collection(context, "SOC", context.scene.collection)
+
+
+def get_preview_collection(context):
+     soc = get_soc_collection(context)
+     return get_collection(context, "Preview", soc)
+
+def get_internal_collection(sibling):
+    name = Prefix + 'internal'
+    collection = sibling.users_collection[0]
+
+    for child in collection.children:
+        if child.name.startswith(name):
+            return child
+
+    # otherwise create one
+    internal_collection = bpy.data.collections.new(name)
+    collection.children.link(internal_collection)
+    return internal_collection
+

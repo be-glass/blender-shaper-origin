@@ -2,7 +2,7 @@ import bpy
 from bpy import utils
 from bpy.types import Panel
 
-from . import sim_helper
+from . import gen_helper
 
 
 def panels():
@@ -71,7 +71,7 @@ class BG_PT_SOC_select(SOCutPanel, Panel):
                 layout.prop(ao, "soc_dogbone")
 
             collection = ao.users_collection[0]
-            perimeters = sim_helper.find_perimeters(collection)
+            perimeters = gen_helper.find_perimeters(collection)
             if ao.soc_mesh_cut_type != 'Perimeter' and len(perimeters) > 0:
                 layout.operator("mesh.socut_align_object")
 

@@ -1,8 +1,9 @@
 import bpy, math
 
-from . import helper, sim_helper
-from .sim_helper import find_perimeters, rebuild_boolean_modifier, cleanup, get_internal_collection, delete_modifiers, \
+from . import helper, gen_helper
+from .gen_helper import find_perimeters, rebuild_boolean_modifier, cleanup, delete_modifiers, \
     delete_internal_objects, find_siblings_by_type, cleanup_meshes
+from .helper import get_internal_collection
 
 from .fillet import Fillet
 from .constant import Prefix
@@ -126,7 +127,7 @@ class MeshCut(Generator):
 
         if cut_type == 'Cutout':
 
-            perimeter_thickness = sim_helper.perimeter_thickness(self.obj)
+            perimeter_thickness = gen_helper.perimeter_thickness(self.obj)
             if perimeter_thickness:
                 cutout_depth = perimeter_thickness + self.length('1mm')
             else:
@@ -168,6 +169,9 @@ class CurveCut(Generator):
         collection = self.obj.users_collection[0]
         self.adjust_boolean_modifiers(collection, mesh_obj)
 
+
+
+
     def create_bevel_object(self):
         name = f'{Prefix}{self.obj.name}.bevel'
 
@@ -178,9 +182,10 @@ class CurveCut(Generator):
                 p.radius = 1.0
 
         # create new one
-        bpy.ops.mesh.primitive_plane_add(size=1.0)
-        bevel = self.context.active_object
-        bevel.name = name
+        bevel = helper.add_plane(self.context, name, 1.0)
+                # bpy.ops.mesh.primitive_plane_add(size=1.0)
+                # bevel = self.context.active_object
+                # bevel.name = name
 
         # move object origin to upper edge
         bevel.location = (0, -0.5, 0)
@@ -189,11 +194,13 @@ class CurveCut(Generator):
         # scale
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
 
+
         # delete first face
-        bpy.ops.object.mode_set(mode='EDIT')
-        bevel.data.polygons[0].select = True
-        bpy.ops.mesh.delete(type='ONLY_FACE')
-        bpy.ops.object.mode_set(mode='OBJECT')
+        # bpy.ops.object.mode_set(mode='EDIT')
+        # bevel.data.polygons[0].select = True
+        # bpy.ops.mesh.delete(type='ONLY_FACE')
+        # bpy.ops.object.mode_set(mode='OBJECT')
+
         bpy.ops.object.convert(target='CURVE')
 
         return bevel

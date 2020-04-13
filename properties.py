@@ -5,7 +5,7 @@ from bpy.types import PropertyGroup
 from . import fillet, generator
 from .constant import defaults
 from .helper import length
-from .sim_helper import cleanup
+from .gen_helper import cleanup
 from .preview import Preview
 
 
@@ -85,15 +85,16 @@ def initialize_object(obj, context):
 
 
 def update_cut_type(obj, context):
+
     if not obj.soc_initialized:
         initialize_object(obj, context)
     generator.update(context, obj, reset=True)
 
 def preview(scene_properties, context):
     if scene_properties.preview:
-        Preview().create()
+        Preview(context).create()
     else:
-        Preview().delete()
+        Preview(context).delete()
 
 # Definition
 

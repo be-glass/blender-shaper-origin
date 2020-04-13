@@ -1,21 +1,8 @@
 import bpy
 
+from .helper import get_internal_collection
 from . import helper, fillet
 from .constant import Prefix
-
-
-def get_internal_collection(sibling):
-    name = Prefix + 'internal'
-    collection = sibling.users_collection[0]
-
-    for child in collection.children:
-        if child.name.startswith(name):
-            return child
-
-    # otherwise create one
-    internal_collection = bpy.data.collections.new(name)
-    collection.children.link(internal_collection)
-    return internal_collection
 
 
 def find_siblings_by_type(cut_types, sibling=None, collection=None):

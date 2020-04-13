@@ -3,7 +3,7 @@ from math import pi
 import mathutils
 from mathutils import Vector, Matrix
 
-from . import constant, helper, sim_helper
+from . import constant, helper, gen_helper
 from .constant import Prefix
 
 
@@ -54,7 +54,7 @@ class Fillet:
 
     def create(self, outside=False):
         fillet = []
-        collection = sim_helper.get_internal_collection(self.obj)
+        collection = helper.get_internal_collection(self.obj)
 
         for shift in range(self.corner_count()):
             corner = self.corner_vectors(shift)

@@ -3,7 +3,7 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils import Vector
 from mathutils.geometry import distance_point_to_plane
-from . import op_export_svg, helper, sim_helper
+from . import op_export_svg, helper, gen_helper
 
 bl_info = {
     "name": "n/a",
@@ -71,7 +71,7 @@ class MESH_OT_socut_align_object(Operator):
 
         obj = context.object
         collection = obj.users_collection[0]
-        perimeters = sim_helper.find_perimeters(collection)
+        perimeters = gen_helper.find_perimeters(collection)
 
         if not perimeters:
             self.report({'ERROR'}, "No perimeter found.")
