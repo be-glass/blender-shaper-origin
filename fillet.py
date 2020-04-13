@@ -12,9 +12,21 @@ class Fillet:
     def __init__(self, obj):
         self.obj = obj
         self.radius = obj.soc_tool_diameter / 2
-        self.polygon = self.obj.data.polygons[0]
+        self.polygon = self.get_polygon_safely()
         self.resolution = constant.fillet_resolution
         self.name = Prefix + self.obj.name + ".fillets"
+
+
+    def get_polygon_safely(self):
+        polygons = self.obj.data.polygons
+        n = len(polygons)
+        if n == 0:
+            helper.error_msg("{self.name} has no face!")
+            return None
+        elif n > 1:
+            helper.warning_msg("{self.name} has more than 1 faces!")
+        return self.obj.data.polygons[0]
+
 
     def get_obj(self):
         return helper.get_object_safely(self.name)
@@ -52,7 +64,6 @@ class Fillet:
         fillet_obj.matrix_world = self.obj.matrix_world
 
         self.obj.display_type = 'WIRE'
-        fillet_obj.hide_select = True
         return fillet_obj
 
     def corner_angle(self, corner):

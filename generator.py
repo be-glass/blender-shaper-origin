@@ -75,8 +75,8 @@ class Perimeter(Generator):
         super().setup()
 
         self.fillet.create(outside=True)
+        self.fillet.get_obj().hide_select = True
 
-        # self.obj.display_type = 'WIRE'
 
         modifier_name = Prefix + 'Solidify'
         fillet_obj = self.fillet.get_obj()

@@ -90,6 +90,12 @@ def error_msg(message, context=bpy.context):
     context.window_manager.popup_menu(msg, title="Error", icon='ERROR')
     print("DEBUG me")
 
+def warning_msg(message, context=bpy.context):
+    def msg(self, text):
+        self.layout.label(text="Something went wrong!")
+
+    context.window_manager.popup_menu(msg, title="Warning", icon='WARNING')
+    print("DEBUG me")
 
 def err_implementation(context=bpy.context):
     error_msg("missing implementation", context)
