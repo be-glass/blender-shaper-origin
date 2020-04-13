@@ -5,11 +5,13 @@ from mathutils import Vector
 from mathutils.geometry import distance_point_to_plane
 from . import op_export_svg, helper, gen_helper
 
-bl_info = {
-    "name": "n/a",
-    "author": "n/a",
-    "version": (0, 0, 0),
-}  # to be filled by __init__
+# bl_info = {
+#     "name": "n/a",
+#     "author": "n/a",
+#     "version": (0, 0, 0),
+# }  # to be filled by __init__
+
+from .__init__ import bl_info
 
 
 def operators():

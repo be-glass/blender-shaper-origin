@@ -1,6 +1,6 @@
 import bpy
 
-from .helper import length, add_plane, get_preview_collection
+from .helper import length, add_plane, get_preview_collection, select_active, apply_scale
 
 
 class Preview:
@@ -26,6 +26,9 @@ class Preview:
             q = p.copy()
             q.data = p.data.copy()
             self.collection.objects.link(q)
+
+            select_active(self.context, q)
+            apply_scale()
             q.matrix_world = self.reference.matrix_world
 
 
