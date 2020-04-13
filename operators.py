@@ -81,7 +81,7 @@ class MESH_OT_socut_align_object(Operator):
         d = distance_point_to_plane(obj.location, perimeters[0].location, perimeters[0].data.polygons[0].normal)
 
 
-        helper.translate_local(obj, mathutils.Vector((0, 0, d + 1.0)))
+        helper.translate_local(obj, mathutils.Vector((0, 0, d + .001)))
 
         self.report({'INFO'}, "OK")
         return {'FINISHED'}
