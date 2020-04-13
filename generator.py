@@ -47,7 +47,8 @@ class Generator:
 
     def setup(self):
         self.obj.display_type = 'WIRE'
-        self.revision.display_type = 'WIRE'
+        if self.fillet:
+            self.fillet.display_type = 'WIRE'
 
     def cleanup(self):
         delete_modifiers(self.obj)
@@ -85,12 +86,8 @@ class Perimeter(Generator):
 
         types = ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']
         for cut in find_siblings_by_type(types, sibling=self.obj):
-
-            fillet = Fillet(cut)
-            if fillet.is_valid():
-                cut = fillet.get_obj()
-
-            rebuild_boolean_modifier(self.obj, cut)
+            cut_filleted = Fillet(cut).get_obj()
+            rebuild_boolean_modifier(self.obj, cut_filleted)
 
     def update(self):
         self.adjust_solidify_thickness()

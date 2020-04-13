@@ -75,12 +75,15 @@ def update_tool_diameter(obj, context):
         else:
             generator.update(context, obj)
 
+def initialize_object(obj, context):
+    obj.soc_cut_depth = default(context, 'cut_depth')
+    obj.soc_tool_diameter = default(context, 'tool_diameter')
+    obj.soc_initialized = True
+
 
 def update_cut_type(obj, context):
     if not obj.soc_initialized:
-        obj.soc_cut_depth = default(context, 'cut_depth')
-        obj.soc_tool_diameter = default(context, 'tool_diameter')
-        obj.soc_initialized = True
+        initialize_object(obj, context)
 
     # cleanup(context, obj)
     # dogbone.update(context, obj)

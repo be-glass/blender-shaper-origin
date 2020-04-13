@@ -7,16 +7,14 @@ def get_internal_collection(sibling):
     name = Prefix + 'internal'
     collection = sibling.users_collection[0]
 
-    existing = [c for c in collection.children.keys() if c.startswith(name)]
-    if existing:
-        return existing[0]
+    for child in collection.children:
+        if child.name.startswith(name):
+            return child
 
-    # if name in collection.children.keys():
-    #     return collection.children[name]
-    else:  # create one
-        internal_collection = bpy.data.collections.new(name)
-        collection.children.link(internal_collection)
-        return internal_collection
+    # otherwise create one
+    internal_collection = bpy.data.collections.new(name)
+    collection.children.link(internal_collection)
+    return internal_collection
 
 
 def find_siblings_by_type(cut_types, sibling=None, collection=None):
@@ -51,14 +49,15 @@ def delete_modifiers(obj):
 
 def delete_internal_objects(obj):
     collection = obj.users_collection[0]
-    internal_collection = get_internal_collection()
-    [bpy.data.objects.remove(o, do_unlink=True) for o in internal_collection.objects if
-     o.name.startswith(Prefix + obj.name)]
+    internal_collection = get_internal_collection(obj)
+    for o in internal_collection.objects:
+        if o.name.startswith(Prefix + obj.name):
+            bpy.data.objects.remove(o, do_unlink=True)
 
 
 def cleanup_meshes(source_obj, mesh_name):
     collection = source_obj.users_collection[0]
-    internal_collection = get_internal_collection()
+    internal_collection = get_internal_collection(source_obj)
     for o in internal_collection.objects:
         if o.name.startswith(mesh_name):
             bpy.data.objects.remove(o, do_unlink=True)

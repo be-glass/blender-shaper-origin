@@ -6,23 +6,6 @@ from mathutils import Vector, Matrix
 from . import constant, helper, sim_helper
 from .constant import Prefix
 
-def update(context, obj):
-    if obj.type == 'MESH':
-        ct = obj.soc_mesh_cut_type
-        dogbone = Fillet(obj)
-
-        if not obj.soc_dogbone:
-            dogbone.delete()
-        elif ct in ['None', 'Guide']:
-            dogbone.delete()
-
-        elif ct in ['Cutout', 'Pocket']:
-            dogbone.create()
-        elif ct == 'Perimeter':
-            dogbone.create(outside=True)
-        else:
-            helper.err_implementation(context)
-
 
 class Fillet:
 
@@ -31,50 +14,23 @@ class Fillet:
         self.radius = obj.soc_tool_diameter / 2
         self.polygon = self.obj.data.polygons[0]
         self.resolution = constant.dogbone_resolution
-        self.name = Prefix + self.obj.name + ".dogbone"
-
-    def is_valid(self):
-        if self.obj.soc_dogbone and \
-                self.obj.type == 'MESH' and \
-                self.obj.soc_mesh_cut_type in ['Cutout', 'Pocket', 'Perimeter']:
-            return True
-        else:
-            return False
+        self.name = Prefix + self.obj.name + ".fillets"
 
     def get_obj(self):
         return helper.get_object_safely(self.name)
 
-    def delete(self):
-        helper.delete_object(self.name)
-
     def create(self, outside=False):
-        dogbone = []
+        fillet = []
         collection = sim_helper.get_internal_collection(self.obj)
 
         for shift in range(self.corner_count()):
-            dogbone += self.regular_polygon(shift, outside)
-        dogbone_obj = helper.create_object(collection, dogbone, self.name)
-        dogbone_obj.matrix_world = self.obj.matrix_world
+            fillet += self.regular_polygon(shift, outside)
+        fillet_obj = helper.create_object(collection, fillet, self.name)
+        fillet_obj.matrix_world = self.obj.matrix_world
 
         self.obj.display_type = 'WIRE'
 
-        return dogbone_obj
-
-    def polygon_angles(self):
-        angles = []
-        m = self.obj.data
-        corners = len(m.vertices)
-        for i in range(corners):
-            ab, cd = [e for e in m.edges if e.vertices[0] == i or e.vertices[1] == i]
-            a, b = ab.vertices
-            d, c = cd.vertices
-            v_ab = Vector(m.vertices[a].co) - Vector(m.vertices[b].co)
-            v_cd = Vector(m.vertices[c].co) - Vector(m.vertices[d].co)
-            angles.append(v_ab.angle(v_cd))
-        return angles
-
-    def polygon_count(self):
-        return len(self.obj.data.polygons)
+        return fillet_obj
 
     def corner_count(self):
         return len(self.polygon.vertices)
