@@ -61,6 +61,8 @@ class Fillet:
     def rounded(self, corner):
         A, B, C = corner
 
+        abc_normal = mathutils.geometry.normal([C, B, A])
+
         ang_ABC = self.corner_angle(corner)
         k = self.radius / math.sin(ang_ABC)
         M = B + k * ((A - B).normalized() + (C - B).normalized())
@@ -69,7 +71,7 @@ class Fillet:
         MB1 = (B - M).normalized()
         for i in range(self.resolution):
             ang =  - ang_ABC * (i / self.resolution - 0.5)
-            rotation = Matrix.Rotation(ang, 4, self.polygon.normal)
+            rotation = Matrix.Rotation(ang, 4, abc_normal)
             P.append(M + self.radius * rotation @ MB1)
         return P
 
