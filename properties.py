@@ -73,7 +73,7 @@ def update_tool_diameter(obj, context):
         elif obj.soc_tool_diameter > maximum:
             obj.soc_tool_diameter = maximum
         else:
-            generator.update(context, obj)
+            generator.update(context, obj, reset=True)
 
 def initialize_object(obj, context):
     obj.soc_cut_depth = default(context, 'cut_depth')
@@ -84,7 +84,7 @@ def initialize_object(obj, context):
 def update_cut_type(obj, context):
     if not obj.soc_initialized:
         initialize_object(obj, context)
-    generator.update(context, obj)
+    generator.update(context, obj, reset=True)
 
 
 # Definition

@@ -1,5 +1,6 @@
 import bpy
-from . import helper
+
+from . import helper, fillet
 from .constant import Prefix
 
 
@@ -51,7 +52,8 @@ def delete_internal_objects(obj):
     collection = obj.users_collection[0]
     internal_collection = get_internal_collection(obj)
     for o in internal_collection.objects:
-        if o.name.startswith(Prefix + obj.name):
+        # if o.name.startswith(Prefix + obj.name):
+        if o.name == Prefix+obj.name+".fillets":
             bpy.data.objects.remove(o, do_unlink=True)
 
 
@@ -89,9 +91,15 @@ def cleanup_boolean_modifiers(context, target_obj):
         delete_modifier(perimeter, boolean_modifier_name(target_obj))
 
 
-def rebuild_boolean_modifier(perimeter_obj, master_obj, target_obj):
-    modifier_name = boolean_modifier_name(master_obj)
-    delete_modifier(perimeter_obj, modifier_name)
-    boolean = perimeter_obj.modifiers.new(modifier_name, 'BOOLEAN')
+def rebuild_boolean_modifier(perimeter_obj, subtract_obj):
+
+    modifier_name = boolean_modifier_name(subtract_obj)
+    subtract_fillet = fillet.Fillet(subtract_obj).get_obj()
+    perimeter_fillet = fillet.Fillet(perimeter_obj).get_obj()
+
+    delete_modifier(perimeter_fillet, modifier_name)
+    boolean = perimeter_fillet.modifiers.new(modifier_name, 'BOOLEAN')
     boolean.operation = 'DIFFERENCE'
-    boolean.object = helper.get_object_safely(target_obj.name)
+    boolean.object = helper.get_object_safely(subtract_fillet.name)
+
+    subtract_fillet.hide_set(True)

@@ -8,10 +8,11 @@ from .fillet import Fillet
 from .constant import Prefix
 
 
-def update(context, obj):
+def update(context, obj, reset=False):
     active = context.object
 
-    cleanup(context, obj)
+    if reset:
+        cleanup(context, obj)
 
     if not obj.soc_simulate:
         return
@@ -29,7 +30,8 @@ def update(context, obj):
         return
 
     generator = cut(context, obj)
-    generator.setup()
+    if reset:
+        generator.setup()
     generator.update()
     helper.select_active(context, active)
 
@@ -64,7 +66,7 @@ class Generator:
 
     def adjust_boolean_modifiers(self, collection):
         for perimeter_obj in find_perimeters(collection):
-            rebuild_boolean_modifier(perimeter_obj, self.obj, self.fillet)
+            rebuild_boolean_modifier(perimeter_obj, self.obj)
 
 
 class Perimeter(Generator):
@@ -78,13 +80,12 @@ class Perimeter(Generator):
         # self.obj.display_type = 'WIRE'
 
         modifier_name = Prefix + 'Solidify'
-        revision = self.fillet.get_obj()
-        revision.modifiers.new(modifier_name, 'SOLIDIFY')
+        fillet_obj = self.fillet.get_obj()
+        fillet_obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
         types = ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']
         for cut in find_siblings_by_type(types, sibling=self.obj):
-            cut_filleted = Fillet(cut).get_obj()
-            rebuild_boolean_modifier(self.obj, cut_filleted)
+            rebuild_boolean_modifier(self.obj,  cut)
 
     def update(self):
         self.adjust_solidify_thickness()
