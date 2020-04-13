@@ -39,6 +39,7 @@ class BG_PT_SOC_export(SOCutPanel, Panel):
         soc = context.scene.so_cut
 
         # Widgets
+        layout.prop(soc, "preview")
         layout.prop(soc, "selected_only")
         layout.prop(soc, "use_transformations")
         layout.prop(soc, "export_path")

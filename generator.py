@@ -86,6 +86,8 @@ class Perimeter(Generator):
         for cut in find_siblings_by_type(types, sibling=self.obj):
             rebuild_boolean_modifier(self.obj, cut)
 
+        self.create_reference()
+
     def update(self):
         self.adjust_solidify_thickness()
 
@@ -93,6 +95,16 @@ class Perimeter(Generator):
         for cut in cutouts:
             cut.soc_cut_depth = self.obj.soc_cut_depth + self.length('1mm')
 
+    def create_reference(self):
+        collection = self.obj.users_collection[0]
+        name = Prefix+"reference."+collection.name
+        if not name in bpy.data.objects.keys():
+            reference = bpy.data.objects.new(name, None)
+            reference.location = self.obj.location
+            reference.matrix_world = self.obj.matrix_world
+            collection.objects.link(reference)
+            reference.empty_display_size = 5
+            reference.empty_display_type = 'PLAIN_AXES'
 
 class MeshCut(Generator):
 

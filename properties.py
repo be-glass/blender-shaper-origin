@@ -6,6 +6,8 @@ from . import fillet, generator
 from .constant import defaults
 from .helper import length
 from .sim_helper import cleanup
+from .preview import Preview
+
 
 
 # Initialization
@@ -87,6 +89,11 @@ def update_cut_type(obj, context):
         initialize_object(obj, context)
     generator.update(context, obj, reset=True)
 
+def preview(scene_properties, context):
+    if scene_properties.preview:
+        Preview().create()
+    else:
+        Preview().delete()
 
 # Definition
 
@@ -189,6 +196,13 @@ class SceneProperties(PropertyGroup):
         description="Export each shape in a separate file",
         default=False,
         options={'HIDDEN'},
+    )
+    preview: BoolProperty(
+        name="Preview",
+        description="Preview export in X-Y-plane",
+        default=False,
+        options={'HIDDEN'},
+        update=preview
     )
     export_path: StringProperty(
         name="Export Directory",
