@@ -75,6 +75,7 @@ def update_tool_diameter(obj, context):
         else:
             generator.update(context, obj, reset=True)
 
+
 def initialize_object(obj, context):
     obj.soc_cut_depth = default(context, 'cut_depth')
     obj.soc_tool_diameter = default(context, 'tool_diameter')

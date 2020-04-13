@@ -76,7 +76,6 @@ class Perimeter(Generator):
 
         self.fillet.create(outside=True)
 
-
         # self.obj.display_type = 'WIRE'
 
         modifier_name = Prefix + 'Solidify'
@@ -85,7 +84,7 @@ class Perimeter(Generator):
 
         types = ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']
         for cut in find_siblings_by_type(types, sibling=self.obj):
-            rebuild_boolean_modifier(self.obj,  cut)
+            rebuild_boolean_modifier(self.obj, cut)
 
     def update(self):
         self.adjust_solidify_thickness()
@@ -105,7 +104,6 @@ class MeshCut(Generator):
         modifier_name = Prefix + 'Solidify'
         revision = self.fillet.get_obj()
         revision.modifiers.new(modifier_name, 'SOLIDIFY')
-
 
         collection = self.obj.users_collection[0]
         self.adjust_boolean_modifiers(collection)
@@ -207,6 +205,3 @@ class CurveCut(Generator):
         helper.hide_objects(mesh_obj.name)
 
         return mesh_obj
-
-
-

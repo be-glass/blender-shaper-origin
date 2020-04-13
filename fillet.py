@@ -71,7 +71,7 @@ class Fillet:
         P = []
         MB1 = (B - M).normalized()
         for i in range(self.resolution):
-            ang =  - ang_ABC * (i / self.resolution - 0.5)
+            ang = - ang_ABC * (i / self.resolution - 0.5)
             rotation = Matrix.Rotation(ang, 4, abc_normal)
             P.append(M + self.radius * rotation @ MB1)
         return P
