@@ -8,7 +8,7 @@ def register():
     bpy.app.handlers.depsgraph_update_post.append(post_ob_updated)
 
 def unregister():
-    bpy.app.handlers.depsgraph_update_post.clear()
+    bpy.app.handlers.depsgraph_update_post.clear()   # TODO: remove instead of clear?
 
 
 @bpy.app.handlers.persistent
