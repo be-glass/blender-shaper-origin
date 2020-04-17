@@ -23,6 +23,7 @@ def register():
     bpy.types.Object.soc_reference_frame = ObjectProperties.reference_frame
     bpy.types.Object.soc_mesh_cut_type = ObjectProperties.mesh_cut_type
     bpy.types.Object.soc_curve_cut_type = ObjectProperties.curve_cut_type
+    bpy.types.Object.soc_object_type = ObjectProperties.object_type
     bpy.types.Object.soc_simulate = ObjectProperties.simulate
     bpy.types.Object.soc_initialized = ObjectProperties.initialized
     bpy.types.Object.soc_dogbone = ObjectProperties.dogbone
@@ -36,6 +37,7 @@ def unregister():
     del bpy.types.Object.soc_reference_frame
     del bpy.types.Object.soc_mesh_cut_type
     del bpy.types.Object.soc_curve_cut_type
+    del bpy.types.Object.soc_object_type
     del bpy.types.Object.soc_simulate
     del bpy.types.Object.soc_initialized
     del bpy.types.Object.soc_dogbone
@@ -91,8 +93,10 @@ def update_cut_type(obj, context):
     generator.update(context, obj, reset=True)
 
 def preview(scene_properties, context):
+
     if scene_properties.preview:
-        Preview(context).create()
+        # Preview(context).create()
+        pass
     else:
         Preview(context).delete()
 
@@ -156,6 +160,18 @@ class ObjectProperties(PropertyGroup):
         default='None',
         options={'HIDDEN'},
         update=update_cut_type
+    )
+    object_type = EnumProperty(
+        name="Object Type",
+        description="SO object type",
+        items=[('None', 'None', 'None', '', 0),
+               ('Cut', 'Cut', "Cut", 1),
+               ('Preview', 'Preview', 'Preview', 2),
+               ('Reference', 'Reference', 'Reference', '', 3),
+               ],
+
+        default='None',
+        options={'HIDDEN'},
     )
     simulate = BoolProperty(
         name="Simulate cut",

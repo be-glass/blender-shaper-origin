@@ -4,6 +4,7 @@ from . import helper, gen_helper
 from .gen_helper import find_perimeters, rebuild_boolean_modifier, cleanup, delete_modifiers, \
     delete_internal_objects, find_siblings_by_type, cleanup_meshes
 from .helper import get_internal_collection
+from .preview import Preview
 
 from .fillet import Fillet
 from .constant import Prefix
@@ -15,9 +16,13 @@ def update(context, obj, reset=False):
     if reset:
         cleanup(context, obj)
 
-    if not obj.soc_simulate:
-        return
+
+
+
     if obj.soc_curve_cut_type == 'None' and obj.soc_mesh_cut_type == 'None':
+        obj.soc_object_type = "None"
+        return
+    if not obj.soc_simulate:
         return
 
     if obj.soc_mesh_cut_type == 'Perimeter':
@@ -30,7 +35,9 @@ def update(context, obj, reset=False):
         helper.err_implementation()
         return
 
+    obj.soc_object_type = 'Cut'
     generator = cut(context, obj)
+
     if reset:
         generator.setup()
     generator.update()
@@ -89,6 +96,10 @@ class Perimeter(Generator):
 
         self.create_reference()
 
+        if self.context.scene.so_cut.preview:
+            Preview(self.context).add_object(self.obj)
+
+
     def update(self):
         self.adjust_solidify_thickness()
 
@@ -106,6 +117,7 @@ class Perimeter(Generator):
             collection.objects.link(reference)
             reference.empty_display_size = 5
             reference.empty_display_type = 'PLAIN_AXES'
+            reference.soc_object_type = 'Reference'
 
 class MeshCut(Generator):
 
@@ -176,7 +188,7 @@ class CurveCut(Generator):
         name = f'{Prefix}{self.obj.name}.bevel'
 
         # normalize curve radii
-        helper.apply_scale()
+        helper.apply_scale(self.context, self.obj)
         for spline in self.obj.data.splines:
             for p in spline.bezier_points:
                 p.radius = 1.0
@@ -189,7 +201,7 @@ class CurveCut(Generator):
 
         # move object origin to upper edge
         bevel.location = (0, -0.5, 0)
-        helper.apply_transformations()
+        helper.apply_scale(self.context, self.obj)
 
         # scale
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)

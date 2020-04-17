@@ -22,20 +22,19 @@ class Preview:
 
     def add_objects(self):
         perimeters = [o for o in bpy.data.objects if o.soc_mesh_cut_type == 'Perimeter']
-        for p in perimeters:
-            q = p.copy()
-            q.data = p.data.copy()
-            self.collection.objects.link(q)
-
-            select_active(self.context, q)
-            apply_scale()
-            q.matrix_world = self.reference.matrix_world
+        for perimeter in perimeters:
+            self.add_object(perimeter)
 
 
+    def add_object(self, obj):
+        q = obj.copy()
+        q.data = obj.data.copy()
+        self.collection.objects.link(q)
 
+        apply_scale(self.context, q)
+        q.matrix_world = self.reference.matrix_world
 
-
-
+        q.soc_object_type = 'Preview'
 
 def exist_object(name):
     return bool(name in bpy.data.objects.keys())

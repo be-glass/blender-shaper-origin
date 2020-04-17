@@ -114,11 +114,13 @@ def delete_object(obj_name):
         bpy.data.objects.remove(obj, do_unlink=True)
 
 
-def apply_scale():
+def apply_scale(context, obj):
+    select_active(context, obj)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
 
-def apply_transformations():
+def apply_transformations(context, obj):
+    select_active(context, obj)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
 

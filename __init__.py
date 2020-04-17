@@ -28,5 +28,6 @@ def unregister():
     handler.unregister()
 
 
+# TODO boolean only when simulate_cut is true
 
 
