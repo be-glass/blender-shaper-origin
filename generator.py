@@ -10,14 +10,11 @@ from .fillet import Fillet
 from .constant import Prefix
 
 
-def update(context, obj, reset=False):
+def update(context, obj, reset=False, transform=False):
     active = context.object
 
     if reset:
         cleanup(context, obj)
-
-
-
 
     if obj.soc_curve_cut_type == 'None' and obj.soc_mesh_cut_type == 'None':
         obj.soc_object_type = "None"
@@ -25,6 +22,17 @@ def update(context, obj, reset=False):
     if not obj.soc_simulate:
         return
 
+    obj.soc_object_type = 'Cut'
+    cut = get_generator(obj)
+    generator = cut(context, obj)
+
+    if reset:
+        generator.setup()
+    generator.update()
+    helper.select_active(context, active)
+
+
+def get_generator(obj):
     if obj.soc_mesh_cut_type == 'Perimeter':
         cut = Perimeter
     elif obj.soc_curve_cut_type in ['Exterior', 'Interior', 'Online'] and obj.type == 'CURVE':
@@ -34,15 +42,12 @@ def update(context, obj, reset=False):
     else:
         helper.err_implementation()
         return
+    return cut
 
-    obj.soc_object_type = 'Cut'
+def transform(context, obj):
+    cut = get_generator(obj)
     generator = cut(context, obj)
-
-    if reset:
-        generator.setup()
-    generator.update()
-    helper.select_active(context, active)
-
+    generator.transform()
 
 class Generator:
 
@@ -60,6 +65,10 @@ class Generator:
     def cleanup(self):
         delete_modifiers(self.obj)
         delete_internal_objects(self.obj)
+
+    def transform(self):
+        fillet_obj = self.fillet.get_obj()
+        fillet_obj.matrix_world = self.obj.matrix_world
 
     def adjust_solidify_thickness(self, delta=0.0):
         master = self.obj
@@ -85,7 +94,6 @@ class Perimeter(Generator):
         self.fillet.create(outside=True)
         self.fillet.get_obj().hide_select = True
 
-
         modifier_name = Prefix + 'Solidify'
         fillet_obj = self.fillet.get_obj()
         fillet_obj.modifiers.new(modifier_name, 'SOLIDIFY')
@@ -99,7 +107,6 @@ class Perimeter(Generator):
         if self.context.scene.so_cut.preview:
             Preview(self.context).add_object(self.obj)
 
-
     def update(self):
         self.adjust_solidify_thickness()
 
@@ -109,7 +116,7 @@ class Perimeter(Generator):
 
     def create_reference(self):
         collection = self.obj.users_collection[0]
-        name = Prefix+"reference."+collection.name
+        name = Prefix + "reference." + collection.name
         if not name in bpy.data.objects.keys():
             reference = bpy.data.objects.new(name, None)
             reference.location = self.obj.location
@@ -118,6 +125,7 @@ class Perimeter(Generator):
             reference.empty_display_size = 5
             reference.empty_display_type = 'PLAIN_AXES'
             reference.soc_object_type = 'Reference'
+
 
 class MeshCut(Generator):
 
@@ -181,9 +189,6 @@ class CurveCut(Generator):
         collection = self.obj.users_collection[0]
         self.adjust_boolean_modifiers(collection, mesh_obj)
 
-
-
-
     def create_bevel_object(self):
         name = f'{Prefix}{self.obj.name}.bevel'
 
@@ -195,9 +200,9 @@ class CurveCut(Generator):
 
         # create new one
         bevel = helper.add_plane(self.context, name, 1.0)
-                # bpy.ops.mesh.primitive_plane_add(size=1.0)
-                # bevel = self.context.active_object
-                # bevel.name = name
+        # bpy.ops.mesh.primitive_plane_add(size=1.0)
+        # bevel = self.context.active_object
+        # bevel.name = name
 
         # move object origin to upper edge
         bevel.location = (0, -0.5, 0)
@@ -205,7 +210,6 @@ class CurveCut(Generator):
 
         # scale
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
-
 
         # delete first face
         # bpy.ops.object.mode_set(mode='EDIT')

@@ -16,10 +16,12 @@ def unregister():
 def post_ob_updated(scene, depsgraph):
     obj = bpy.context.object
     if obj is not None:
-        if obj.soc_mesh_cut_type != 'None' or obj.soc_curve_cut_type != 'None':
+        if obj.soc_object_type != None:
+        # if obj.soc_mesh_cut_type != 'None' or obj.soc_curve_cut_type != 'None':
             for u in depsgraph.updates:
                 if u.is_updated_geometry:
                     generator.update(bpy.context, obj, reset=True)
                 if u.is_updated_transform:
-                    pass
+                    generator.transform(bpy.context, obj)
+
 
