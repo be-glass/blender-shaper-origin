@@ -168,6 +168,7 @@ class ObjectProperties(PropertyGroup):
                ('Cut', 'Cut', "Cut", 1),
                ('Preview', 'Preview', 'Preview', 2),
                ('Reference', 'Reference', 'Reference', '', 3),
+               ('Bounding', 'Bounding', 'Bounding', '', 4),
                ],
 
         default='None',

@@ -22,7 +22,9 @@ class Preview:
         if search:
             return search[0]
         else:
-            return add_plane(self.context, "Bounding frame", length(self.context, '20cm'), collection=self.collection)
+            frame =  add_plane(self.context, "Bounding frame", length(self.context, '20cm'), collection=self.collection)
+            frame.soc_object_type = "Bounding"
+            return frame
 
     def add_objects(self):
         perimeters = [o for o in bpy.data.objects if o.soc_mesh_cut_type == 'Perimeter']
@@ -31,14 +33,14 @@ class Preview:
 
 
     def add_object(self, obj):
-        q = obj.copy()
-        q.data = obj.data.copy()
-        self.collection.objects.link(q)
-
-        apply_scale(self.context, q)
-        q.matrix_world = self.reference.matrix_world
-
-        q.soc_object_type = 'Preview'
+        pass
+        # q = obj.copy()
+        # q.data = obj.data.copy()
+        # self.collection.objects.link(q)
+        #
+        # apply_scale(self.context, q)
+        # q.matrix_world = self.reference.matrix_world
+        # q.soc_object_type = 'Preview'
 
 def exist_object(name):
     return bool(name in bpy.data.objects.keys())
