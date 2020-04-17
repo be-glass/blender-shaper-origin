@@ -7,9 +7,9 @@ class Preview:
     def __init__(self, context):
         self.context = context
         self.collection = get_preview_collection(self.context)
+        self.reference = self.get_bounding_frame()
 
     def create(self):
-        self.reference = self.add_bounding_frame()
         self.add_objects()
 
     def delete(self):
@@ -17,8 +17,12 @@ class Preview:
             bpy.data.objects.remove(obj)
         bpy.data.collections.remove(self.collection)
 
-    def add_bounding_frame(self):
-        return add_plane(self.context, "Bounding frame", length(self.context, '20cm'), collection=self.collection)
+    def get_bounding_frame(self):
+        search = [o for o in self.collection.objects if o.name.startswith('Bounding frame')]
+        if search:
+            return search[0]
+        else:
+            return add_plane(self.context, "Bounding frame", length(self.context, '20cm'), collection=self.collection)
 
     def add_objects(self):
         perimeters = [o for o in bpy.data.objects if o.soc_mesh_cut_type == 'Perimeter']
