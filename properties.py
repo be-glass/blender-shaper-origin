@@ -95,7 +95,7 @@ def update_cut_type(obj, context):
 def preview(scene_properties, context):
 
     if scene_properties.preview:
-        # Preview(context).create()
+        Preview(context).create()
         pass
     else:
         Preview(context).delete()
