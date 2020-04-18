@@ -2,7 +2,7 @@ import bpy
 
 from .helper import get_internal_collection
 from . import helper, fillet
-from .constant import Prefix
+from .constant import PREFIX
 
 
 def find_siblings_by_type(cut_types, sibling=None, collection=None):
@@ -31,7 +31,7 @@ def delete_modifier(obj, name):
 
 def delete_modifiers(obj):
     for modifier in obj.modifiers:
-        if modifier.name.startswith(Prefix):
+        if modifier.name.startswith(PREFIX):
             obj.modifiers.remove(modifier)
 
 
@@ -40,7 +40,7 @@ def delete_internal_objects(obj):
     internal_collection = get_internal_collection(obj)
     for o in internal_collection.objects:
         # if o.name.startswith(Prefix + obj.name):
-        if o.name == Prefix+obj.name+".fillets":
+        if o.name == PREFIX+obj.name+ ".fillets":
             bpy.data.objects.remove(o, do_unlink=True)
 
 
@@ -69,7 +69,7 @@ def find_perimeters(collection):
 
 
 def boolean_modifier_name(cut_obj):
-    return Prefix + "Boolean." + cut_obj.name
+    return PREFIX + "Boolean." + cut_obj.name
 
 
 def cleanup_boolean_modifiers(context, target_obj):
@@ -98,7 +98,7 @@ def get_reference(obj):
     name = obj.soc_reference_name
 
     if not name:
-        name = Prefix + "reference." + collection.name
+        name = PREFIX + "reference." + collection.name
 
     if name in bpy.data.objects.keys():
         return bpy.data.objects[name]

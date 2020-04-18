@@ -4,7 +4,7 @@ import itertools
 
 from mathutils import Vector
 
-from .constant import Prefix
+from .constant import PREFIX
 
 
 def write(content, file_name):
@@ -222,7 +222,7 @@ def get_preview_collection(context):
      return get_collection(context, "Preview", soc)
 
 def get_internal_collection(sibling):
-    name = Prefix + 'internal'
+    name = PREFIX + 'internal'
     collection = sibling.users_collection[0]
 
     for child in collection.children:

@@ -7,7 +7,7 @@ from .helper import get_internal_collection
 from .preview import Preview
 
 from .fillet import Fillet
-from .constant import Prefix
+from .constant import PREFIX
 
 
 def update(context, obj, reset=False, transform=False):
@@ -75,7 +75,7 @@ class Generator:
         master = self.obj
         revision = self.fillet.get_obj()
 
-        modifier_name = Prefix + 'Solidify'
+        modifier_name = PREFIX + 'Solidify'
         if modifier_name in revision.modifiers:
             revision.modifiers[modifier_name].thickness = master.soc_cut_depth + delta
 
@@ -100,7 +100,7 @@ class Perimeter(Generator):
         self.fillet.create(outside=True)
         self.fillet.get_obj().hide_select = True
 
-        modifier_name = Prefix + 'Solidify'
+        modifier_name = PREFIX + 'Solidify'
         fillet_obj = self.fillet.get_obj()
         fillet_obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
@@ -128,7 +128,7 @@ class MeshCut(Generator):
 
         self.fillet.create()
 
-        modifier_name = Prefix + 'Solidify'
+        modifier_name = PREFIX + 'Solidify'
         revision = self.fillet.get_obj()
         revision.modifiers.new(modifier_name, 'SOLIDIFY')
 
@@ -172,11 +172,11 @@ class CurveCut(Generator):
         self.obj.data.bevel_object = bevel
 
         self.obj.display_type = 'WIRE'
-        modifier_name = Prefix + 'Solidify'
+        modifier_name = PREFIX + 'Solidify'
         self.obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
     def update(self):
-        bevel = helper.get_object_safely(f'{Prefix}{self.obj.name}.bevel')
+        bevel = helper.get_object_safely(f'{PREFIX}{self.obj.name}.bevel')
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
 
         mesh_obj = self.update_mesh()
@@ -184,7 +184,7 @@ class CurveCut(Generator):
         self.adjust_boolean_modifiers(collection, mesh_obj)
 
     def create_bevel_object(self):
-        name = f'{Prefix}{self.obj.name}.bevel'
+        name = f'{PREFIX}{self.obj.name}.bevel'
 
         # normalize curve radii
         helper.apply_scale(self.context, self.obj)
@@ -216,7 +216,7 @@ class CurveCut(Generator):
         return bevel
 
     def update_mesh(self):
-        mesh_name = Prefix + self.obj.name + '.mesh'
+        mesh_name = PREFIX + self.obj.name + '.mesh'
         helper.delete_object(mesh_name)
         internal_collection = get_internal_collection(self.obj)
 

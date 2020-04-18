@@ -18,7 +18,7 @@ def dimensions(context, selection):
 
 
 def vector2string(vector):
-    return constant.svg_coords.format(vector[0], vector[1])
+    return constant.SVG_COORD_FORMAT.format(vector[0], vector[1])
 
 
 def svg_header(context, selection, bl_info):
@@ -79,7 +79,7 @@ def svg_material_attributes(id):
     }
 
     style = style_map[id]
-    (stroke, fill) = constant.cut_encoding[style]
+    (stroke, fill) = constant.CUT_ENCODING[style]
     return f'stroke="{stroke}" fill="{fill}"'
 
 

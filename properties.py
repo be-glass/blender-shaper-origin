@@ -3,7 +3,7 @@ from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty,
 from bpy.types import PropertyGroup
 
 from . import fillet, generator
-from .constant import defaults
+from .constant import DEFAULTS
 from .helper import length
 from .gen_helper import cleanup
 from .preview import Preview
@@ -49,13 +49,13 @@ def unregister():
 # Update
 
 def minmax(context, property_name):
-    d0, dd, d1 = defaults[property_name]
+    d0, dd, d1 = DEFAULTS[property_name]
     return length(context, d0), \
            length(context, d1)
 
 
 def default(context, property_name):
-    d0, dd, d1 = defaults[property_name]
+    d0, dd, d1 = DEFAULTS[property_name]
     return length(context, dd)
 
 

@@ -4,7 +4,7 @@ import mathutils
 from mathutils import Vector, Matrix
 
 from . import constant, helper, gen_helper
-from .constant import Prefix
+from .constant import PREFIX
 
 
 class Fillet:
@@ -13,8 +13,8 @@ class Fillet:
         self.obj = obj
         self.radius = obj.soc_tool_diameter / 2
         self.polygon = self.get_polygon_safely()
-        self.resolution = constant.fillet_resolution
-        self.name = Prefix + self.obj.name + ".fillets"
+        self.resolution = constant.FILLET_RESOLUTION
+        self.name = PREFIX + self.obj.name + ".fillets"
 
 
     def get_polygon_safely(self):
