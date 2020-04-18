@@ -2,7 +2,7 @@ import bmesh
 import bpy
 import itertools
 
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 from .constant import PREFIX
 
@@ -115,14 +115,25 @@ def delete_object(obj_name):
         bpy.data.objects.remove(obj, do_unlink=True)
 
 
+# def apply_scale(context, obj):
+#     select_active(context, obj)
+#     return bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+
 def apply_scale(context, obj):
-    select_active(context, obj)
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
+    scale = obj.matrix_world.to_scale()
+    transform = Matrix()
+    for i in range(3):
+        transform[i][i] = scale[i]
 
-def apply_transformations(context, obj):
-    select_active(context, obj)
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    for v in obj.data.vertices:
+        v.co = transform @ v.co
+
+    obj.scale = Vector([1,1,1])
+
+# def apply_transformations(context, obj):
+#     select_active(context, obj)
+#     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
 
 def repair_mesh(context, obj):
