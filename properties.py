@@ -27,6 +27,9 @@ def register():
     bpy.types.Object.soc_simulate = ObjectProperties.simulate
     bpy.types.Object.soc_initialized = ObjectProperties.initialized
     bpy.types.Object.soc_dogbone = ObjectProperties.dogbone
+    bpy.types.Object.soc_solid_name = ObjectProperties.solid_name
+    bpy.types.Object.soc_reference_name = ObjectProperties.reference_name
+    bpy.types.Object.soc_preview_name = ObjectProperties.preview_name
 
 
 def unregister():
@@ -194,7 +197,21 @@ class ObjectProperties(PropertyGroup):
         options={'HIDDEN'},
         update=update_cut_type
     )
-
+    solid_name = StringProperty(
+        name="Solid Mesh Name",
+        description="Internal record of solid name",
+        default="",
+    )
+    preview_name = StringProperty(
+        name="Preview Object Name",
+        description="Internal record of preview object name",
+        default="",
+    )
+    reference_name = StringProperty(
+        name="Reference Name",
+        description="Internal record of reference object name",
+        default="",
+    )
 
 class SceneProperties(PropertyGroup):
     use_transformations: BoolProperty(

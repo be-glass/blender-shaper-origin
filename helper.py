@@ -101,11 +101,12 @@ def err_implementation(context=bpy.context):
     error_msg("missing implementation", context)
 
 
-def get_object_safely(obj_name):
+def get_object_safely(obj_name, error_msg=True):
     if obj_name in bpy.data.objects.keys():
         return bpy.data.objects[obj_name]
-    else:
+    elif error_msg:
         error_msg("Cannot find (internal) object")
+    return None
 
 
 def delete_object(obj_name):

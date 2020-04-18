@@ -94,15 +94,22 @@ def rebuild_boolean_modifier(perimeter_obj, subtract_obj):
 
 def get_reference(obj):
     collection = obj.users_collection[0]
-    name = Prefix + "reference." + collection.name
+
+    name = obj.soc_reference_name
+
+    if not name:
+        name = Prefix + "reference." + collection.name
+
     if name in bpy.data.objects.keys():
         return bpy.data.objects[name]
     else:
         reference = bpy.data.objects.new(name, None)
         reference.location = obj.location
-        reference.matrix_world = obj.matrix_world
+        # reference.matrix_world = obj.matrix_world
+        reference.matrix_world.identity()
         collection.objects.link(reference)
         reference.empty_display_size = 5
         reference.empty_display_type = 'PLAIN_AXES'
         reference.soc_object_type = 'Reference'
+        obj.soc_reference_name = reference.name
         return reference
