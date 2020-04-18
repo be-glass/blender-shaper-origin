@@ -2,7 +2,7 @@ import bpy, math
 
 from . import helper, gen_helper
 from .gen_helper import find_perimeters, rebuild_boolean_modifier, cleanup, delete_modifiers, \
-    delete_internal_objects, find_siblings_by_type, cleanup_meshes
+    delete_internal_objects, find_siblings_by_type, cleanup_meshes, get_reference
 from .helper import get_internal_collection
 from .preview import Preview
 
@@ -44,10 +44,11 @@ def get_generator(obj):
         return
     return cut
 
-def transform(context, obj):
+def  transform(context, obj):
     cut = get_generator(obj)
     generator = cut(context, obj)
     generator.transform()
+
 
 class Generator:
 
@@ -85,6 +86,11 @@ class Generator:
         for perimeter_obj in find_perimeters(collection):
             rebuild_boolean_modifier(perimeter_obj, self.obj)
 
+    def reset_preview_object(self):
+        name = self.obj.name+'.preview'
+        if name in bpy.data.objects.keys():
+            bpy.data.objects.remove(bpy.data.object[name])
+
 
 class Perimeter(Generator):
 
@@ -102,7 +108,7 @@ class Perimeter(Generator):
         for cut in find_siblings_by_type(types, sibling=self.obj):
             rebuild_boolean_modifier(self.obj, cut)
 
-        self.create_reference()
+        self.reference = get_reference(self.obj)
 
         if self.context.scene.so_cut.preview:
             Preview(self.context).add_object(self.obj)
@@ -113,18 +119,6 @@ class Perimeter(Generator):
         cutouts = find_siblings_by_type('Cutout', sibling=self.context.object)
         for cut in cutouts:
             cut.soc_cut_depth = self.obj.soc_cut_depth + self.length('1mm')
-
-    def create_reference(self):
-        collection = self.obj.users_collection[0]
-        name = Prefix + "reference." + collection.name
-        if not name in bpy.data.objects.keys():
-            reference = bpy.data.objects.new(name, None)
-            reference.location = self.obj.location
-            reference.matrix_world = self.obj.matrix_world
-            collection.objects.link(reference)
-            reference.empty_display_size = 5
-            reference.empty_display_type = 'PLAIN_AXES'
-            reference.soc_object_type = 'Reference'
 
 
 class MeshCut(Generator):

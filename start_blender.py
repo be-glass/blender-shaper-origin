@@ -1,2 +1,2 @@
 import os
-os.system("/opt/blender/latest/blender blender_files/alignment.blend")
+os.system("/opt/blender/latest/blender blender_files/preview_object.blend")

@@ -90,3 +90,19 @@ def rebuild_boolean_modifier(perimeter_obj, subtract_obj):
     boolean.object = helper.get_object_safely(subtract_fillet.name)
 
     subtract_fillet.hide_set(True)
+
+
+def get_reference(obj):
+    collection = obj.users_collection[0]
+    name = Prefix + "reference." + collection.name
+    if name in bpy.data.objects.keys():
+        return bpy.data.objects[name]
+    else:
+        reference = bpy.data.objects.new(name, None)
+        reference.location = obj.location
+        reference.matrix_world = obj.matrix_world
+        collection.objects.link(reference)
+        reference.empty_display_size = 5
+        reference.empty_display_type = 'PLAIN_AXES'
+        reference.soc_object_type = 'Reference'
+        return reference
