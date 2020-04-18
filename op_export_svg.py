@@ -25,7 +25,7 @@ def svg_header(context, selection, bl_info):
     version = '.'.join([str(i) for i in bl_info['version']])
     (x0, y0, x1, y1, w, h) = dimensions(context, selection)
 
-    return constant.svg_header_template.format(
+    return constant.SVG_HEADER_TEMPLATE.format(
         x0=x0, w=x1-x0, y0=-y1, h=y1-y0,
         width=w*1000, height=h*1000, unit="mm",
         version=version, author=bl_info['author'],

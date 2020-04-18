@@ -25,7 +25,7 @@ DEFAULTS = {
 FILLET_RESOLUTION = 8
 
 
-svg_header_template= '''\
+SVG_HEADER_TEMPLATE= '''\
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Blender SVG Export by {author} v{version})  -->
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
