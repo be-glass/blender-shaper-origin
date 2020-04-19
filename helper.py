@@ -43,12 +43,14 @@ def boundaries_in_local_coords(object_list):
     y = []
     z = []
     for obj in object_list:
-        mw = obj.matrix_world
+        scale = Matrix.Diagonal(obj.matrix_world.to_scale())
+
+
         bb = obj.bound_box
-        for p in range(7):
+        for p in range(8):
             v_local = Vector([bb[p][0], bb[p][1], bb[p][2]])
 
-            v = transform_if_needed(obj, v_local)
+            v = scale @ v_local
 
             x.append(v[0])
             y.append(v[1])

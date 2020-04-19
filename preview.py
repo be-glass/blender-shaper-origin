@@ -13,37 +13,48 @@ class Preview:
         self.context = context
         self.collection = get_preview_collection(self.context)
         self.perimeters = [o for o in bpy.data.objects if o.soc_mesh_cut_type == 'Perimeter']
-        if self.perimeters:
-            self.bounding = self.get_bounding_frame()
-        else:
-            self.bounding = None
 
     def create(self):
         if self.perimeters:
+            self.bounding = self.get_bounding_frame()
             self.add_objects()
+        else:
+            self.bounding = None
 
     def delete(self):
         for obj in self.collection.objects:
             bpy.data.objects.remove(obj)
         bpy.data.collections.remove(self.collection)
+        self.hide_bounding_frame()
+
+    def hide_bounding_frame(self):
+        collection = helper.get_soc_collection(self.context)
+        search = [o for o in collection.objects if o.name.startswith('Bounding Frame')]
+        if search:
+            search[0].hide_set(True)
+
 
     def get_bounding_frame(self):
         collection = helper.get_soc_collection(self.context)
         search = [o for o in collection.objects if o.name.startswith('Bounding Frame')]
         if search:
-            return search[0]
+            mw = search[0].matrix_world.copy()
+            bpy.data.objects.remove(search[0])
         else:
-            m0, m2 = helper.boundaries_in_local_coords(self.perimeters)
+            mw = Matrix()
 
-            m0.z = 0
-            m2.z = 0
-            m1 = Vector([m0.x, m2.y, 0])
-            m3 = Vector([m2.x, m0.y, 0])
-            quad = [m0, m1, m2, m3]
+        m0, m2 = helper.boundaries_in_local_coords(self.perimeters)
 
-            frame = helper.create_object(collection, quad, "Bounding Frame")
-            frame.soc_object_type = "Bounding"
-            return frame
+        m0.z = 0
+        m2.z = 0
+        m1 = Vector([m0.x, m2.y, 0])
+        m3 = Vector([m2.x, m0.y, 0])
+        quad = [m0, m1, m2, m3]
+
+        frame = helper.create_object(collection, quad, "Bounding Frame")
+        frame.matrix_world = mw
+        frame.soc_object_type = "Bounding"
+        return frame
 
     def add_objects(self):
         for perimeter in self.perimeters:
@@ -76,4 +87,4 @@ class Preview:
                 mw = preview_obj.matrix_world.copy()
                 mw.invert()
                 reference_obj.matrix_world = mw
-                reference_obj.location = -reference_obj.location
+                reference_obj.location.negate()
