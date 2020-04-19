@@ -55,8 +55,8 @@ class Preview:
 
         m0.z = 0
         m2.z = 0
-        m1 = Vector([m0.x, m2.y, 0])
-        m3 = Vector([m2.x, m0.y, 0])
+        m1 = Vector([m0.x, m2.y, -0.001])
+        m3 = Vector([m2.x, m0.y, -0.001])
         quad = [m0, m1, m2, m3]
 
         frame = helper.create_object(collection, quad, "Bounding Frame")
@@ -70,6 +70,14 @@ class Preview:
 
     def add_object(self, cut_obj):
 
+        if cut_obj.soc_preview_name:
+            name = cut_obj.soc_preview_name
+        else:
+            name = cut_obj.name + '.preview'
+
+        if name in bpy.data.objects.keys():
+            bpy.data.objects.remove(name)
+
         q = cut_obj.copy()
         q.data = cut_obj.data.copy()
         self.collection.objects.link(q)
@@ -81,7 +89,7 @@ class Preview:
         m = reference.matrix_world @ self.bounding.matrix_world
 
         q.matrix_world = m
-
+        q.name = name
         cut_obj.soc_preview_name = q.name
 
         return q
@@ -96,3 +104,4 @@ class Preview:
                 frame_1.invert()
 
                 reference_obj.matrix_world = frame_1 @ preview_obj.matrix_world
+                reference_obj.location.z = 0

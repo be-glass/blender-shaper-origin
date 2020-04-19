@@ -48,30 +48,51 @@ class BG_PT_SOC_export(SOCutPanel, Panel):
 
 
 class BG_PT_SOC_select(SOCutPanel, Panel):
-    bl_label = "Select"
+    bl_label = "Item Settings"
 
     def draw(self, context):
+        self.layout.use_property_split = True
+        self.layout.use_property_decorate = True
+
+        obj = bpy.context.active_object
+
+        if obj:
+            typ = obj.soc_object_type
+
+            if typ == 'None':
+                self.draw_type_select(obj)
+
+            elif typ == 'Cut':
+                self.draw_cut(obj)
+
+            elif typ == 'Bounding':
+                self.layout.label(text="Bounding Frame")
+
+            elif typ == 'Preview':
+                self.layout.label(text="Preview Item")
+
+            elif typ == 'Reference':
+                self.layout.label(text="Reference Item")
+
+    def draw_cut(self, obj):
         layout = self.layout
-        layout.use_property_split = True
-        layout.use_property_decorate = True
 
-        ao = bpy.context.active_object
+        self.draw_type_select(obj)
 
-        if ao:
-            if ao.type == 'MESH':
-                layout.prop(ao, "soc_mesh_cut_type")
-            elif ao.type == 'CURVE':
-                layout.prop(ao, "soc_curve_cut_type")
+        if obj.soc_mesh_cut_type != 'None' or obj.soc_curve_cut_type != 'None':
+            layout.prop(obj, "soc_reference_frame")
+            layout.prop(obj, "soc_cut_depth")
+            layout.prop(obj, "soc_tool_diameter")
+            layout.prop(obj, "soc_simulate")
+            layout.prop(obj, "soc_dogbone")
 
-            if ao.soc_mesh_cut_type != 'None' or ao.soc_curve_cut_type != 'None':
-                layout.prop(ao, "soc_reference_frame")
-                layout.prop(ao, "soc_cut_depth")
-                layout.prop(ao, "soc_tool_diameter")
-                layout.prop(ao, "soc_simulate")
-                layout.prop(ao, "soc_dogbone")
+        collection = obj.users_collection[0]
+        perimeters = gen_helper.find_perimeters(collection)
+        if obj.soc_mesh_cut_type != 'Perimeter' and len(perimeters) > 0:
+            layout.operator("mesh.socut_align_object")
 
-            collection = ao.users_collection[0]
-            perimeters = gen_helper.find_perimeters(collection)
-            if ao.soc_mesh_cut_type != 'Perimeter' and len(perimeters) > 0:
-                layout.operator("mesh.socut_align_object")
-
+    def draw_type_select(self, obj):
+        if obj.type == 'MESH':
+            self.layout.prop(obj, "soc_mesh_cut_type")
+        elif obj.type == 'CURVE':
+            self.layout.prop(obj, "soc_curve_cut_type")
