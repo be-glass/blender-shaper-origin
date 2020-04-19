@@ -5,7 +5,7 @@ from . import constant, helper
 
 def dimensions(context, selection):
 
-    minimum, maximum = helper.boundaries_in_local_coords(selection)
+    minimum, maximum = helper.boundaries(selection)
     x0, y0, z0 = minimum
     x1, y1, z1 = maximum
 

@@ -28,7 +28,9 @@ def post_ob_updated(scene, depsgraph):
             elif obj.soc_object_type == 'Preview':
                 for u in depsgraph.updates:
                     if u.is_updated_transform:
-                        Preview(bpy.context).transform_reference(obj)
+                        preview = Preview(bpy.context)
+                        preview.transform_reference(obj)
+                        preview.update_bounding_frame()
 
 
 

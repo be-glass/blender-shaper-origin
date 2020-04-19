@@ -38,18 +38,23 @@ def check_type(obj, valid_types):
     return True if remain else False
 
 
-def boundaries_in_local_coords(object_list):
+def boundaries(object_list):
     x = []
     y = []
     z = []
     for obj in object_list:
-        scale = Matrix.Diagonal(obj.matrix_world.to_scale())
+
+        reference = get_object_safely(obj.soc_reference_name)
+
+        user = reference.matrix_world
+        scale = Matrix.Diagonal(obj.matrix_world.to_scale()).to_4x4()
+        transform = user @ scale
 
         bb = obj.bound_box
         for p in range(8):
             v_local = Vector([bb[p][0], bb[p][1], bb[p][2]])
 
-            v = scale @ v_local
+            v = -(user @ scale @ v_local)
 
             x.append(v[0])
             y.append(v[1])

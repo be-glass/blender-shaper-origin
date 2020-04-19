@@ -16,7 +16,7 @@ class Preview:
 
     def create(self):
         if self.perimeters:
-            self.bounding = self.get_bounding_frame()
+            self.bounding = self.update_bounding_frame()
             self.add_objects()
         else:
             self.bounding = None
@@ -33,7 +33,7 @@ class Preview:
         if search:
             search[0].hide_set(True)
 
-    def get_bounding_frame(self):
+    def update_bounding_frame(self):
         collection = helper.get_soc_collection(self.context)
         search = [o for o in collection.objects if o.name.startswith('Bounding Frame')]
         if search:
@@ -42,7 +42,7 @@ class Preview:
         else:
             mw = Matrix()
 
-        m0, m2 = helper.boundaries_in_local_coords(self.perimeters)
+        m0, m2 = helper.boundaries(self.perimeters)
 
         m0.z = 0
         m2.z = 0
