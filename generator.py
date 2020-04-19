@@ -52,11 +52,15 @@ def transform(context, obj):
 
 
 def transform_previews(context, frame_obj):
-    for cut_obj in bpy.data.objects:
-        if cut_obj.soc_object_type == 'Cut':
-            cut = get_generator(cut_obj)
-            generator = cut(context, cut_obj)
-            generator.transform_preview(frame_obj.matrix_world)
+    for obj in bpy.data.objects:
+        if obj.soc_object_type == 'Cut':
+            reference = helper.get_object_safely(obj.soc_reference_name)
+
+            transform = frame_obj.matrix_world @ reference.matrix_world
+
+            cut = get_generator(obj)
+            generator = cut(context, obj)
+            generator.transform_preview(transform)
 
 
 class Generator:

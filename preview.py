@@ -14,6 +14,14 @@ class Preview:
         self.collection = get_preview_collection(self.context)
         self.perimeters = [o for o in bpy.data.objects if
                            o.soc_object_type == 'Cut' and o.soc_mesh_cut_type == 'Perimeter']
+        self.bounding = self.get_bounding_frame()
+
+    def get_bounding_frame(self):
+        name = 'Bounding Frame'
+        if name in bpy.data.objects.keys():
+            return bpy.data.objects[name]
+        else:
+            return None
 
     def create(self):
         if self.perimeters:
@@ -84,7 +92,7 @@ class Preview:
             obj = matches[0]
             reference_obj = helper.get_object_safely(obj.soc_reference_name, error_msg=False)
             if reference_obj is not None:
-                mw = preview_obj.matrix_world.copy()
-                mw.invert()
-                reference_obj.matrix_world = mw
-                reference_obj.location.negate()
+                frame_1 = self.bounding.matrix_world.copy()
+                frame_1.invert()
+
+                reference_obj.matrix_world = frame_1 @ preview_obj.matrix_world
