@@ -44,10 +44,19 @@ def get_generator(obj):
         return
     return cut
 
-def  transform(context, obj):
+
+def transform(context, obj):
     cut = get_generator(obj)
     generator = cut(context, obj)
     generator.transform()
+
+
+def transform_previews(context, frame_obj):
+    for cut_obj in bpy.data.objects:
+        if cut_obj.soc_object_type == 'Cut':
+            cut = get_generator(cut_obj)
+            generator = cut(context, cut_obj)
+            generator.transform_preview(frame_obj.matrix_world)
 
 
 class Generator:
@@ -70,6 +79,12 @@ class Generator:
     def transform(self):
         fillet_obj = self.fillet.get_obj()
         fillet_obj.matrix_world = self.obj.matrix_world
+
+    def transform_preview(self, matrix):
+        name = self.obj.soc_preview_name
+        if name:
+            preview = helper.get_object_safely(name)
+            preview.matrix_world = matrix
 
     def adjust_solidify_thickness(self, delta=0.0):
         master = self.obj

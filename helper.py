@@ -45,7 +45,6 @@ def boundaries_in_local_coords(object_list):
     for obj in object_list:
         scale = Matrix.Diagonal(obj.matrix_world.to_scale())
 
-
         bb = obj.bound_box
         for p in range(8):
             v_local = Vector([bb[p][0], bb[p][1], bb[p][2]])
@@ -69,7 +68,7 @@ def transform_if_needed(obj, coordinates):
     if obj.soc_reference_frame == 'local':
         return coordinates
     elif obj.soc_reference_frame == 'object':
-        return 'TODO'      # a feature missing implementation. TODO will be printed into the SVG file
+        return 'TODO'  # a feature missing implementation. TODO will be printed into the SVG file
     else:  # 'global'
         return obj.matrix_world @ coordinates
 
@@ -94,12 +93,14 @@ def error_msg(message, context=bpy.context):
     context.window_manager.popup_menu(msg, title="Error", icon='ERROR')
     print("DEBUG me")
 
+
 def warning_msg(message, context=bpy.context):
     def msg(self, text):
         self.layout.label(text="Something went wrong!")
 
     context.window_manager.popup_menu(msg, title="Warning", icon='WARNING')
     print("DEBUG me")
+
 
 def err_implementation(context=bpy.context):
     error_msg("missing implementation", context)
@@ -120,13 +121,12 @@ def delete_object(obj_name):
 
 
 def apply_scale(context, obj):
-
     S = Matrix.Diagonal(obj.matrix_world.to_scale())
 
     for v in obj.data.vertices:
         v.co = S @ v.co
 
-    obj.scale = Vector([1,1,1])             # TODO: Does it work at all?
+    obj.scale = Vector([1, 1, 1])  # TODO: Does it work at all?
 
 
 def repair_mesh(context, obj):
@@ -150,9 +150,6 @@ def shade_mesh_flat(obj):
         f.use_smooth = False
 
 
-
-
-
 def hide_objects(name):
     for obj in bpy.data.objects:
         if obj.name.startswith(name):
@@ -161,6 +158,7 @@ def hide_objects(name):
 
 def length(context, quantity_with_unit):
     return bpy.utils.units.to_value('METRIC', 'LENGTH', quantity_with_unit) / context.scene.unit_settings.scale_length
+
 
 def create_object(collection, polygon, name):
     bm = bmesh.new()
@@ -189,7 +187,7 @@ def add_plane(context, name, size, collection=None):
     bpy.context.object.data.polygons[0].select = True
     bpy.ops.mesh.delete(type='ONLY_FACE')
     bpy.ops.object.mode_set(mode='OBJECT')
-    select_active(context, context.object)    # TODO
+    select_active(context, context.object)  # TODO
 
     obj = context.active_object
     obj.name = name
@@ -199,8 +197,6 @@ def add_plane(context, name, size, collection=None):
             c.objects.unlink(obj)
         collection.objects.link(obj)
     return obj
-
-
 
 
 def get_collection(context, name, parent):
@@ -217,8 +213,9 @@ def get_soc_collection(context):
 
 
 def get_preview_collection(context):
-     soc = get_soc_collection(context)
-     return get_collection(context, "Preview", soc)
+    soc = get_soc_collection(context)
+    return get_collection(context, "Preview", soc)
+
 
 def get_internal_collection(sibling):
     name = PREFIX + 'internal'
@@ -232,4 +229,3 @@ def get_internal_collection(sibling):
     internal_collection = bpy.data.collections.new(name)
     collection.children.link(internal_collection)
     return internal_collection
-

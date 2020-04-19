@@ -33,7 +33,6 @@ class Preview:
         if search:
             search[0].hide_set(True)
 
-
     def get_bounding_frame(self):
         collection = helper.get_soc_collection(self.context)
         search = [o for o in collection.objects if o.name.startswith('Bounding Frame')]
