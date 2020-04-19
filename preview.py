@@ -76,7 +76,7 @@ class Preview:
             name = cut_obj.name + '.preview'
 
         if name in bpy.data.objects.keys():
-            bpy.data.objects.remove(name)
+            bpy.data.objects.remove(bpy.data.objects[name])
 
         q = cut_obj.copy()
         q.data = cut_obj.data.copy()

@@ -46,7 +46,7 @@ def unregister():
     del bpy.types.Object.soc_dogbone
 
 
-# Update
+# Update handlers
 
 def minmax(context, property_name):
     d0, dd, d1 = DEFAULTS[property_name]
