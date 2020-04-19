@@ -57,7 +57,7 @@ class Preview:
         m2.z = 0
         m1 = Vector([m0.x, m2.y, -0.001])
         m3 = Vector([m2.x, m0.y, -0.001])
-        quad = [m0, m1, m2, m3]
+        quad = [m3, m2, m1, m0]
 
         frame = helper.create_object(collection, quad, "Bounding Frame")
         frame.matrix_world = mw
@@ -91,6 +91,7 @@ class Preview:
         q.matrix_world = m
         q.name = name
         cut_obj.soc_preview_name = q.name
+        q.display_type = 'TEXTURED'
 
         return q
 
