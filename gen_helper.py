@@ -62,6 +62,13 @@ def cleanup(context, obj):
     if obj.type == 'CURVE':
         obj.data.bevel_object = None
 
+    helper.delete_object(obj.soc_reference_name)
+    helper.delete_object(obj.soc_preview_name)
+    helper.delete_object(obj.soc_solid_name)
+    obj.soc_reference_name = ''
+    obj.soc_preview_name = ''
+    obj.soc_solid_name = ''
+
 
 def find_perimeters(collection):
     all_perimeters = find_siblings_by_type('Perimeter', collection=collection)
