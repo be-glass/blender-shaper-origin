@@ -2,11 +2,13 @@ PREFIX = "SOC_"
 
 # sheet_name = prefix + "Work Area"
 
-# cut_face_color = {'Interior': (1, 1, 1, 1),
-#                   'Exterior': (0, 0, 0, 1),
-#                   'Online': (1, 0, 1, 1),
-#                   'Pocket': (.5, .5, .5, 1),
-#                   'Guide': (0, 0, 1, 1)}
+FACE_COLOR = {'Interior': (1, 1, 1, 1),
+              'Exterior': (0, 0, 0, 1),
+              'Perimeter': (0, 0, 0, 1),
+              'Online': (1, 0, 1, 1),
+              'Pocket': (.5, .5, .5, 1),
+              'Cutout': (.5, .5, .5, 1),
+              'Guide': (0, 0, 1, 1)}
 
 CUT_ENCODING = {'Interior': ('black', 'white'),
                 'Exterior': ('black', 'black'),

@@ -1,6 +1,7 @@
 import bpy
 from mathutils import Matrix, Vector
 
+from .constant import FACE_COLOR
 from . import helper, gen_helper
 from .helper import length, add_plane, get_preview_collection, select_active, apply_scale
 
@@ -29,6 +30,15 @@ class Preview:
             self.add_objects()
         else:
             self.bounding = None
+        self.set_viewport()
+
+    def set_viewport(self):
+        for area in self.context.screen.areas:
+            if area.type == 'VIEW_3D':
+                for space in area.spaces:
+                    if space.type == 'VIEW_3D':
+                        space.shading.type = 'SOLID'
+                        space.shading.color_type = 'OBJECT'
 
     def delete(self):
         for obj in self.collection.objects:
@@ -51,13 +61,17 @@ class Preview:
         else:
             mw = Matrix()
 
-        m0, m2 = helper.boundaries(self.perimeters)
+        c0, c1 = helper.boundaries(self.perimeters)
 
-        m0.z = 0
-        m2.z = 0
-        m1 = Vector([m0.x, m2.y, -0.001])
-        m3 = Vector([m2.x, m0.y, -0.001])
-        quad = [m3, m2, m1, m0]
+        z = -0.1
+        d = length(self.context, '10mm')  # margin of preview sheet
+
+        m0 = Vector([c1.x + d, c0.y - d, z])
+        m1 = Vector([c1.x + d, c1.y + d, z])
+        m2 = Vector([c0.x - d, c1.y + d, z])
+        m3 = Vector([c0.x - d, c0.y - d, z])
+
+        quad = [m0, m1, m2, m3]
 
         frame = helper.create_object(collection, quad, "Bounding Frame")
         frame.matrix_world = mw
@@ -92,6 +106,8 @@ class Preview:
         q.name = name
         cut_obj.soc_preview_name = q.name
         q.display_type = 'TEXTURED'
+
+        q.color = FACE_COLOR[cut_obj.soc_mesh_cut_type]
 
         return q
 
