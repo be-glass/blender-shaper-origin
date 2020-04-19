@@ -1,2 +1,1 @@
-- bounding box: fix calculation
-- more than one perimeters: debug
+- warn about >1 perimeters in collection

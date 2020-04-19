@@ -115,7 +115,7 @@ class Preview:
         matches = [o for o in bpy.data.objects if o.soc_preview_name == preview_obj.name]
         if matches:
             obj = matches[0]
-            reference_obj = helper.get_object_safely(obj.soc_reference_name, error_msg=False)
+            reference_obj = helper.get_object_safely(obj.soc_reference_name, report_error=False)
             if reference_obj is not None:
                 frame_1 = self.bounding.matrix_world.copy()
                 frame_1.invert()

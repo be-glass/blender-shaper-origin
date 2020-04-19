@@ -54,7 +54,8 @@ def transform(context, obj):
 def transform_previews(context, frame_obj):
     for obj in bpy.data.objects:
         if obj.soc_object_type == 'Cut':
-            reference = helper.get_object_safely(obj.soc_reference_name)
+            reference = gen_helper.get_reference(obj)
+            # reference = helper.get_object_safely(obj.soc_reference_name)
 
             transform = frame_obj.matrix_world @ reference.matrix_world
 

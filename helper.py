@@ -6,6 +6,8 @@ from mathutils import Vector, Matrix
 
 from .constant import PREFIX
 
+from . import gen_helper
+
 
 def write(content, file_name):
     file = open(file_name, 'w')
@@ -44,7 +46,8 @@ def boundaries(object_list):
     z = []
     for obj in object_list:
 
-        reference = get_object_safely(obj.soc_reference_name)
+        reference = gen_helper.get_reference(obj)
+        # reference = get_object_safely(obj.soc_reference_name)
 
         user = reference.matrix_world
         scale = Matrix.Diagonal(obj.matrix_world.to_scale()).to_4x4()
@@ -111,10 +114,10 @@ def err_implementation(context=bpy.context):
     error_msg("missing implementation", context)
 
 
-def get_object_safely(obj_name, error_msg=True):
+def get_object_safely(obj_name, report_error=True):
     if obj_name in bpy.data.objects.keys():
         return bpy.data.objects[obj_name]
-    elif error_msg:
+    elif report_error:
         error_msg("Cannot find (internal) object")
     return None
 
