@@ -1,0 +1,2 @@
+- bounding box: fix calculation
+- more than one perimeters: debug

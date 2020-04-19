@@ -194,9 +194,6 @@ class CurveCut(Generator):
 
         # create new one
         bevel = helper.add_plane(self.context, name, 1.0)
-        # bpy.ops.mesh.primitive_plane_add(size=1.0)
-        # bevel = self.context.active_object
-        # bevel.name = name
 
         # move object origin to upper edge
         bevel.location = (0, -0.5, 0)
@@ -204,12 +201,6 @@ class CurveCut(Generator):
 
         # scale
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
-
-        # delete first face
-        # bpy.ops.object.mode_set(mode='EDIT')
-        # bevel.data.polygons[0].select = True
-        # bpy.ops.mesh.delete(type='ONLY_FACE')
-        # bpy.ops.object.mode_set(mode='OBJECT')
 
         bpy.ops.object.convert(target='CURVE')
 

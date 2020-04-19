@@ -38,7 +38,7 @@ def check_type(obj, valid_types):
     return True if remain else False
 
 
-def boundaries(object_list):
+def boundaries_in_local_coords(object_list):
     x = []
     y = []
     z = []
@@ -54,7 +54,9 @@ def boundaries(object_list):
             y.append(v[1])
             z.append(v[2])
 
-    return min(x), min(y), min(z), max(x), max(y), max(z)
+    minimum = Vector([min(x), min(y), min(z)])
+    maximum = Vector([max(x), max(y), max(z)])
+    return minimum, maximum
 
 
 def add_Empty_at(*location):
@@ -115,25 +117,14 @@ def delete_object(obj_name):
         bpy.data.objects.remove(obj, do_unlink=True)
 
 
-# def apply_scale(context, obj):
-#     select_active(context, obj)
-#     return bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-
 def apply_scale(context, obj):
 
-    scale = obj.matrix_world.to_scale()
-    transform = Matrix()
-    for i in range(3):
-        transform[i][i] = scale[i]
+    S = Matrix.Diagonal(obj.matrix_world.to_scale())
 
     for v in obj.data.vertices:
-        v.co = transform @ v.co
+        v.co = S @ v.co
 
-    obj.scale = Vector([1,1,1])
-
-# def apply_transformations(context, obj):
-#     select_active(context, obj)
-#     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    obj.scale = Vector([1,1,1])             # TODO: Does it work at all?
 
 
 def repair_mesh(context, obj):
@@ -143,11 +134,6 @@ def repair_mesh(context, obj):
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='SELECT')
 
-    # approach 1
-    # bpy.ops.mesh.dissolve_degenerate(threshold=0.1)  # TODO unit
-    # bpy.ops.mesh.normals_make_consistent(inside=False)
-
-    # approach 2
     bpy.ops.mesh.separate(type='LOOSE')
 
     bpy.ops.object.editmode_toggle()

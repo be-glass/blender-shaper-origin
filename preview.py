@@ -1,4 +1,5 @@
 import bpy
+from mathutils import Matrix, Vector
 
 from . import helper, gen_helper
 from .helper import length, add_plane, get_preview_collection, select_active, apply_scale
@@ -32,9 +33,14 @@ class Preview:
         if search:
             return search[0]
         else:
-            x0, y0, z0, x1, y1, z1 = helper.boundaries(self.perimeters)
+            m0, m2 = helper.boundaries_in_local_coords(self.perimeters)
 
-            quad = [[x0, y0, 0], [x0, y1, 0], [x1, y1, 0], [x1, y0, 0]]
+            m0.z = 0
+            m2.z = 0
+            m1 = Vector([m0.x, m2.y, 0])
+            m3 = Vector([m2.x, m0.y, 0])
+            quad = [m0, m1, m2, m3]
+
             frame = helper.create_object(collection, quad, "Bounding Frame")
             frame.soc_object_type = "Bounding"
             return frame
@@ -70,3 +76,4 @@ class Preview:
                 mw = preview_obj.matrix_world.copy()
                 mw.invert()
                 reference_obj.matrix_world = mw
+                reference_obj.location = -reference_obj.location

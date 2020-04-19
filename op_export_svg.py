@@ -5,7 +5,10 @@ from . import constant, helper
 
 def dimensions(context, selection):
 
-    x0, y0, z0, x1, y1, z1 = helper.boundaries(selection)
+    minimum, maximum = helper.boundaries_in_local_coords(selection)
+    x0, y0, z0 = minimum
+    x1, y1, z1 = maximum
+
     scale = context.scene.unit_settings.scale_length
     w = (x1-x0) * scale
     h = (y1-y0) * scale
