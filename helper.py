@@ -54,7 +54,7 @@ def boundaries(object_list):
         for p in range(8):
             v_local = Vector([bb[p][0], bb[p][1], bb[p][2]])
 
-            v = -(user @ scale @ v_local)
+            v = user @ scale @ v_local
 
             x.append(v[0])
             y.append(v[1])

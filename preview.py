@@ -12,7 +12,8 @@ class Preview:
     def __init__(self, context):
         self.context = context
         self.collection = get_preview_collection(self.context)
-        self.perimeters = [o for o in bpy.data.objects if o.soc_mesh_cut_type == 'Perimeter']
+        self.perimeters = [o for o in bpy.data.objects if
+                           o.soc_object_type == 'Cut' and o.soc_mesh_cut_type == 'Perimeter']
 
     def create(self):
         if self.perimeters:
