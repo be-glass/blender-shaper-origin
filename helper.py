@@ -118,7 +118,7 @@ def get_object_safely(obj_name, report_error=True):
     if obj_name in bpy.data.objects.keys():
         return bpy.data.objects[obj_name]
     elif report_error:
-        error_msg("Cannot find (internal) object")
+        error_msg(f'Cannot find (internal) object: "{obj_name}"')
     return None
 
 

@@ -4,7 +4,7 @@ from bpy.types import PropertyGroup
 
 from . import fillet, generator
 from .constant import DEFAULTS
-from .helper import length
+from .helper import length, select_active
 from .gen_helper import cleanup
 from .preview import Preview
 
@@ -100,13 +100,18 @@ def update_cut_type(obj, context):
         initialize_object(obj, context)
     generator.update(context, obj, reset=True)
 
+
 def preview(scene_properties, context):
+    # active = context.object
 
     if scene_properties.preview:
         Preview(context).create()
         pass
     else:
         Preview(context).delete()
+
+    # select_active(context, active)
+
 
 # Definition
 
