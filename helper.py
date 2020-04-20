@@ -128,7 +128,7 @@ def delete_object(obj_name):
         bpy.data.objects.remove(obj, do_unlink=True)
 
 
-def apply_scale(context, obj):
+def apply_mesh_scale(context, obj):
     S = Matrix.Diagonal(obj.matrix_world.to_scale())
 
     for v in obj.data.vertices:

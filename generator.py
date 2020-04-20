@@ -7,7 +7,7 @@ from .gen_helper import find_perimeters, cleanup, delete_modifiers, \
     find_siblings_by_type, cleanup_meshes, get_reference, delete_solid_objects, boolean_modifier_name, \
     delete_modifier, perimeter_thickness
 from .helper import get_solid_collection, err_implementation, select_active, get_object_safely, length, move_object, \
-    apply_scale, add_plane, delete_object, shade_mesh_flat, repair_mesh, hide_objects
+    apply_mesh_scale, add_plane, delete_object, shade_mesh_flat, repair_mesh, hide_objects
 from .preview import Preview
 
 
@@ -63,12 +63,9 @@ class Generator:
         self.obj = obj
         self.context = context
         self.solid_collection = get_solid_collection(context)
-        self.fillet = Fillet(context, obj)
 
     def setup(self):
         self.obj.display_type = 'WIRE'
-        if self.fillet:
-            self.fillet.display_type = 'WIRE'
 
     def cleanup(self):
         delete_modifiers(self.obj)
@@ -138,7 +135,9 @@ class Perimeter(Generator):
     def setup(self):
         super().setup()
 
+        self.fillet = Fillet(self.context, self.obj)
         self.fillet.create(outside=True)
+        self.fillet.display_type = 'WIRE'
 
         modifier_name = PREFIX + 'Solidify'
         fillet_obj = self.get_fillet_obj()
@@ -171,7 +170,9 @@ class MeshCut(Generator):
     def setup(self):
         super().setup()
 
+        self.fillet = Fillet(self.context, self.obj)
         self.fillet.create()
+        self.fillet.display_type = 'WIRE'
 
         modifier_name = PREFIX + 'Solidify'
         fillet_obj = self.get_fillet_obj()
@@ -233,7 +234,7 @@ class CurveCut(Generator):
         name = f'{PREFIX}{self.obj.name}.bevel'
 
         # normalize curve radii
-        apply_scale(self.context, self.obj)
+        # apply_mesh_scale(self.context, self.obj)   # TODO: mesh version cannot work -> write curve version
         for spline in self.obj.data.splines:
             for p in spline.bezier_points:
                 p.radius = 1.0
@@ -243,7 +244,7 @@ class CurveCut(Generator):
 
         # move object origin to upper edge
         bevel.location = (0, -0.5, 0)
-        apply_scale(self.context, self.obj)
+        # apply_mesh_scale(self.context, self.obj) # TODO dito
 
         # scale
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)

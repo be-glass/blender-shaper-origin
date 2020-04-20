@@ -4,7 +4,8 @@ from mathutils import Matrix, Vector
 from .gen_helper import get_reference
 from .preview_helper import transform_preview
 from .constant import FACE_COLOR
-from .helper import length, get_preview_collection, find_cuts, get_soc_collection, boundaries, warning_msg, apply_scale, \
+from .helper import length, get_preview_collection, find_cuts, get_soc_collection, boundaries, warning_msg, \
+    apply_mesh_scale, \
     create_object, get_object_safely
 
 
@@ -98,7 +99,7 @@ class Preview:
         preview_obj = cut_obj.copy()
         preview_obj.data = cut_obj.data.copy()
         self.collection.objects.link(preview_obj)
-        apply_scale(self.context, preview_obj)
+        apply_mesh_scale(self.context, preview_obj)
 
         preview_obj.matrix_world = transform_preview(self.context, self.bounding, perimeter, cut_obj)
         preview_obj.name = name
