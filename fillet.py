@@ -9,13 +9,13 @@ from .constant import PREFIX
 
 class Fillet:
 
-    def __init__(self, obj):
+    def __init__(self, context, obj):
+        self.context = context
         self.obj = obj
         self.radius = obj.soc_tool_diameter / 2
         self.polygon = self.get_polygon_safely()
         self.resolution = constant.FILLET_RESOLUTION
         self.name = PREFIX + self.obj.name + ".fillets"
-
 
     def get_polygon_safely(self):
         polygons = self.obj.data.polygons
@@ -53,7 +53,7 @@ class Fillet:
 
     def create(self, outside=False):
         fillet = []
-        collection = helper.get_internal_collection(self.obj)
+        collection = helper.get_solid_collection(self.context)
 
         for shift in range(self.corner_count()):
             corner = self.corner_vectors(shift)

@@ -1,13 +1,14 @@
-import bpy, math
+import bpy
+import math
 
 from . import helper, gen_helper
-from .gen_helper import find_perimeters, rebuild_boolean_modifier, cleanup, delete_modifiers, \
-    delete_internal_objects, find_siblings_by_type, cleanup_meshes, get_reference
-from .helper import get_internal_collection
-from .preview import Preview
-
-from .fillet import Fillet
 from .constant import PREFIX
+from .fillet import Fillet
+from .gen_helper import boolean_modifier_name, delete_modifier
+from .gen_helper import find_perimeters, cleanup, delete_modifiers, \
+    find_siblings_by_type, cleanup_meshes, get_reference, delete_solid_objects
+from .helper import get_solid_collection
+from .preview import Preview
 
 
 def update(context, obj, reset=False, transform=False):
@@ -54,8 +55,7 @@ def transform(context, obj):
 def transform_previews(context, frame_obj):
     for obj in bpy.data.objects:
         if obj.soc_object_type == 'Cut':
-            reference = gen_helper.get_reference(obj)
-            # reference = helper.get_object_safely(obj.soc_reference_name)
+            reference = gen_helper.get_reference(context, obj)
 
             transform = frame_obj.matrix_world @ reference.matrix_world
 
@@ -69,8 +69,8 @@ class Generator:
     def __init__(self, context, obj):
         self.obj = obj
         self.context = context
-        self.internal_collection = get_internal_collection(self.obj)
-        self.fillet = Fillet(obj)
+        self.solid_collection = get_solid_collection(context)
+        self.fillet = Fillet(context, obj)
 
     def setup(self):
         self.obj.display_type = 'WIRE'
@@ -79,7 +79,7 @@ class Generator:
 
     def cleanup(self):
         delete_modifiers(self.obj)
-        delete_internal_objects(self.obj)
+        delete_solid_objects(self.context, self.obj)
 
     def transform(self):
         fillet_obj = self.get_fillet_obj()
@@ -104,15 +104,37 @@ class Generator:
 
     def adjust_boolean_modifiers(self, collection):
         for perimeter_obj in find_perimeters(collection):
-            rebuild_boolean_modifier(perimeter_obj, self.obj)
+            self.rebuild_boolean_modifier(perimeter_obj, self.obj)
 
     def reset_preview_object(self):
         name = self.obj.name + '.preview'
         if name in bpy.data.objects.keys():
             bpy.data.objects.remove(bpy.data.object[name])
 
-    def get_fillet_obj(self):
-        return helper.get_object_safely(self.obj.soc_solid_name)
+    def get_fillet_obj(self, obj=None, outside=False):
+        if not obj:
+            obj = self.obj
+        fillet_obj = helper.get_object_safely(obj.soc_solid_name, report_error=False)
+
+        if not fillet_obj:
+            fillet = Fillet(self.context, obj)
+            fillet_obj = fillet.create(outside)
+
+        return fillet_obj
+
+    def rebuild_boolean_modifier(self, perimeter_obj, subtract_obj):
+
+        modifier_name = boolean_modifier_name(subtract_obj)
+
+        subtract_fillet = self.get_fillet_obj(subtract_obj)
+        perimeter_fillet = self.get_fillet_obj(perimeter_obj, outside=True)
+
+        delete_modifier(perimeter_fillet, modifier_name)
+        boolean = perimeter_fillet.modifiers.new(modifier_name, 'BOOLEAN')
+        boolean.operation = 'DIFFERENCE'
+        boolean.object = helper.get_object_safely(subtract_fillet.name)
+
+        subtract_fillet.hide_set(True)
 
 
 class Perimeter(Generator):
@@ -127,10 +149,10 @@ class Perimeter(Generator):
         fillet_obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
         types = ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']
-        for cut in find_siblings_by_type(types, sibling=self.obj):
-            rebuild_boolean_modifier(self.obj, cut)
+        for cut_obj in find_siblings_by_type(types, sibling=self.obj):
+            self.rebuild_boolean_modifier(self.obj, cut_obj)
 
-        self.reference = get_reference(self.obj)
+        self.reference = get_reference(self.context, self.obj)
 
         if self.context.scene.so_cut.preview:
             Preview(self.context).add_object(self.obj)
@@ -191,7 +213,7 @@ class CurveCut(Generator):
         self.fillet = None
 
         bevel = self.create_bevel_object()
-        helper.move_object(bevel, self.internal_collection)
+        helper.move_object(bevel, self.solid_collection)
         self.obj.data.bevel_object = bevel
 
         self.obj.display_type = 'WIRE'
@@ -232,7 +254,7 @@ class CurveCut(Generator):
     def update_mesh(self):
         mesh_name = PREFIX + self.obj.name + '.mesh'
         helper.delete_object(mesh_name)
-        internal_collection = get_internal_collection(self.obj)
+        solid_collection = get_solid_collection(self.context)
 
         # create a MESH version of the curve object
         depsgraph = self.context.evaluated_depsgraph_get()
@@ -240,9 +262,9 @@ class CurveCut(Generator):
         mesh = bpy.data.meshes.new_from_object(object_evaluated)
         mesh_obj = bpy.data.objects.new(mesh_name, mesh)
         mesh_obj.matrix_world = self.obj.matrix_world
-        cleanup_meshes(self.obj, mesh_name)
+        cleanup_meshes(self.context, self.obj, mesh_name)
         self.obj.users_collection[0].objects.link(mesh_obj)
-        helper.move_object(mesh_obj, internal_collection)
+        helper.move_object(mesh_obj, solid_collection)
         helper.shade_mesh_flat(mesh_obj)
         helper.repair_mesh(self.context, mesh_obj)
         helper.hide_objects(mesh_obj.name)

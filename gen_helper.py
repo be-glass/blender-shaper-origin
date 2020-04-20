@@ -1,7 +1,7 @@
 import bpy
 
-from .helper import get_internal_collection
-from . import helper, fillet
+from .helper import get_solid_collection
+from . import helper
 from .constant import PREFIX
 
 
@@ -35,19 +35,16 @@ def delete_modifiers(obj):
             obj.modifiers.remove(modifier)
 
 
-def delete_internal_objects(obj):
-    collection = obj.users_collection[0]
-    internal_collection = get_internal_collection(obj)
-    for o in internal_collection.objects:
-        # if o.name.startswith(Prefix + obj.name):
-        if o.name == PREFIX+obj.name+ ".fillets":
+def delete_solid_objects(context, obj):
+    solid_collection = get_solid_collection(context)
+    for o in solid_collection.objects:
+        if o.name == PREFIX + obj.name + ".fillets":
             bpy.data.objects.remove(o, do_unlink=True)
 
 
-def cleanup_meshes(source_obj, mesh_name):
-    collection = source_obj.users_collection[0]
-    internal_collection = get_internal_collection(source_obj)
-    for o in internal_collection.objects:
+def cleanup_meshes(context, source_obj, mesh_name):
+    solid_collection = get_solid_collection(context)
+    for o in solid_collection.objects:
         if o.name.startswith(mesh_name):
             bpy.data.objects.remove(o, do_unlink=True)
 
@@ -57,7 +54,7 @@ def cleanup(context, obj):
         return
 
     delete_modifiers(obj)
-    delete_internal_objects(obj)
+    delete_solid_objects(context, obj)
     obj.display_type = 'TEXTURED'
 
     cleanup_boolean_modifiers(context, obj)
@@ -88,27 +85,13 @@ def cleanup_boolean_modifiers(context, target_obj):
         delete_modifier(perimeter, boolean_modifier_name(target_obj))
 
 
-def rebuild_boolean_modifier(perimeter_obj, subtract_obj):
-
-    modifier_name = boolean_modifier_name(subtract_obj)
-    subtract_fillet = fillet.Fillet(subtract_obj).get_obj()
-    perimeter_fillet = fillet.Fillet(perimeter_obj).get_obj()
-
-    delete_modifier(perimeter_fillet, modifier_name)
-    boolean = perimeter_fillet.modifiers.new(modifier_name, 'BOOLEAN')
-    boolean.operation = 'DIFFERENCE'
-    boolean.object = helper.get_object_safely(subtract_fillet.name)
-
-    subtract_fillet.hide_set(True)
-
-
-def get_reference(obj):
-    collection = obj.users_collection[0]
+def get_reference(context, obj):
+    collection = helper.get_reference_collection(context)
 
     name = obj.soc_reference_name
 
     if not name:
-        name = PREFIX + "reference." + collection.name
+        name = PREFIX + obj.users_collection[0].name + '.reference'
 
     if name in bpy.data.objects.keys():
         return bpy.data.objects[name]

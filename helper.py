@@ -40,13 +40,13 @@ def check_type(obj, valid_types):
     return True if remain else False
 
 
-def boundaries(object_list):
+def boundaries(context, object_list):
     x = []
     y = []
     z = []
     for obj in object_list:
 
-        reference = gen_helper.get_reference(obj)
+        reference = gen_helper.get_reference(context, obj)
         # reference = get_object_safely(obj.soc_reference_name)
 
         user = reference.matrix_world
@@ -222,21 +222,30 @@ def get_soc_collection(context):
 
 def get_preview_collection(context):
     soc = get_soc_collection(context)
-    return get_collection(context, "Preview", soc)
+    return get_collection(context, PREFIX + "Preview", soc)
 
 
-def get_internal_collection(sibling):
-    name = PREFIX + 'internal'
-    collection = sibling.users_collection[0]
+def get_solid_collection(context):
+    soc = get_soc_collection(context)
+    return get_collection(context, PREFIX + "Solid", soc)
 
-    for child in collection.children:
-        if child.name.startswith(name):
-            return child
+
+def get_reference_collection(context):
+    soc = get_soc_collection(context)
+    return get_collection(context, PREFIX + "Reference", soc)
+
+    # def get_internal_collection(sibling):
+    #     name = PREFIX + 'internal'
+    #     collection = sibling.users_collection[0]
+    #
+    #     for child in collection.children:
+    #         if child.name.startswith(name):
+    #             return child
 
     # otherwise create one
-    internal_collection = bpy.data.collections.new(name)
-    collection.children.link(internal_collection)
-    return internal_collection
+    solid_collection = bpy.data.collections.new(name)
+    collection.children.link(solid_collection)
+    return solid_collection
 
 
 def check_duplication(obj):

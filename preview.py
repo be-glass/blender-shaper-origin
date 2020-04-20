@@ -61,7 +61,7 @@ class Preview:
         else:
             mw = Matrix()
 
-        c0, c1 = helper.boundaries(self.perimeters)
+        c0, c1 = helper.boundaries(self.context, self.perimeters)
 
         z = -0.1
         d = length(self.context, '10mm')  # margin of preview sheet
@@ -98,7 +98,7 @@ class Preview:
         q.soc_object_type = 'Preview'
         helper.apply_scale(self.context, q)
 
-        reference = gen_helper.get_reference(cut_obj)
+        reference = gen_helper.get_reference(self.context, cut_obj)
 
         m = reference.matrix_world @ self.bounding.matrix_world
 
