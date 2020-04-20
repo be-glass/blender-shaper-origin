@@ -23,13 +23,14 @@ def post_ob_updated(scene, depsgraph):
         if obj.mode == 'OBJECT':
             if obj.soc_object_type != 'None':
                 helper.check_duplication(obj)
-                handle_object_types(obj, depsgraph)
+
+                for o in bpy.context.selected_objects:
+                    handle_object_types(o, depsgraph)
 
 
 def handle_object_types(obj, depsgraph):
     if obj.soc_object_type == 'Cut':
         for u in depsgraph.updates:
-            print(str(datetime.datetime.now()) + obj.name)
             if u.is_updated_geometry:
                 generator.update(bpy.context, obj, reset=True)
             elif u.is_updated_transform:
@@ -40,12 +41,11 @@ def handle_object_types(obj, depsgraph):
     elif obj.soc_object_type == 'Preview':
         for u in depsgraph.updates:
             if u.is_updated_transform:
-                print(datetime.datetime.now())
-                print(f"Handler - preview {obj.name}")
-                # return  REMOVE
-                preview = Preview(bpy.context)
-                preview.transform_reference(obj)
-                preview.update_bounding_frame()
+                if obj.soc_mesh_cut_type == 'Perimeter':
+                    preview = Preview(bpy.context)
+                    preview.transform_reference(obj)
+                    preview.transform_siblings(obj)
+                    preview.update_bounding_frame()
 
     elif obj.soc_object_type == 'Reference':
         pass
@@ -56,13 +56,7 @@ def handle_object_types(obj, depsgraph):
     elif obj.soc_object_type == 'Bounding':
         for u in depsgraph.updates:
             if u.is_updated_transform:
-                print(datetime.datetime.now())
-                print(f"Handler - bounding {obj.name}")
-                generator.transform_previews(bpy.context, obj)
-
-
-
-
+                Preview(bpy.context).transform_previews(bpy.context, obj)
 
     else:
         print(str(datetime.datetime.now()) + " Something else...: " + obj.name)

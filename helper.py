@@ -104,9 +104,9 @@ def error_msg(message, context=bpy.context):
 
 def warning_msg(message, context=bpy.context):
     def msg(self, text):
-        self.layout.label(text="Something went wrong!")
+        self.layout.label(text=message)
 
-    context.window_manager.popup_menu(msg, title="Warning", icon='WARNING')
+    context.window_manager.popup_menu(msg, title="Warning", icon='ERROR')
     print("DEBUG me")
 
 
@@ -118,7 +118,7 @@ def get_object_safely(obj_name, report_error=True):
     if obj_name in bpy.data.objects.keys():
         return bpy.data.objects[obj_name]
     elif report_error:
-        error_msg("Cannot find (internal) object")
+        error_msg(f'Cannot find (internal) object: "{obj_name}"')
     return None
 
 
@@ -137,7 +137,7 @@ def apply_scale(context, obj):
     obj.scale = Vector([1, 1, 1])  # TODO: Does it work at all?
 
 
-def repair_mesh(context, obj):
+def repair_mesh(context, obj):  # TODO: needed?
     active = context.object
     select_active(context, obj)
 
@@ -187,7 +187,7 @@ def translate_local(obj, vector):
     obj.location += global_translation
 
 
-def add_plane(context, name, size, collection=None):
+def add_plane(context, name, size, collection=None):  # TODO: replace without ops
     bpy.ops.mesh.primitive_plane_add(size=size)
 
     # delete face
@@ -232,20 +232,8 @@ def get_solid_collection(context):
 
 def get_reference_collection(context):
     soc = get_soc_collection(context)
-    return get_collection(context, PREFIX + "Reference", soc)
-
-    # def get_internal_collection(sibling):
-    #     name = PREFIX + 'internal'
-    #     collection = sibling.users_collection[0]
-    #
-    #     for child in collection.children:
-    #         if child.name.startswith(name):
-    #             return child
-
-    # otherwise create one
-    solid_collection = bpy.data.collections.new(name)
-    collection.children.link(solid_collection)
-    return solid_collection
+    collection = get_collection(context, PREFIX + "Reference", soc)
+    return collection
 
 
 def check_duplication(obj):
@@ -263,3 +251,11 @@ def check_duplication(obj):
                 obj.soc_known_as = ""
             else:  # obj appears to be renamed
                 obj.soc_known_as = obj.name
+
+
+def find_cuts():
+    return [o for o in bpy.data.objects if o.soc_object_type == 'Cut']
+
+
+def find_perimeters(obj):
+    return [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']

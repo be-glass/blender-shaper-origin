@@ -1,21 +1,20 @@
 import bpy
 from mathutils import Matrix, Vector
 
+from .gen_helper import get_reference
+from .preview_helper import transform_preview
 from .constant import FACE_COLOR
-from . import helper, gen_helper
-from .helper import length, add_plane, get_preview_collection, select_active, apply_scale
-
-
-
+from .helper import length, get_preview_collection, find_cuts, get_soc_collection, boundaries, warning_msg, apply_scale, \
+    create_object, get_object_safely
 
 
 class Preview:
     def __init__(self, context):
         self.context = context
         self.collection = get_preview_collection(self.context)
-        self.perimeters = [o for o in bpy.data.objects if
-                           o.soc_object_type == 'Cut' and o.soc_mesh_cut_type == 'Perimeter']
         self.bounding = self.get_bounding_frame()
+        self.cut_objs = find_cuts()
+        self.perimeters = [o for o in self.cut_objs if o.soc_mesh_cut_type == 'Perimeter']
 
     def get_bounding_frame(self):
         name = 'Bounding Frame'
@@ -27,10 +26,14 @@ class Preview:
     def create(self):
         if self.perimeters:
             self.bounding = self.update_bounding_frame()
-            self.add_objects()
+
+            for perimeter in self.perimeters:
+                for obj in perimeter.users_collection[0].objects:
+                    self.add_object(perimeter, obj)
+
+            self.set_viewport()
         else:
             self.bounding = None
-        self.set_viewport()
 
     def set_viewport(self):
         for area in self.context.screen.areas:
@@ -47,13 +50,13 @@ class Preview:
         self.hide_bounding_frame()
 
     def hide_bounding_frame(self):
-        collection = helper.get_soc_collection(self.context)
+        collection = get_soc_collection(self.context)
         search = [o for o in collection.objects if o.name.startswith('Bounding Frame')]
         if search:
             search[0].hide_set(True)
 
     def update_bounding_frame(self):
-        collection = helper.get_soc_collection(self.context)
+        collection = get_soc_collection(self.context)
         search = [o for o in collection.objects if o.name.startswith('Bounding Frame')]
         if search:
             mw = search[0].matrix_world.copy()
@@ -61,7 +64,7 @@ class Preview:
         else:
             mw = Matrix()
 
-        c0, c1 = helper.boundaries(self.context, self.perimeters)
+        c0, c1 = boundaries(self.context, self.perimeters)
 
         z = -0.1
         d = length(self.context, '10mm')  # margin of preview sheet
@@ -73,16 +76,16 @@ class Preview:
 
         quad = [m0, m1, m2, m3]
 
-        frame = helper.create_object(collection, quad, "Bounding Frame")
+        frame = create_object(collection, quad, "Bounding Frame")
         frame.matrix_world = mw
         frame.soc_object_type = "Bounding"
         return frame
 
-    def add_objects(self):
-        for perimeter in self.perimeters:
-            self.add_object(perimeter)
+    def add_object(self, perimeter, cut_obj):
 
-    def add_object(self, cut_obj):
+        if cut_obj.scale != Vector([1, 1, 1]):
+            warning_msg(
+                f'Please apply scale to object "{cut_obj.name}" to avoid unexpected results in preview and export!')
 
         if cut_obj.soc_preview_name:
             name = cut_obj.soc_preview_name
@@ -92,38 +95,57 @@ class Preview:
         if name in bpy.data.objects.keys():
             bpy.data.objects.remove(bpy.data.objects[name])
 
-        q = cut_obj.copy()
-        q.data = cut_obj.data.copy()
-        self.collection.objects.link(q)
-        helper.apply_scale(self.context, q)
+        preview_obj = cut_obj.copy()
+        preview_obj.data = cut_obj.data.copy()
+        self.collection.objects.link(preview_obj)
+        apply_scale(self.context, preview_obj)
 
-        reference = gen_helper.get_reference(self.context, cut_obj)
+        preview_obj.matrix_world = transform_preview(self.context, self.bounding, perimeter, cut_obj)
+        preview_obj.name = name
+        cut_obj.soc_preview_name = preview_obj.name
+        preview_obj.soc_preview_name = ""
+        preview_obj.soc_known_as = preview_obj.name
+        preview_obj.soc_object_type = 'Preview'
+        preview_obj.display_type = 'TEXTURED'
 
-        m = reference.matrix_world @ self.bounding.matrix_world
+        preview_obj.color = FACE_COLOR[cut_obj.soc_mesh_cut_type]
 
-        q.matrix_world = m
-        q.name = name
-        cut_obj.soc_preview_name = q.name
-        q.soc_known_as = q.name
-        q.soc_object_type = 'Preview'
-        q.display_type = 'TEXTURED'
-
-        q.color = FACE_COLOR[cut_obj.soc_mesh_cut_type]
-
-        return q
+        return preview_obj
 
     def transform_reference(self, preview_obj):
         matches = [o for o in bpy.data.objects if o.soc_preview_name == preview_obj.name]
         if matches:
             obj = matches[0]
 
-            reference_obj = gen_helper.get_reference(self.context, obj)
-
-            # reference_obj = helper.get_object_safely(obj.soc_reference_name, report_error=False)
+            reference_obj = get_reference(self.context, obj)
 
             if reference_obj is not None:
                 frame_1 = self.bounding.matrix_world.copy()
                 frame_1.invert()
+                # frame_1 = self.bounding.matrix_world.inverted()
 
                 reference_obj.matrix_world = frame_1 @ preview_obj.matrix_world
                 reference_obj.location.z = 0
+
+    def transform_siblings(self, perimeter_preview):
+
+        perimeters = [o for o in bpy.data.objects if o.soc_preview_name == perimeter_preview.name]
+        if not perimeters:
+            return
+        perimeter = perimeters[0]
+
+        for obj in perimeter.users_collection[0].objects:
+            if obj.soc_mesh_cut_type != 'Perimeter':
+                m = transform_preview(self.context, self.bounding, perimeter, obj)
+                preview_obj = get_object_safely(obj.soc_preview_name)
+                preview_obj.matrix_world = m
+
+    def transform_previews(self, context, frame_obj):
+
+        for perimeter in self.perimeters:
+            for obj in perimeter.users_collection[0].objects:
+
+                if obj.soc_object_type == 'Cut':
+                    matrix = transform_preview(context, frame_obj, perimeter, obj)
+                    preview_obj = get_object_safely(obj.soc_preview_name)
+                    preview_obj.matrix_world = matrix

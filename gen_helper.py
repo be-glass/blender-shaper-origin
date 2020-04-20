@@ -1,8 +1,8 @@
 import bpy
 
-from .helper import get_solid_collection
-from . import helper
+
 from .constant import PREFIX
+from .helper import get_solid_collection, delete_object, get_reference_collection
 
 
 def find_siblings_by_type(cut_types, sibling=None, collection=None):
@@ -62,9 +62,9 @@ def cleanup(context, obj):
     if obj.type == 'CURVE':
         obj.data.bevel_object = None
 
-    helper.delete_object(obj.soc_reference_name)
-    helper.delete_object(obj.soc_preview_name)
-    helper.delete_object(obj.soc_solid_name)
+    delete_object(obj.soc_reference_name)
+    delete_object(obj.soc_preview_name)
+    delete_object(obj.soc_solid_name)
     obj.soc_reference_name = ''
     obj.soc_preview_name = ''
     obj.soc_solid_name = ''
@@ -86,7 +86,7 @@ def cleanup_boolean_modifiers(context, target_obj):
 
 
 def get_reference(context, obj):
-    collection = helper.get_reference_collection(context)
+    collection = get_reference_collection(context)
 
     name = obj.soc_reference_name
 
@@ -105,4 +105,5 @@ def get_reference(context, obj):
         reference.empty_display_type = 'PLAIN_AXES'
         reference.soc_object_type = 'Reference'
         obj.soc_reference_name = reference.name
+        reference.hide_set(True)
         return reference
