@@ -4,7 +4,8 @@ from mathutils import Matrix, Vector
 from .gen_helper import get_reference
 from .preview_helper import transform_preview
 from .constant import FACE_COLOR
-from .helper import length, get_preview_collection, find_cuts, get_soc_collection, boundaries, warning_msg, apply_scale
+from .helper import length, get_preview_collection, find_cuts, get_soc_collection, boundaries, warning_msg, apply_scale, \
+    create_object, get_object_safely
 
 
 class Preview:
@@ -75,7 +76,7 @@ class Preview:
 
         quad = [m0, m1, m2, m3]
 
-        frame = helper.create_object(collection, quad, "Bounding Frame")
+        frame = create_object(collection, quad, "Bounding Frame")
         frame.matrix_world = mw
         frame.soc_object_type = "Bounding"
         return frame
@@ -102,6 +103,7 @@ class Preview:
         preview_obj.matrix_world = transform_preview(self.context, self.bounding, perimeter, cut_obj)
         preview_obj.name = name
         cut_obj.soc_preview_name = preview_obj.name
+        preview_obj.soc_preview_name = ""
         preview_obj.soc_known_as = preview_obj.name
         preview_obj.soc_object_type = 'Preview'
         preview_obj.display_type = 'TEXTURED'
@@ -132,12 +134,11 @@ class Preview:
             return
         perimeter = perimeters[0]
 
-        for obj in perimeters.users_collection[0].objects:
+        for obj in perimeter.users_collection[0].objects:
             if obj.soc_mesh_cut_type != 'Perimeter':
                 m = transform_preview(self.context, self.bounding, perimeter, obj)
-                obj.matrix_world = Matrix()
-                name = obj.name
-                x = name
+                preview_obj = get_object_safely(obj.soc_preview_name)
+                preview_obj.matrix_world = m
 
     def transform_previews(self, context, frame_obj):
 
@@ -146,6 +147,5 @@ class Preview:
 
                 if obj.soc_object_type == 'Cut':
                     matrix = transform_preview(context, frame_obj, perimeter, obj)
-                    cut = generator.get_generator
-                    generator = cut(context, obj)
-                    generator.transform_preview(matrix)
+                    preview_obj = get_object_safely(obj.soc_preview_name)
+                    preview_obj.matrix_world = matrix

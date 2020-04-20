@@ -59,9 +59,7 @@ def handle_object_types(obj, depsgraph):
             if u.is_updated_transform:
                 print(datetime.datetime.now())
                 print(f"Handler - bounding {obj.name}")
-
                 Preview(bpy.context).transform_previews(bpy.context, obj)
-
 
     else:
         print(str(datetime.datetime.now()) + " Something else...: " + obj.name)
