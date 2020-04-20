@@ -137,7 +137,7 @@ def apply_scale(context, obj):
     obj.scale = Vector([1, 1, 1])  # TODO: Does it work at all?
 
 
-def repair_mesh(context, obj):
+def repair_mesh(context, obj):  # TODO: needed?
     active = context.object
     select_active(context, obj)
 
@@ -187,7 +187,7 @@ def translate_local(obj, vector):
     obj.location += global_translation
 
 
-def add_plane(context, name, size, collection=None):
+def add_plane(context, name, size, collection=None):  # TODO: replace without ops
     bpy.ops.mesh.primitive_plane_add(size=size)
 
     # delete face
