@@ -82,7 +82,7 @@ class Generator:
         delete_internal_objects(self.obj)
 
     def transform(self):
-        fillet_obj = self.fillet.get_obj()
+        fillet_obj = self.get_fillet_obj()
         fillet_obj.matrix_world = self.obj.matrix_world
 
     def transform_preview(self, matrix):
@@ -93,7 +93,7 @@ class Generator:
 
     def adjust_solidify_thickness(self, delta=0.0):
         master = self.obj
-        revision = self.fillet.get_obj()
+        revision = self.get_fillet_obj()
 
         modifier_name = PREFIX + 'Solidify'
         if modifier_name in revision.modifiers:
@@ -107,9 +107,12 @@ class Generator:
             rebuild_boolean_modifier(perimeter_obj, self.obj)
 
     def reset_preview_object(self):
-        name = self.obj.name+'.preview'
+        name = self.obj.name + '.preview'
         if name in bpy.data.objects.keys():
             bpy.data.objects.remove(bpy.data.object[name])
+
+    def get_fillet_obj(self):
+        return helper.get_object_safely(self.obj.soc_solid_name)
 
 
 class Perimeter(Generator):
@@ -120,7 +123,7 @@ class Perimeter(Generator):
         self.fillet.create(outside=True)
 
         modifier_name = PREFIX + 'Solidify'
-        fillet_obj = self.fillet.get_obj()
+        fillet_obj = self.get_fillet_obj()
         fillet_obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
         types = ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']
@@ -148,7 +151,7 @@ class MeshCut(Generator):
         self.fillet.create()
 
         modifier_name = PREFIX + 'Solidify'
-        fillet_obj = self.fillet.get_obj()
+        fillet_obj = self.get_fillet_obj()
 
         fillet_obj.modifiers.new(modifier_name, 'SOLIDIFY')
 

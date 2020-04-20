@@ -27,9 +27,8 @@ class Fillet:
             helper.warning_msg(f'Object "{self.obj.name}" has more than 1 faces! Using the first one.')
         return self.obj.data.polygons[0]
 
-
-    def get_obj(self):
-        return helper.get_object_safely(self.name)
+    # def get_obj(self):
+    #     return helper.get_object_safely(self.name)
 
     def corner_count(self):
         return len(self.polygon.vertices)
@@ -70,6 +69,8 @@ class Fillet:
         self.obj.display_type = 'WIRE'
 
         fillet_obj.hide_select = True
+
+        self.obj.soc_solid_name = fillet_obj.name
 
         return fillet_obj
 
