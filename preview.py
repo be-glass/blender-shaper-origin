@@ -95,7 +95,6 @@ class Preview:
         q = cut_obj.copy()
         q.data = cut_obj.data.copy()
         self.collection.objects.link(q)
-        q.soc_object_type = 'Preview'
         helper.apply_scale(self.context, q)
 
         reference = gen_helper.get_reference(self.context, cut_obj)
@@ -105,6 +104,8 @@ class Preview:
         q.matrix_world = m
         q.name = name
         cut_obj.soc_preview_name = q.name
+        q.soc_known_as = q.name
+        q.soc_object_type = 'Preview'
         q.display_type = 'TEXTURED'
 
         q.color = FACE_COLOR[cut_obj.soc_mesh_cut_type]
@@ -115,7 +116,11 @@ class Preview:
         matches = [o for o in bpy.data.objects if o.soc_preview_name == preview_obj.name]
         if matches:
             obj = matches[0]
-            reference_obj = helper.get_object_safely(obj.soc_reference_name, report_error=False)
+
+            reference_obj = gen_helper.get_reference(self.context, obj)
+
+            # reference_obj = helper.get_object_safely(obj.soc_reference_name, report_error=False)
+
             if reference_obj is not None:
                 frame_1 = self.bounding.matrix_world.copy()
                 frame_1.invert()

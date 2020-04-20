@@ -1,1 +1,1 @@
-- warn about >1 perimeters in collection
+- export dogbone
