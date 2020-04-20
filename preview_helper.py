@@ -1,5 +1,6 @@
 from mathutils import Matrix, Vector
 
+from .helper import length
 from .gen_helper import get_reference
 from .constant import PREVIEW_Z
 
@@ -9,7 +10,7 @@ def transform_preview(context, bounding_frame, perimeter, obj):
 
     m0 = obj.matrix_world
     m1 = perimeter.matrix_world.inverted()
-    m2 = lift_z(obj)
+    m2 = lift_z(context, obj)
     m3 = reference.matrix_world
     m4 = bounding_frame.matrix_world
 
@@ -22,12 +23,12 @@ def transform_preview(context, bounding_frame, perimeter, obj):
     # return m
 
 
-def lift_z(obj):
+def lift_z(context, obj):
     if obj.soc_mesh_cut_type != 'None':
         z = PREVIEW_Z[obj.soc_mesh_cut_type]
     elif obj.soc_curve_cut_type != 'None':
         z = PREVIEW_Z[obj.soc_curve_cut_type]
     else:
-        z = 0
-    lift = Vector([0, 0, 20 * z])
+        z = "0"
+    lift = Vector([0, 0, length(context, z)])
     return Matrix.Translation(lift)
