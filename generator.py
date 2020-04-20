@@ -64,6 +64,12 @@ def transform_previews(context, frame_obj):
             generator.transform_preview(transform)
 
 
+def update_hide_state(context, obj):
+    cut = get_generator(obj)
+    generator = cut(context, obj)
+    generator.update_hide_state()
+
+
 class Generator:
 
     def __init__(self, context, obj):
@@ -136,6 +142,9 @@ class Generator:
 
         subtract_fillet.hide_set(True)
 
+    def update_hide_state(self):
+        pass
+
 
 class Perimeter(Generator):
 
@@ -163,6 +172,11 @@ class Perimeter(Generator):
         cutouts = find_siblings_by_type('Cutout', sibling=self.context.object)
         for cut in cutouts:
             cut.soc_cut_depth = self.obj.soc_cut_depth + self.length('1mm')
+
+    def update_hide_state(self):
+        hidden = self.obj.hide_get()  # or self.obj.users_collection[0].hide_viewport   # collection cannot work
+        solid = helper.get_object_safely(self.obj.soc_solid_name)
+        solid.hide_set(hidden)
 
 
 class MeshCut(Generator):

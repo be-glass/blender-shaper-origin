@@ -31,13 +31,11 @@ def handle_object_types(obj, depsgraph):
         for u in depsgraph.updates:
             print(str(datetime.datetime.now()) + obj.name)
             if u.is_updated_geometry:
-                print(f"Handler - updated geometry: {obj.name}")
-
                 generator.update(bpy.context, obj, reset=True)
-            if u.is_updated_transform:
-                print(f"Handler - updated transform {obj.name}")
-
+            elif u.is_updated_transform:
                 generator.transform(bpy.context, obj)
+            else:
+                generator.update_hide_state(bpy.context, obj)
 
     elif obj.soc_object_type == 'Preview':
         for u in depsgraph.updates:
