@@ -118,7 +118,6 @@ class Perimeter(Generator):
         super().setup()
 
         self.fillet.create(outside=True)
-        self.fillet.get_obj().hide_select = True
 
         modifier_name = PREFIX + 'Solidify'
         fillet_obj = self.fillet.get_obj()
@@ -149,8 +148,9 @@ class MeshCut(Generator):
         self.fillet.create()
 
         modifier_name = PREFIX + 'Solidify'
-        revision = self.fillet.get_obj()
-        revision.modifiers.new(modifier_name, 'SOLIDIFY')
+        fillet_obj = self.fillet.get_obj()
+
+        fillet_obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
         collection = self.obj.users_collection[0]
         self.adjust_boolean_modifiers(collection)

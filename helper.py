@@ -96,7 +96,7 @@ def select_active(context, obj):
 
 def error_msg(message, context=bpy.context):
     def msg(self, text):
-        self.layout.label(text="Something went wrong!")
+        self.layout.label(text=message)
 
     context.window_manager.popup_menu(msg, title="Error", icon='ERROR')
     print("DEBUG me")
@@ -237,3 +237,20 @@ def get_internal_collection(sibling):
     internal_collection = bpy.data.collections.new(name)
     collection.children.link(internal_collection)
     return internal_collection
+
+
+def check_duplication(obj):
+    if not obj.soc_known_as:
+        obj.soc_known_as = obj.name
+    else:
+        if obj.soc_known_as != obj.name:
+            if obj.soc_known_as in bpy.data.objects.keys():  # obj has been duplicated -> reset
+                obj.soc_object_type = 'None'
+                obj.soc_mesh_cut_type = 'None'
+                obj.soc_curve_cut_type = 'None'
+                obj.soc_reference_name = ""
+                obj.soc_preview_name = ""
+                obj.soc_solid_name = ""
+                obj.soc_known_as = ""
+            else:  # obj appears to be renamed
+                obj.soc_known_as = obj.name

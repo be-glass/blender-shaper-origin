@@ -21,10 +21,10 @@ class Fillet:
         polygons = self.obj.data.polygons
         n = len(polygons)
         if n == 0:
-            helper.error_msg("{self.name} has no face!")
+            helper.error_msg(f'Object "{self.obj.name}" has no face!')
             return None
         elif n > 1:
-            helper.warning_msg("{self.name} has more than 1 faces!")
+            helper.warning_msg(f'Object "{self.obj.name}" has more than 1 faces! Using the first one.')
         return self.obj.data.polygons[0]
 
 
@@ -60,10 +60,17 @@ class Fillet:
             corner = self.corner_vectors(shift)
             fillet += self.corner_fillet(corner, outside)
 
+        helper.delete_object(self.obj.soc_solid_name)
+
         fillet_obj = helper.create_object(collection, fillet, self.name)
         fillet_obj.matrix_world = self.obj.matrix_world
 
+        self.obj.soc_solid_name = fillet_obj.name
+
         self.obj.display_type = 'WIRE'
+
+        fillet_obj.hide_select = True
+
         return fillet_obj
 
     def corner_angle(self, corner):

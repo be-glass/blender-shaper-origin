@@ -53,6 +53,9 @@ def cleanup_meshes(source_obj, mesh_name):
 
 
 def cleanup(context, obj):
+    if obj.soc_known_as != obj.name:
+        return
+
     delete_modifiers(obj)
     delete_internal_objects(obj)
     obj.display_type = 'TEXTURED'

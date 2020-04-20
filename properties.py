@@ -30,6 +30,7 @@ def register():
     bpy.types.Object.soc_solid_name = ObjectProperties.solid_name
     bpy.types.Object.soc_reference_name = ObjectProperties.reference_name
     bpy.types.Object.soc_preview_name = ObjectProperties.preview_name
+    bpy.types.Object.soc_known_as = ObjectProperties.known_as
 
 
 def unregister():
@@ -44,6 +45,10 @@ def unregister():
     del bpy.types.Object.soc_simulate
     del bpy.types.Object.soc_initialized
     del bpy.types.Object.soc_dogbone
+    del bpy.types.Object.soc_solid_name
+    del bpy.types.Object.soc_reference_name
+    del bpy.types.Object.soc_preview_name
+    del bpy.types.Object.soc_known_as
 
 
 # Update handlers
@@ -210,6 +215,11 @@ class ObjectProperties(PropertyGroup):
     reference_name = StringProperty(
         name="Reference Name",
         description="Internal record of reference object name",
+        default="",
+    )
+    known_as = StringProperty(
+        name="Known as",
+        description="Internal record of object association",
         default="",
     )
 

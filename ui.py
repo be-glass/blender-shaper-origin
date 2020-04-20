@@ -2,7 +2,7 @@ import bpy
 from bpy import utils
 from bpy.types import Panel
 
-from . import gen_helper
+from . import gen_helper, helper
 
 
 def panels():
@@ -23,13 +23,11 @@ def unregister():
         utils.unregister_class(widget)
 
 
-class SOCutPanel:
+class BG_PT_SOC_export(Panel):
     bl_category = "SO Cut"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
 
-
-class BG_PT_SOC_export(SOCutPanel, Panel):
     bl_label = "Export"
 
     def draw(self, context):
@@ -47,8 +45,12 @@ class BG_PT_SOC_export(SOCutPanel, Panel):
         layout.operator("mesh.socut_export_cuts", text="Export Cuts")
 
 
-class BG_PT_SOC_select(SOCutPanel, Panel):
-    bl_label = "Item Settings"
+class BG_PT_SOC_select(Panel):
+    bl_category = "Item"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+
+    bl_label = "SO Cut Settings"
 
     def draw(self, context):
         self.layout.use_property_split = True
