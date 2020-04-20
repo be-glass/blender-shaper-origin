@@ -1,13 +1,13 @@
 import bpy
 import math
 
-from . import helper, gen_helper
 from .constant import PREFIX
 from .fillet import Fillet
-from .gen_helper import boolean_modifier_name, delete_modifier
 from .gen_helper import find_perimeters, cleanup, delete_modifiers, \
-    find_siblings_by_type, cleanup_meshes, get_reference, delete_solid_objects
-from .helper import get_solid_collection
+    find_siblings_by_type, cleanup_meshes, get_reference, delete_solid_objects, boolean_modifier_name, \
+    delete_modifier, perimeter_thickness
+from .helper import get_solid_collection, err_implementation, select_active, get_object_safely, length, move_object, \
+    apply_scale, add_plane, delete_object, shade_mesh_flat, repair_mesh, hide_objects
 from .preview import Preview
 
 
@@ -30,7 +30,19 @@ def update(context, obj, reset=False, transform=False):
     if reset:
         generator.setup()
     generator.update()
-    helper.select_active(context, active)
+    select_active(context, active)
+
+
+def transform(context, obj):
+    cut = get_generator(obj)
+    generator = cut(context, obj)
+    generator.transform()
+
+
+def update_hide_state(context, obj):
+    cut = get_generator(obj)
+    generator = cut(context, obj)
+    generator.update_hide_state()
 
 
 def get_generator(obj):
@@ -41,34 +53,9 @@ def get_generator(obj):
     elif obj.soc_mesh_cut_type in ['Cutout', 'Pocket'] and obj.type == 'MESH':
         cut = MeshCut
     else:
-        helper.err_implementation()
+        err_implementation()
         return
     return cut
-
-
-def transform(context, obj):
-    cut = get_generator(obj)
-    generator = cut(context, obj)
-    generator.transform()
-
-
-def transform_previews(context, frame_obj):
-    for obj in bpy.data.objects:
-        if obj.soc_object_type == 'Cut':
-            reference = gen_helper.get_reference(context, obj)
-
-            transform = frame_obj.matrix_world @ reference.matrix_world
-
-            cut = get_generator(obj)
-            generator = cut(context, obj)
-            generator.transform_preview(transform)
-
-
-def update_hide_state(context, obj):
-    cut = get_generator(obj)
-    generator = cut(context, obj)
-    generator.update_hide_state()
-
 
 class Generator:
 
@@ -94,7 +81,7 @@ class Generator:
     def transform_preview(self, matrix):
         name = self.obj.soc_preview_name
         if name:
-            preview = helper.get_object_safely(name)
+            preview = get_object_safely(name)
             preview.matrix_world = matrix
 
     def adjust_solidify_thickness(self, delta=0.0):
@@ -106,7 +93,7 @@ class Generator:
             revision.modifiers[modifier_name].thickness = master.soc_cut_depth + delta
 
     def length(self, quantity_with_unit):
-        return helper.length(self.context, quantity_with_unit)
+        return length(self.context, quantity_with_unit)
 
     def adjust_boolean_modifiers(self, collection):
         for perimeter_obj in find_perimeters(collection):
@@ -120,7 +107,7 @@ class Generator:
     def get_fillet_obj(self, obj=None, outside=False):
         if not obj:
             obj = self.obj
-        fillet_obj = helper.get_object_safely(obj.soc_solid_name, report_error=False)
+        fillet_obj = get_object_safely(obj.soc_solid_name, report_error=False)
 
         if not fillet_obj:
             fillet = Fillet(self.context, obj)
@@ -138,7 +125,7 @@ class Generator:
         delete_modifier(perimeter_fillet, modifier_name)
         boolean = perimeter_fillet.modifiers.new(modifier_name, 'BOOLEAN')
         boolean.operation = 'DIFFERENCE'
-        boolean.object = helper.get_object_safely(subtract_fillet.name)
+        boolean.object = get_object_safely(subtract_fillet.name)
 
         subtract_fillet.hide_set(True)
 
@@ -164,7 +151,7 @@ class Perimeter(Generator):
         self.reference = get_reference(self.context, self.obj)
 
         if self.context.scene.so_cut.preview:
-            Preview(self.context).add_object(self.obj)
+            Preview(self.context).add_object(self.obj, self.obj)
 
     def update(self):
         self.adjust_solidify_thickness()
@@ -175,7 +162,7 @@ class Perimeter(Generator):
 
     def update_hide_state(self):
         hidden = self.obj.hide_get()  # or self.obj.users_collection[0].hide_viewport   # collection cannot work
-        solid = helper.get_object_safely(self.obj.soc_solid_name)
+        solid = get_object_safely(self.obj.soc_solid_name)
         solid.hide_set(hidden)
 
 
@@ -200,9 +187,9 @@ class MeshCut(Generator):
 
         if cut_type == 'Cutout':
 
-            perimeter_thickness = gen_helper.perimeter_thickness(self.obj)
-            if perimeter_thickness:
-                cutout_depth = perimeter_thickness + self.length('1mm')
+            thickness = perimeter_thickness(self.obj)
+            if thickness:
+                cutout_depth = thickness + self.length('1mm')
             else:
                 cutout_depth = self.length('1cm')
 
@@ -227,7 +214,7 @@ class CurveCut(Generator):
         self.fillet = None
 
         bevel = self.create_bevel_object()
-        helper.move_object(bevel, self.solid_collection)
+        move_object(bevel, self.solid_collection)
         self.obj.data.bevel_object = bevel
 
         self.obj.display_type = 'WIRE'
@@ -235,7 +222,7 @@ class CurveCut(Generator):
         self.obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
     def update(self):
-        bevel = helper.get_object_safely(f'{PREFIX}{self.obj.name}.bevel')
+        bevel = get_object_safely(f'{PREFIX}{self.obj.name}.bevel')
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
 
         mesh_obj = self.update_mesh()
@@ -246,17 +233,17 @@ class CurveCut(Generator):
         name = f'{PREFIX}{self.obj.name}.bevel'
 
         # normalize curve radii
-        helper.apply_scale(self.context, self.obj)
+        apply_scale(self.context, self.obj)
         for spline in self.obj.data.splines:
             for p in spline.bezier_points:
                 p.radius = 1.0
 
         # create new one
-        bevel = helper.add_plane(self.context, name, 1.0)
+        bevel = add_plane(self.context, name, 1.0)
 
         # move object origin to upper edge
         bevel.location = (0, -0.5, 0)
-        helper.apply_scale(self.context, self.obj)
+        apply_scale(self.context, self.obj)
 
         # scale
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
@@ -267,7 +254,7 @@ class CurveCut(Generator):
 
     def update_mesh(self):
         mesh_name = PREFIX + self.obj.name + '.mesh'
-        helper.delete_object(mesh_name)
+        delete_object(mesh_name)
         solid_collection = get_solid_collection(self.context)
 
         # create a MESH version of the curve object
@@ -278,9 +265,9 @@ class CurveCut(Generator):
         mesh_obj.matrix_world = self.obj.matrix_world
         cleanup_meshes(self.context, self.obj, mesh_name)
         self.obj.users_collection[0].objects.link(mesh_obj)
-        helper.move_object(mesh_obj, solid_collection)
-        helper.shade_mesh_flat(mesh_obj)
-        helper.repair_mesh(self.context, mesh_obj)
-        helper.hide_objects(mesh_obj.name)
+        move_object(mesh_obj, solid_collection)
+        shade_mesh_flat(mesh_obj)
+        repair_mesh(self.context, mesh_obj)
+        hide_objects(mesh_obj.name)
 
         return mesh_obj

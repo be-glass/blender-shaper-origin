@@ -40,12 +40,13 @@ def handle_object_types(obj, depsgraph):
     elif obj.soc_object_type == 'Preview':
         for u in depsgraph.updates:
             if u.is_updated_transform:
-                print(datetime.datetime.now())
-                print(f"Handler - preview {obj.name}")
-                # return  REMOVE
-                preview = Preview(bpy.context)
-                preview.transform_reference(obj)
-                preview.update_bounding_frame()
+                if obj.soc_mesh_cut_type == 'Perimeter':
+                    print(datetime.datetime.now())
+                    print(f"Handler - preview {obj.name}")
+                    preview = Preview(bpy.context)
+                    preview.transform_reference(obj)
+                    preview.transform_siblings(obj)
+                    preview.update_bounding_frame()
 
     elif obj.soc_object_type == 'Reference':
         pass
@@ -58,10 +59,8 @@ def handle_object_types(obj, depsgraph):
             if u.is_updated_transform:
                 print(datetime.datetime.now())
                 print(f"Handler - bounding {obj.name}")
-                generator.transform_previews(bpy.context, obj)
 
-
-
+                Preview(bpy.context).transform_previews(bpy.context, obj)
 
 
     else:

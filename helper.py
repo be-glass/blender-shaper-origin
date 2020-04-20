@@ -104,9 +104,9 @@ def error_msg(message, context=bpy.context):
 
 def warning_msg(message, context=bpy.context):
     def msg(self, text):
-        self.layout.label(text="Something went wrong!")
+        self.layout.label(text=message)
 
-    context.window_manager.popup_menu(msg, title="Warning", icon='WARNING')
+    context.window_manager.popup_menu(msg, title="Warning", icon='ERROR')
     print("DEBUG me")
 
 
@@ -232,20 +232,8 @@ def get_solid_collection(context):
 
 def get_reference_collection(context):
     soc = get_soc_collection(context)
-    return get_collection(context, PREFIX + "Reference", soc)
-
-    # def get_internal_collection(sibling):
-    #     name = PREFIX + 'internal'
-    #     collection = sibling.users_collection[0]
-    #
-    #     for child in collection.children:
-    #         if child.name.startswith(name):
-    #             return child
-
-    # otherwise create one
-    solid_collection = bpy.data.collections.new(name)
-    collection.children.link(solid_collection)
-    return solid_collection
+    collection = get_collection(context, PREFIX + "Reference", soc)
+    return collection
 
 
 def check_duplication(obj):
@@ -263,3 +251,11 @@ def check_duplication(obj):
                 obj.soc_known_as = ""
             else:  # obj appears to be renamed
                 obj.soc_known_as = obj.name
+
+
+def find_cuts():
+    return [o for o in bpy.data.objects if o.soc_object_type == 'Cut']
+
+
+def find_perimeters(obj):
+    return [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']
