@@ -1,12 +1,13 @@
 import bpy
 from mathutils import Matrix, Vector
 
-from .gen_helper import get_reference
-from .preview_helper import transform_preview
 from .constant import FACE_COLOR
-from .helper import length, get_preview_collection, find_cuts, get_soc_collection, boundaries, warning_msg, \
-    apply_mesh_scale, \
-    create_object, get_object_safely
+from .helper.gen_helper import get_reference, boundaries
+from .helper.preview_helper import transform_preview
+from .helper.mesh import apply_mesh_scale, create_object
+from .helper.other import (
+    length, get_preview_collection, find_cuts, get_soc_collection, warning_msg, get_object_safely
+)
 
 
 class Preview:

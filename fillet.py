@@ -3,8 +3,8 @@ from math import pi
 import mathutils
 from mathutils import Vector, Matrix
 
-from . import constant, helper, gen_helper
-from .constant import PREFIX
+from .helper.other import error_msg, warning_msg, get_solid_collection, delete_object
+from .constant import PREFIX, FILLET_RESOLUTION
 
 
 class Fillet:
@@ -14,21 +14,21 @@ class Fillet:
         self.obj = obj
         self.radius = obj.soc_tool_diameter / 2
         self.polygon = self.get_polygon_safely()
-        self.resolution = constant.FILLET_RESOLUTION
+        self.resolution = FILLET_RESOLUTION
         self.name = PREFIX + self.obj.name + ".fillets"
 
     def get_polygon_safely(self):
         polygons = self.obj.data.polygons
         n = len(polygons)
         if n == 0:
-            helper.error_msg(f'Object "{self.obj.name}" has no face!')
+            error_msg(f'Object "{self.obj.name}" has no face!')
             return None
         elif n > 1:
-            helper.warning_msg(f'Object "{self.obj.name}" has more than 1 faces! Using the first one.')
+            warning_msg(f'Object "{self.obj.name}" has more than 1 faces! Using the first one.')
         return self.obj.data.polygons[0]
 
     # def get_obj(self):
-    #     return helper.get_object_safely(self.name)
+    #     return get_object_safely(self.name)
 
     def corner_count(self):
         return len(self.polygon.vertices)
@@ -53,15 +53,15 @@ class Fillet:
 
     def create(self, outside=False):
         fillet = []
-        collection = helper.get_solid_collection(self.context)
+        collection = get_solid_collection(self.context)
 
         for shift in range(self.corner_count()):
             corner = self.corner_vectors(shift)
             fillet += self.corner_fillet(corner, outside)
 
-        helper.delete_object(self.obj.soc_solid_name)
+        delete_object(self.obj.soc_solid_name)
 
-        fillet_obj = helper.create_object(collection, fillet, self.name)
+        fillet_obj = mesh.create_object(collection, fillet, self.name)
         fillet_obj.matrix_world = self.obj.matrix_world
 
         self.obj.soc_solid_name = fillet_obj.name

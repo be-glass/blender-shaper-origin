@@ -3,11 +3,13 @@ import math
 
 from .constant import PREFIX
 from .fillet import Fillet
-from .gen_helper import find_perimeters, cleanup, delete_modifiers, \
+from .helper.gen_helper import find_perimeters, cleanup, delete_modifiers, \
     find_siblings_by_type, cleanup_meshes, get_reference, delete_solid_objects, boolean_modifier_name, \
     delete_modifier, perimeter_thickness
-from .helper import get_solid_collection, err_implementation, select_active, get_object_safely, length, move_object, \
-    apply_mesh_scale, add_plane, delete_object, shade_mesh_flat, repair_mesh, hide_objects
+from .helper.other import get_solid_collection, err_implementation, select_active, get_object_safely, length, \
+    move_object, \
+    delete_object, hide_objects
+from .helper.mesh import repair_mesh, shade_mesh_flat, add_plane
 from .preview import Preview
 
 
@@ -56,6 +58,7 @@ def get_generator(obj):
         err_implementation()
         return
     return cut
+
 
 class Generator:
 

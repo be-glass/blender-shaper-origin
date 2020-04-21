@@ -1,8 +1,8 @@
 from mathutils import Matrix, Vector
 
-from .helper import length
+from ..constant import PREVIEW_Z
+from .other import length
 from .gen_helper import get_reference
-from .constant import PREVIEW_Z
 
 
 def transform_preview(context, bounding_frame, perimeter, obj):

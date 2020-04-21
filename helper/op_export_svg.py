@@ -1,16 +1,17 @@
 import bpy
 
-from . import constant, helper
+from .other import transform_if_needed
+from .gen_helper import boundaries
+from .. import constant
 
 
 def dimensions(context, selection):
-
-    minimum, maximum = helper.boundaries(context, selection)
+    minimum, maximum = boundaries(context, selection)
     x0, y0, z0 = minimum
     x1, y1, z1 = maximum
 
     scale = context.scene.unit_settings.scale_length
-    w = (x1-x0) * scale
+    w = (x1 - x0) * scale
     h = (y1-y0) * scale
 
     # debug:
@@ -43,7 +44,7 @@ def svg_path(obj, points, is_closed):
     source = ''
     path_cmd = 'M'
     for point in points:
-        vector = helper.transform_if_needed(obj, point.co)
+        vector = transform_if_needed(obj, point.co)
         source += path_cmd + vector2string(vector)
         path_cmd = 'L'
     if is_closed:

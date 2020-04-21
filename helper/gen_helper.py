@@ -1,8 +1,8 @@
 import bpy
+from mathutils import Matrix, Vector
 
-
-from .constant import PREFIX
-from .helper import get_solid_collection, delete_object, get_reference_collection
+from ..constant import PREFIX
+from .other import get_solid_collection, delete_object, get_reference_collection
 
 
 def find_siblings_by_type(cut_types, sibling=None, collection=None):
@@ -107,3 +107,31 @@ def get_reference(context, obj):
         obj.soc_reference_name = reference.name
         reference.hide_set(True)
         return reference
+
+
+def boundaries(context, object_list):
+    x = []
+    y = []
+    z = []
+    for obj in object_list:
+
+        reference = get_reference(context, obj)
+        # reference = get_object_safely(obj.soc_reference_name)
+
+        user = reference.matrix_world
+        scale = Matrix.Diagonal(obj.matrix_world.to_scale()).to_4x4()
+        transform = user @ scale
+
+        bb = obj.bound_box
+        for p in range(8):
+            v_local = Vector([bb[p][0], bb[p][1], bb[p][2]])
+
+            v = user @ scale @ v_local
+
+            x.append(v[0])
+            y.append(v[1])
+            z.append(v[2])
+
+    minimum = Vector([min(x), min(y), min(z)])
+    maximum = Vector([max(x), max(y), max(z)])
+    return minimum, maximum

@@ -1,17 +1,11 @@
 import mathutils
 from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
-from mathutils import Vector
 from mathutils.geometry import distance_point_to_plane
-from . import op_export_svg, helper, gen_helper
-
-# bl_info = {
-#     "name": "n/a",
-#     "author": "n/a",
-#     "version": (0, 0, 0),
-# }  # to be filled by __init__
 
 from .__init__ import bl_info
+from .helper.op_export_svg import svg_content
+from .helper.other import project_name, write, find_perimeters, translate_local
 
 
 def operators():
@@ -53,13 +47,13 @@ class MESH_OT_socut_export_cuts(Operator):
                 name = obj.name
                 selection_set[obj.name] = [obj]
         else:
-            name = helper.project_name()
+            name = project_name()
             selection_set = {name: items}
 
         for name, selection in selection_set.items():
-            content = op_export_svg.svg_content(context, selection, bl_info)
+            content = svg_content(context, selection, bl_info)
             file_name = f'{dir_name}/{name}.svg'
-            helper.write(content, file_name)
+            write(content, file_name)
 
         self.report({'INFO'}, "OK")
         return {'FINISHED'}
@@ -73,7 +67,7 @@ class MESH_OT_socut_align_object(Operator):
 
         obj = context.object
         collection = obj.users_collection[0]
-        perimeters = gen_helper.find_perimeters(collection)
+        perimeters = find_perimeters(collection)
 
         if not perimeters:
             self.report({'ERROR'}, "No perimeter found.")
@@ -82,8 +76,7 @@ class MESH_OT_socut_align_object(Operator):
         obj.matrix_world = perimeters[0].matrix_world
         d = distance_point_to_plane(obj.location, perimeters[0].location, perimeters[0].data.polygons[0].normal)
 
-
-        helper.translate_local(obj, mathutils.Vector((0, 0, d + .001)))
+        translate_local(obj, mathutils.Vector((0, 0, d + .001)))
 
         self.report({'INFO'}, "OK")
         return {'FINISHED'}

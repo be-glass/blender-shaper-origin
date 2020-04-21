@@ -4,8 +4,7 @@ from bpy.types import PropertyGroup
 
 from . import fillet, generator
 from .constant import DEFAULTS
-from .helper import length, select_active
-from .gen_helper import cleanup
+from .helper.other import length, select_active
 from .preview import Preview
 
 
