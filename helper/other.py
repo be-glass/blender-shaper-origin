@@ -171,3 +171,20 @@ def find_cuts():
 
 def find_perimeters(obj):
     return [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']
+
+
+def store_selection():
+    active_object = bpy.context.object
+    selected_objects = bpy.context.selected_objects
+    bpy.context.view_layer.objects.active = None
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    return active_object, selected_objects
+
+
+def restore_selection(active_object, selected_objects):
+    bpy.context.view_layer.objects.active = active_object
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    for o in selected_objects:
+        o.select_set(True)

@@ -65,9 +65,11 @@ def cleanup(context, obj):
     delete_object(obj.soc_reference_name)
     delete_object(obj.soc_preview_name)
     delete_object(obj.soc_solid_name)
+    delete_object(obj.soc_bevel_name)
     obj.soc_reference_name = ''
     obj.soc_preview_name = ''
     obj.soc_solid_name = ''
+    obj.soc_bevel_name = ''
 
 
 def find_perimeters(collection):

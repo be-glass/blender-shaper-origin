@@ -5,7 +5,7 @@ import bpy
 from . import generator
 from .constant import DEFAULTS
 from .preview import Preview
-from .helper.other import check_duplication, length
+from .helper.other import check_duplication, length, store_selection, restore_selection
 
 
 def register():
@@ -19,7 +19,7 @@ def unregister():
 
 @bpy.app.handlers.persistent
 def post_ob_updated(scene, depsgraph):
-    obj = bpy.context.object
+    obj, selection = store_selection()
 
     if obj is not None:
         if obj.mode == 'OBJECT':
@@ -29,6 +29,7 @@ def post_ob_updated(scene, depsgraph):
                 for o in bpy.context.selected_objects:
                     handle_object_types(o, depsgraph)
 
+    restore_selection(obj, selection)
 
 def handle_object_types(obj, depsgraph):
     if obj.soc_object_type == 'Cut':
@@ -124,3 +125,4 @@ def preview(scene_properties, context):
         Preview(context).delete()
 
     # select_active(context, active)
+
