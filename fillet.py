@@ -3,6 +3,7 @@ from math import pi
 import mathutils
 from mathutils import Vector, Matrix
 
+from .helper.mesh import create_object
 from .helper.other import error_msg, warning_msg, get_solid_collection, delete_object
 from .constant import PREFIX, FILLET_RESOLUTION
 
@@ -61,7 +62,7 @@ class Fillet:
 
         delete_object(self.obj.soc_solid_name)
 
-        fillet_obj = mesh.create_object(collection, fillet, self.name)
+        fillet_obj = create_object(collection, fillet, self.name)
         fillet_obj.matrix_world = self.obj.matrix_world
 
         self.obj.soc_solid_name = fillet_obj.name

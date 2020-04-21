@@ -14,12 +14,13 @@ def register():
 
 
 def unregister():
-    bpy.app.handlers.depsgraph_update_post.clear()  # TODO: remove instead of clear?
+    bpy.app.handlers.depsgraph_update_post.clear()
 
 
 @bpy.app.handlers.persistent
 def post_ob_updated(scene, depsgraph):
     obj, selection = store_selection()
+    # restore_selection(obj, selection)
 
     if obj is not None:
         if obj.mode == 'OBJECT':
@@ -30,6 +31,7 @@ def post_ob_updated(scene, depsgraph):
                     handle_object_types(o, depsgraph)
 
     restore_selection(obj, selection)
+
 
 def handle_object_types(obj, depsgraph):
     if obj.soc_object_type == 'Cut':
@@ -50,19 +52,12 @@ def handle_object_types(obj, depsgraph):
                     preview.transform_siblings(obj)
                     preview.update_bounding_frame()
 
-    elif obj.soc_object_type == 'Reference':
-        pass
-        # for u in depsgraph.updates:
-        #     if u.is_updated_transform:
-        #         Preview(bpy.context).transform_reference(obj)
-
     elif obj.soc_object_type == 'Bounding':
         for u in depsgraph.updates:
             if u.is_updated_transform:
                 Preview(bpy.context).transform_previews(bpy.context, obj)
 
     else:
-        print(str(datetime.datetime.now()) + " Something else...: " + obj.name)
         pass
 
 
@@ -116,13 +111,8 @@ def update_cut_type(obj, context):
 
 
 def preview(scene_properties, context):
-    # active = context.object
-
     if scene_properties.preview:
         Preview(context).create()
         pass
     else:
         Preview(context).delete()
-
-    # select_active(context, active)
-

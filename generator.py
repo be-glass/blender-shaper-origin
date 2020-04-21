@@ -217,22 +217,17 @@ class CurveCut(Generator):
         super().setup()
 
         self.fillet = None
-
-        bevel = self.get_bevel_object()
-        move_object(bevel, self.solid_collection)
-        self.obj.data.bevel_object = bevel
-
         self.obj.display_type = 'WIRE'
-        modifier_name = PREFIX + 'Solidify'
-        self.obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
     def update(self):
         bevel = self.get_bevel_object()
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
-
-        mesh_obj = self.update_mesh()
+        self.obj.data.bevel_object = bevel
+        solid_obj = self.update_mesh()
+        self.obj.data.bevel_object = None
+        self.obj.soc_solid_name = solid_obj.name
         collection = self.obj.users_collection[0]
-        self.adjust_boolean_modifiers(collection, mesh_obj)
+        self.adjust_boolean_modifiers(collection)
 
     def get_bevel_object(self):
         if self.obj.soc_bevel_name:
@@ -244,6 +239,7 @@ class CurveCut(Generator):
         name = f'{PREFIX}{self.obj.name}.bevel'
         bevel_obj = add_nurbs_square(collection, name)
         bevel_obj.soc_object_type = 'Helper'
+        bevel_obj.hide_set(True)
         self.obj.soc_bevel_name = bevel_obj.name
 
         return bevel_obj
