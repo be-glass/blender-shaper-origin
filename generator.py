@@ -8,8 +8,9 @@ from .helper.gen_helper import find_perimeters, cleanup, delete_modifiers, \
     delete_modifier, perimeter_thickness
 from .helper.other import get_solid_collection, err_implementation, select_active, get_object_safely, length, \
     move_object, \
-    delete_object, hide_objects
+    delete_object, hide_objects, get_helper_collection
 from .helper.mesh import repair_mesh, shade_mesh_flat, add_plane
+from .helper.curve import add_nurbs_quad
 from .preview import Preview
 
 
@@ -243,16 +244,17 @@ class CurveCut(Generator):
                 p.radius = 1.0
 
         # create new one
-        bevel = add_plane(self.context, name, 1.0)
+        collection = get_helper_collection(self.context)
+        bevel = add_nurbs_quad(collection, PREFIX + self.obj.name + '.bevel', width=self.obj.soc_tool_diameter,
+                               height=self.obj.soc_cut_depth)
 
         # move object origin to upper edge
-        bevel.location = (0, -0.5, 0)
+        # bevel.location = (0, -0.5, 0)
         # apply_mesh_scale(self.context, self.obj) # TODO dito
 
         # scale
-        bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
+        # bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
 
-        bpy.ops.object.convert(target='CURVE')
 
         return bevel
 

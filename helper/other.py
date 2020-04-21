@@ -141,6 +141,12 @@ def get_reference_collection(context):
     return collection
 
 
+def get_helper_collection(context):
+    soc = get_soc_collection(context)
+    collection = get_collection(context, PREFIX + "Helper", soc)
+    return collection
+
+
 def check_duplication(obj):
     if not obj.soc_known_as:
         obj.soc_known_as = obj.name
