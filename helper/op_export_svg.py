@@ -1,8 +1,6 @@
-import bpy
-
+from ..constant import SVG_COORD_FORMAT, SVG_HEADER_TEMPLATE, CUT_ENCODING
 from .other import transform_if_needed
 from .gen_helper import boundaries
-from .. import constant
 
 
 def dimensions(context, selection):
@@ -22,16 +20,16 @@ def dimensions(context, selection):
 
 
 def vector2string(vector):
-    return constant.SVG_COORD_FORMAT.format(vector[0], vector[1])
+    return SVG_COORD_FORMAT.format(vector[0], vector[1])
 
 
 def svg_header(context, selection, bl_info):
     version = '.'.join([str(i) for i in bl_info['version']])
     (x0, y0, x1, y1, w, h) = dimensions(context, selection)
 
-    return constant.SVG_HEADER_TEMPLATE.format(
-        x0=x0, w=x1-x0, y0=-y1, h=y1-y0,
-        width=w*1000, height=h*1000, unit="mm",
+    return SVG_HEADER_TEMPLATE.format(
+        x0=x0, w=x1 - x0, y0=-y1, h=y1 - y0,
+        width=w * 1000, height=h * 1000, unit="mm",
         version=version, author=bl_info['author'],
     )
 
@@ -83,7 +81,7 @@ def svg_material_attributes(id):
     }
 
     style = style_map[id]
-    (stroke, fill) = constant.CUT_ENCODING[style]
+    (stroke, fill) = CUT_ENCODING[style]
     return f'stroke="{stroke}" fill="{fill}"'
 
 
