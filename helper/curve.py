@@ -2,13 +2,20 @@ import bpy
 from mathutils import Vector
 
 
-def add_nurbs_square(collection, name):
+def add_nurbs_square(collection, name, curve_cut_type):
     curve = bpy.data.curves.new(name, 'CURVE')
     obj = bpy.data.objects.new(name, curve)
     collection.objects.link(obj)
     curve.dimensions = "2D"
 
-    square = [(0.5, 0), (0.5, -1), (-0.5, -1), (-0.5, 0)]
+    square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+
+    if curve_cut_type == 'Exterior':
+        shift = (-1, -1)
+    elif curve_cut_type == 'Interior':
+        shift = (0, -1)
+    else:
+        shift = (-0.5, -1)
 
     spline = curve.splines.new('NURBS')
     spline.use_cyclic_u = True
@@ -17,6 +24,6 @@ def add_nurbs_square(collection, name):
     spline.points.add(len(points) - 1)
 
     for (i, point) in enumerate(points):
-        spline.points[i].co = Vector(point).to_4d()
+        spline.points[i].co = (Vector(point) + Vector(shift)).to_4d()
 
     return obj

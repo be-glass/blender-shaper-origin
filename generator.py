@@ -237,7 +237,7 @@ class CurveCut(Generator):
 
         collection = get_helper_collection(self.context)
         name = f'{PREFIX}{self.obj.name}.bevel'
-        bevel_obj = add_nurbs_square(collection, name)
+        bevel_obj = add_nurbs_square(collection, name, self.obj.soc_curve_cut_type)
         bevel_obj.soc_object_type = 'Helper'
         bevel_obj.hide_set(True)
         self.obj.soc_bevel_name = bevel_obj.name
