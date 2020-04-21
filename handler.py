@@ -27,7 +27,7 @@ def post_ob_updated(scene, depsgraph):
             if obj.soc_object_type != 'None':
                 check_duplication(obj)
 
-                for o in bpy.context.selected_objects:
+                for o in selection:
                     handle_object_types(o, depsgraph)
 
     restore_selection(obj, selection)
