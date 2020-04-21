@@ -76,6 +76,9 @@ class BG_PT_SOC_select(Panel):
             elif typ == 'Reference':
                 self.layout.label(text="Reference Item")
 
+            elif typ == 'Helper':
+                self.layout.label(text="Helper Item")
+
     def draw_cut(self, obj):
         layout = self.layout
 

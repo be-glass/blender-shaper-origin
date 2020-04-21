@@ -2,8 +2,10 @@ import datetime
 
 import bpy
 
-from . import generator, helper
+from . import generator
+from .constant import DEFAULTS
 from .preview import Preview
+from .helper.other import check_duplication, length
 
 
 def register():
@@ -22,7 +24,7 @@ def post_ob_updated(scene, depsgraph):
     if obj is not None:
         if obj.mode == 'OBJECT':
             if obj.soc_object_type != 'None':
-                helper.check_duplication(obj)
+                check_duplication(obj)
 
                 for o in bpy.context.selected_objects:
                     handle_object_types(o, depsgraph)
@@ -61,3 +63,64 @@ def handle_object_types(obj, depsgraph):
     else:
         print(str(datetime.datetime.now()) + " Something else...: " + obj.name)
         pass
+
+
+# Update handlers
+
+def minmax(context, property_name):
+    d0, dd, d1 = DEFAULTS[property_name]
+    return length(context, d0), \
+           length(context, d1)
+
+
+def default(context, property_name):
+    d0, dd, d1 = DEFAULTS[property_name]
+    return length(context, dd)
+
+
+def update_cut_depth(obj, context):
+    minimum, maximum = minmax(context, 'cut_depth')
+
+    if obj.soc_initialized:
+        if obj.soc_cut_depth < minimum:
+            obj.soc_cut_depth = minimum
+        elif obj.soc_cut_depth > maximum:
+            obj.soc_cut_depth = maximum
+        else:
+            generator.update(context, obj)
+
+
+def update_tool_diameter(obj, context):
+    minimum, maximum = minmax(context, 'tool_diameter')
+
+    if obj.soc_initialized:
+        if obj.soc_tool_diameter < minimum:
+            obj.soc_tool_diameter = minimum
+        elif obj.soc_tool_diameter > maximum:
+            obj.soc_tool_diameter = maximum
+        else:
+            generator.update(context, obj, reset=True)
+
+
+def initialize_object(obj, context):
+    obj.soc_cut_depth = default(context, 'cut_depth')
+    obj.soc_tool_diameter = default(context, 'tool_diameter')
+    obj.soc_initialized = True
+
+
+def update_cut_type(obj, context):
+    if not obj.soc_initialized:
+        initialize_object(obj, context)
+    generator.update(context, obj, reset=True)
+
+
+def preview(scene_properties, context):
+    # active = context.object
+
+    if scene_properties.preview:
+        Preview(context).create()
+        pass
+    else:
+        Preview(context).delete()
+
+    # select_active(context, active)

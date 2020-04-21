@@ -10,7 +10,7 @@ from .helper.other import get_solid_collection, err_implementation, select_activ
     move_object, \
     delete_object, hide_objects, get_helper_collection
 from .helper.mesh import repair_mesh, shade_mesh_flat, add_plane
-from .helper.curve import add_nurbs_quad
+from .helper.curve import add_nurbs_square
 from .preview import Preview
 
 
@@ -218,7 +218,7 @@ class CurveCut(Generator):
 
         self.fillet = None
 
-        bevel = self.create_bevel_object()
+        bevel = self.get_bevel_object()
         move_object(bevel, self.solid_collection)
         self.obj.data.bevel_object = bevel
 
@@ -227,36 +227,26 @@ class CurveCut(Generator):
         self.obj.modifiers.new(modifier_name, 'SOLIDIFY')
 
     def update(self):
-        bevel = get_object_safely(f'{PREFIX}{self.obj.name}.bevel')
+        bevel = self.get_bevel_object()
         bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
 
         mesh_obj = self.update_mesh()
         collection = self.obj.users_collection[0]
         self.adjust_boolean_modifiers(collection, mesh_obj)
 
-    def create_bevel_object(self):
-        name = f'{PREFIX}{self.obj.name}.bevel'
+    def get_bevel_object(self):
+        if self.obj.soc_bevel_name:
+            bevel_obj = get_object_safely(self.obj.soc_bevel_name)
+            if bevel_obj:
+                return bevel_obj
 
-        # normalize curve radii
-        # apply_mesh_scale(self.context, self.obj)   # TODO: mesh version cannot work -> write curve version
-        for spline in self.obj.data.splines:
-            for p in spline.bezier_points:
-                p.radius = 1.0
-
-        # create new one
         collection = get_helper_collection(self.context)
-        bevel = add_nurbs_quad(collection, PREFIX + self.obj.name + '.bevel', width=self.obj.soc_tool_diameter,
-                               height=self.obj.soc_cut_depth)
+        name = f'{PREFIX}{self.obj.name}.bevel'
+        bevel_obj = add_nurbs_square(collection, name)
+        bevel_obj.soc_object_type = 'Helper'
+        self.obj.soc_bevel_name = bevel_obj.name
 
-        # move object origin to upper edge
-        # bevel.location = (0, -0.5, 0)
-        # apply_mesh_scale(self.context, self.obj) # TODO dito
-
-        # scale
-        # bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
-
-
-        return bevel
+        return bevel_obj
 
     def update_mesh(self):
         mesh_name = PREFIX + self.obj.name + '.mesh'

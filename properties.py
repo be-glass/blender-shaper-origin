@@ -2,11 +2,7 @@ import bpy
 from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty
 from bpy.types import PropertyGroup
 
-from . import fillet, generator
-from .constant import DEFAULTS
-from .helper.other import length, select_active
-from .preview import Preview
-
+from . import handler
 
 
 # Initialization
@@ -29,6 +25,7 @@ def register():
     bpy.types.Object.soc_solid_name = ObjectProperties.solid_name
     bpy.types.Object.soc_reference_name = ObjectProperties.reference_name
     bpy.types.Object.soc_preview_name = ObjectProperties.preview_name
+    bpy.types.Object.soc_bevel_name = ObjectProperties.bevel_name
     bpy.types.Object.soc_known_as = ObjectProperties.known_as
 
 
@@ -47,69 +44,10 @@ def unregister():
     del bpy.types.Object.soc_solid_name
     del bpy.types.Object.soc_reference_name
     del bpy.types.Object.soc_preview_name
+    del bpy.types.Object.soc_bevel_name
     del bpy.types.Object.soc_known_as
 
 
-# Update handlers
-
-def minmax(context, property_name):
-    d0, dd, d1 = DEFAULTS[property_name]
-    return length(context, d0), \
-           length(context, d1)
-
-
-def default(context, property_name):
-    d0, dd, d1 = DEFAULTS[property_name]
-    return length(context, dd)
-
-
-def update_cut_depth(obj, context):
-    minimum, maximum = minmax(context, 'cut_depth')
-
-    if obj.soc_initialized:
-        if obj.soc_cut_depth < minimum:
-            obj.soc_cut_depth = minimum
-        elif obj.soc_cut_depth > maximum:
-            obj.soc_cut_depth = maximum
-        else:
-            generator.update(context, obj)
-
-
-def update_tool_diameter(obj, context):
-    minimum, maximum = minmax(context, 'tool_diameter')
-
-    if obj.soc_initialized:
-        if obj.soc_tool_diameter < minimum:
-            obj.soc_tool_diameter = minimum
-        elif obj.soc_tool_diameter > maximum:
-            obj.soc_tool_diameter = maximum
-        else:
-            generator.update(context, obj, reset=True)
-
-
-def initialize_object(obj, context):
-    obj.soc_cut_depth = default(context, 'cut_depth')
-    obj.soc_tool_diameter = default(context, 'tool_diameter')
-    obj.soc_initialized = True
-
-
-def update_cut_type(obj, context):
-
-    if not obj.soc_initialized:
-        initialize_object(obj, context)
-    generator.update(context, obj, reset=True)
-
-
-def preview(scene_properties, context):
-    # active = context.object
-
-    if scene_properties.preview:
-        Preview(context).create()
-        pass
-    else:
-        Preview(context).delete()
-
-    # select_active(context, active)
 
 
 # Definition
@@ -122,7 +60,7 @@ class ObjectProperties(PropertyGroup):
         min=0,
         max=float('inf'),
         unit='LENGTH',
-        update=update_cut_depth
+        update=handler.update_cut_depth
     )
 
     tool_diameter = FloatProperty(
@@ -132,7 +70,7 @@ class ObjectProperties(PropertyGroup):
         min=0,
         max=float('inf'),
         unit='LENGTH',
-        update=update_tool_diameter
+        update=handler.update_tool_diameter
     )
 
     reference_frame = EnumProperty(
@@ -157,7 +95,7 @@ class ObjectProperties(PropertyGroup):
 
         default='None',
         options={'HIDDEN'},
-        update=update_cut_type
+        update=handler.update_cut_type
     )
     mesh_cut_type = EnumProperty(
         name="Cut Type",
@@ -171,7 +109,7 @@ class ObjectProperties(PropertyGroup):
 
         default='None',
         options={'HIDDEN'},
-        update=update_cut_type
+        update=handler.update_cut_type
     )
     object_type = EnumProperty(
         name="Object Type",
@@ -181,6 +119,7 @@ class ObjectProperties(PropertyGroup):
                ('Preview', 'Preview', 'Preview', 2),
                ('Reference', 'Reference', 'Reference', '', 3),
                ('Bounding', 'Bounding', 'Bounding', '', 4),
+               ('Helper', 'Helper', 'Helper', '', 5),
                ],
 
         default='None',
@@ -191,7 +130,7 @@ class ObjectProperties(PropertyGroup):
         description="Simulate cut",
         default=True,
         options={'HIDDEN'},
-        update=update_cut_type
+        update=handler.update_cut_type
     )
     initialized = BoolProperty(
         name="Object initialized",
@@ -204,7 +143,7 @@ class ObjectProperties(PropertyGroup):
         description="Add dogbone fillets to cut",
         default=False,
         options={'HIDDEN'},
-        update=update_cut_type
+        update=handler.update_cut_type
     )
     solid_name = StringProperty(
         name="Solid Mesh Name",
@@ -221,11 +160,21 @@ class ObjectProperties(PropertyGroup):
         description="Internal record of reference object name",
         default="",
     )
+    bevel_name = StringProperty(
+        name="Bevel Name",
+        description="Internal record of bevel helper object name",
+        default="",
+    )
     known_as = StringProperty(
         name="Known as",
         description="Internal record of object association",
         default="",
     )
+
+
+# def preview(args):
+#     pass
+
 
 class SceneProperties(PropertyGroup):
     use_transformations: BoolProperty(
@@ -251,7 +200,7 @@ class SceneProperties(PropertyGroup):
         description="Preview export in X-Y-plane",
         default=False,
         options={'HIDDEN'},
-        update=preview
+        update=handler.preview
     )
     export_path: StringProperty(
         name="Export Directory",

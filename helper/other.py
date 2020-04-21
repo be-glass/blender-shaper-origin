@@ -159,6 +159,7 @@ def check_duplication(obj):
                 obj.soc_reference_name = ""
                 obj.soc_preview_name = ""
                 obj.soc_solid_name = ""
+                obj.soc_bevel_name = ""
                 obj.soc_known_as = ""
             else:  # obj appears to be renamed
                 obj.soc_known_as = obj.name
