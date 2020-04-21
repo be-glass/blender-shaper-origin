@@ -5,7 +5,8 @@ from mathutils.geometry import distance_point_to_plane
 
 from .__init__ import bl_info
 from .helper.op_export_svg import svg_content
-from .helper.other import project_name, write, find_perimeters, translate_local
+from .helper.other import project_name, write, translate_local
+from .helper.gen_helper import find_perimeters
 
 
 def operators():

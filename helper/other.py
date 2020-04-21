@@ -169,8 +169,8 @@ def find_cuts():
     return [o for o in bpy.data.objects if o.soc_object_type == 'Cut']
 
 
-def find_perimeters(obj):
-    return [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']
+# def find_perimeters(obj):
+#     return [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']
 
 
 def store_selection():
