@@ -66,7 +66,7 @@ def error_msg(message, context=bpy.context):
         self.layout.label(text=message)
 
     context.window_manager.popup_menu(msg, title="Error", icon='ERROR')
-    print("DEBUG me")
+    raise Exception("DEBUG me")
 
 
 def warning_msg(message, context=bpy.context):
@@ -74,7 +74,7 @@ def warning_msg(message, context=bpy.context):
         self.layout.label(text=message)
 
     context.window_manager.popup_menu(msg, title="Warning", icon='ERROR')
-    print("DEBUG me")
+    raise Exception("DEBUG me")
 
 
 def err_implementation(context=bpy.context):
@@ -148,9 +148,10 @@ def get_helper_collection(context):
 
 
 def consistency_checks(obj):
-    check_duplication(obj)
-    check_state(obj)
-    check_open_curves(obj)
+    if obj.soc_object_type == 'Cut':
+        check_duplication(obj)
+        check_state(obj)
+        check_open_curves(obj)
 
 
 def check_open_curves(obj):

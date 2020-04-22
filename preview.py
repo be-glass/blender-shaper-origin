@@ -100,7 +100,8 @@ class Preview:
         preview_obj = cut_obj.copy()
         preview_obj.data = cut_obj.data.copy()
         self.collection.objects.link(preview_obj)
-        apply_mesh_scale(self.context, preview_obj)
+
+        # apply_mesh_scale(self.context, preview_obj)    # TODO: is this needed? for mesh? for curve?
 
         preview_obj.matrix_world = transform_preview(self.context, self.bounding, perimeter, cut_obj)
         preview_obj.name = name
@@ -110,7 +111,10 @@ class Preview:
         preview_obj.soc_object_type = 'Preview'
         preview_obj.display_type = 'TEXTURED'
 
-        preview_obj.color = FACE_COLOR[cut_obj.soc_mesh_cut_type]
+        if cut_obj.soc_mesh_cut_type != 'None':
+            preview_obj.color = FACE_COLOR[cut_obj.soc_mesh_cut_type]
+        elif cut_obj.soc_curve_cut_type != 'None':
+            preview_obj.color = FACE_COLOR[cut_obj.soc_curve_cut_type]
 
         return preview_obj
 

@@ -3,13 +3,13 @@ PREFIX = "SOC_"
 # sheet_name = prefix + "Work Area"
 
 FACE_COLOR = {
-    'Interior': (1, 1, 1, 1),
     'Cutout': (1, 1, 1, 1),
-    'Exterior': (0, 0, 0, 1),
     'Perimeter': (0, 0, 0, 1),
-    'Online': (1, 0, 1, 1),
     'Pocket': (.5, .5, .5, 1),
-    'Guide': (0, 0, 1, 1)
+    'Guide': (0, 0, 1, 1),
+    'Exterior': (0, 1, 1, 1),
+    'Online': (1, 0, 1, 1),
+    'Interior': (1, 1, 0, 1),
 }
 
 PREVIEW_Z = {
