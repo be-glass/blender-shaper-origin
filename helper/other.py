@@ -150,7 +150,13 @@ def get_helper_collection(context):
 def consistency_checks(obj):
     check_duplication(obj)
     check_state(obj)
+    check_open_curves(obj)
 
+
+def check_open_curves(obj):
+    if obj.soc_curve_cut_type in ['Exterior', 'Interior']:
+        if not obj.data.splines[0].use_cyclic_u:
+            obj.soc_curve_cut_type = 'Online'
 
 def check_state(obj):
     if obj.soc_mesh_cut_type == 'None' and obj.soc_curve_cut_type == 'None':
