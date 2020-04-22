@@ -223,6 +223,9 @@ class CurveCut(Generator):
 
         sign = int(face_is_down(self.obj)) * 2 - 1
 
+        for p in self.obj.data.splines[0].points:
+            p.radius = 1.0
+
         bevel = self.get_bevel_object()
         bevel.scale = (sign * self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
         self.obj.data.bevel_object = bevel
