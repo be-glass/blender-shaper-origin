@@ -15,8 +15,6 @@ from .preview import Preview
 
 
 def update(context, obj, reset=False, transform=False):
-    active = context.object
-
     if reset:
         cleanup(context, obj)
 
@@ -33,7 +31,6 @@ def update(context, obj, reset=False, transform=False):
     if reset:
         generator.setup()
     generator.update()
-    select_active(context, active)
 
 
 def transform(context, obj):
