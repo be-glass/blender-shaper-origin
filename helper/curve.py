@@ -1,5 +1,8 @@
+import bmesh
 import bpy
 from mathutils import Vector
+
+from .mesh import create_object
 
 
 def add_nurbs_square(collection, name, curve_cut_type):
@@ -27,3 +30,13 @@ def add_nurbs_square(collection, name, curve_cut_type):
         spline.points[i].co = (Vector(point) + Vector(shift)).to_4d()
 
     return obj
+
+
+def face_normal(obj):
+    polygon = [p.co.to_3d() for p in obj.data.splines[0].points]
+    mesh_obj = create_object(polygon)
+    return mesh_obj.data.polygons[0].normal
+
+
+def face_is_down(obj):
+    return face_normal(obj).dot(Vector([0, 0, 1])) < 0
