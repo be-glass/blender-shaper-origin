@@ -1,7 +1,7 @@
 from mathutils import Matrix, Vector
 
 from ..constant import PREVIEW_Z
-from .other import length
+from .other import length, find_first_perimeter
 from .gen_helper import get_reference
 
 
@@ -16,11 +16,17 @@ def transform_preview(context, bounding_frame, perimeter, obj):
 
     return m4 @ m3 @ m2 @ m1 @ m0
 
-    # m = bounding_frame.matrix_world \
-    #     @ reference.matrix_world \
-    #     @ perimeter.matrix_world.inverted() \
-    #     @ obj.matrix_world
-    # return m
+
+def transform_export(context, obj):
+    perimeter = find_first_perimeter(obj)
+    reference = get_reference(context, perimeter)
+
+    m0 = obj.matrix_world
+    m1 = perimeter.matrix_world.inverted()
+    m2 = lift_z(context, obj)
+    m3 = reference.matrix_world
+
+    return m3 @ m2 @ m1 @ m0
 
 
 def lift_z(context, obj):

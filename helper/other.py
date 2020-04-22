@@ -39,13 +39,13 @@ def add_Empty_at(*location):
     bpy.ops.object.add(type='EMPTY', location=(location))
 
 
-def transform_if_needed(obj, coordinates):
-    if obj.soc_reference_frame == 'local':
-        return coordinates
-    elif obj.soc_reference_frame == 'object':
-        return 'TODO'  # a feature missing implementation. TODO will be printed into the SVG file
-    else:  # 'global'
-        return obj.matrix_world @ coordinates
+# def transform_if_needed(obj, coordinates):
+#     if obj.soc_reference_frame == 'local':
+#         return coordinates
+#     elif obj.soc_reference_frame == 'object':
+#         return 'TODO'  # a feature missing implementation. TODO will be printed into the SVG file
+#     else:  # 'global'
+#         return obj.matrix_world @ coordinates
 
 
 def move_object(obj, collection):
@@ -190,8 +190,8 @@ def find_cuts():
     return [o for o in bpy.data.objects if o.soc_object_type == 'Cut']
 
 
-# def find_perimeters(obj):
-#     return [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']
+def find_first_perimeter(obj):
+    return [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter'][0]
 
 
 def store_selection(context, reset=False):
