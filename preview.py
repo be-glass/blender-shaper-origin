@@ -78,7 +78,7 @@ class Preview:
 
         quad = [m0, m1, m2, m3]
 
-        frame = create_object(collection, quad, "Bounding Frame")
+        frame = create_object(quad, collection, "Bounding Frame")
         frame.matrix_world = mw
         frame.soc_object_type = "Bounding"
         return frame

@@ -62,7 +62,7 @@ class Fillet:
 
         delete_object(self.obj.soc_solid_name)
 
-        fillet_obj = create_object(collection, fillet, self.name)
+        fillet_obj = create_object(fillet, collection, self.name)
         fillet_obj.matrix_world = self.obj.matrix_world
 
         self.obj.soc_solid_name = fillet_obj.name

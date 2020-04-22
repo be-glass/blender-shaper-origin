@@ -147,20 +147,40 @@ def get_helper_collection(context):
     return collection
 
 
+def consistency_checks(obj):
+    check_duplication(obj)
+    check_state(obj)
+    check_open_curves(obj)
+
+
+def check_open_curves(obj):
+    if obj.soc_curve_cut_type in ['Exterior', 'Interior']:
+        if not obj.data.splines[0].use_cyclic_u:
+            obj.soc_curve_cut_type = 'Online'
+
+def check_state(obj):
+    if obj.soc_mesh_cut_type == 'None' and obj.soc_curve_cut_type == 'None':
+        reset_obj(obj)
+
+
+def reset_obj(obj):
+    obj.soc_object_type = 'None'
+    obj.soc_mesh_cut_type = 'None'
+    obj.soc_curve_cut_type = 'None'
+    obj.soc_reference_name = ""
+    obj.soc_preview_name = ""
+    obj.soc_solid_name = ""
+    obj.soc_bevel_name = ""
+    obj.soc_known_as = ""
+
+
 def check_duplication(obj):
     if not obj.soc_known_as:
         obj.soc_known_as = obj.name
     else:
         if obj.soc_known_as != obj.name:
-            if obj.soc_known_as in bpy.data.objects.keys():  # obj has been duplicated -> reset
-                obj.soc_object_type = 'None'
-                obj.soc_mesh_cut_type = 'None'
-                obj.soc_curve_cut_type = 'None'
-                obj.soc_reference_name = ""
-                obj.soc_preview_name = ""
-                obj.soc_solid_name = ""
-                obj.soc_bevel_name = ""
-                obj.soc_known_as = ""
+            if obj.soc_known_as in bpy.data.objects.keys():
+                reset_obj(obj)
             else:  # obj appears to be renamed
                 obj.soc_known_as = obj.name
 
@@ -173,12 +193,13 @@ def find_cuts():
 #     return [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']
 
 
-def store_selection():
-    active_object = bpy.context.object
-    selected_objects = bpy.context.selected_objects
-    bpy.context.view_layer.objects.active = None
-    for o in bpy.context.selected_objects:
-        o.select_set(False)
+def store_selection(context, reset=False):
+    active_object = context.object
+    selected_objects = context.selected_objects
+    context.view_layer.objects.active = None
+    if reset:
+        for o in bpy.context.selected_objects:
+            o.select_set(False)
     return active_object, selected_objects
 
 

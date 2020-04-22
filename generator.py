@@ -1,8 +1,11 @@
 import bpy
 import math
 
+from mathutils import Vector
+
 from .constant import PREFIX
 from .fillet import Fillet
+
 from .helper.gen_helper import find_perimeters, cleanup, delete_modifiers, \
     find_siblings_by_type, cleanup_meshes, get_reference, delete_solid_objects, boolean_modifier_name, \
     delete_modifier, perimeter_thickness
@@ -10,13 +13,11 @@ from .helper.other import get_solid_collection, err_implementation, select_activ
     move_object, \
     delete_object, hide_objects, get_helper_collection
 from .helper.mesh import repair_mesh, shade_mesh_flat, add_plane
-from .helper.curve import add_nurbs_square
+from .helper.curve import add_nurbs_square, face_normal, face_is_down
 from .preview import Preview
 
 
-def update(context, obj, reset=False, transform=False):
-    active = context.object
-
+def update(context, obj, reset=False):
     if reset:
         cleanup(context, obj)
 
@@ -33,7 +34,6 @@ def update(context, obj, reset=False, transform=False):
     if reset:
         generator.setup()
     generator.update()
-    select_active(context, active)
 
 
 def transform(context, obj):
@@ -220,8 +220,11 @@ class CurveCut(Generator):
         self.obj.display_type = 'WIRE'
 
     def update(self):
+
+        sign = int(face_is_down(self.obj)) * 2 - 1
+
         bevel = self.get_bevel_object()
-        bevel.scale = (self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
+        bevel.scale = (sign * self.obj.soc_tool_diameter, self.obj.soc_cut_depth, 1)
         self.obj.data.bevel_object = bevel
         solid_obj = self.update_mesh()
         self.obj.data.bevel_object = None
