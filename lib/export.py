@@ -68,8 +68,7 @@ class Export:
     def svg_body(self, selection):
         svg_objs = [svg_object.create(self.context, obj) for obj in selection]
 
-        return \
-            '<g transform="scale(1,-1)">' + \
-            ''.join([
-                o.svg() for o in svg_objs
-            ]) + '</g>'
+        content = [o.svg() for o in svg_objs]
+        content_sorted = [item[1] for item in sorted(content, reverse=True)]
+
+        return '<g transform="scale(1,-1)">' + ''.join(content_sorted) + '</g>'

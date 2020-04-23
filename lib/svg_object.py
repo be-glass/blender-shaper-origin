@@ -16,29 +16,34 @@ def create(context, obj):
 
 
 class SvgObject:
-    def __init__(self, context, obj, perimeter=None):
+    def __init__(self, context, obj, curve_obj=None):
         self.obj = obj
         self.context = context
-
-        self.perimeter = perimeter if perimeter else find_first_perimeter(obj)
+        self.original = curve_obj if curve_obj else obj
+        self.cut_type = curve_obj.soc_curve_cut_type if curve_obj else obj.soc_mesh_cut_type
 
     def svg_object(self, content, attributes):
         return \
-            f'<g id="{self.obj.name_full}" class="{self.obj.type}" {attributes}>' + \
+            f'<g id="{self.original.name_full}" class="{self.original.type}" {attributes}>' + \
             ''.join(content) + \
             '</g>'
 
 
 class SvgMesh(SvgObject):
 
-    def svg(self, attributes=None):
+    def svg(self):
 
-        self.attributes = attributes if attributes else svg_material_attributes(self.obj.soc_mesh_cut_type)
+        self.perimeter = find_first_perimeter(self.original)
 
-        content = ''.join([
-            self.svg_polygon(self.obj, self.obj.data.vertices, p) for p in self.obj.data.polygons
-        ])
-        return self.svg_object(content, self.attributes)
+        self.attributes = svg_material_attributes(self.cut_type)
+
+        z = 0
+        content = ''
+        for p in self.obj.data.polygons:
+            c, z = self.svg_polygon(self.obj, self.obj.data.vertices, p)
+            content += c
+
+        return z, self.svg_object(content, self.attributes)
 
     def svg_polygon(self, obj, vertices, polygon):
         points = [vertices[i] for i in polygon.vertices]
@@ -47,32 +52,21 @@ class SvgMesh(SvgObject):
     def svg_path(self, points, is_closed):
         source = ''
         path_cmd = 'M'
+        z = 0
         for point in points:
-            vector = transform_export(self.context, self.obj, self.perimeter) @ point.co
+            vector = transform_export(self.context, self.original, self.perimeter) @ point.co
             source += path_cmd + vector2string(vector)
             path_cmd = 'L'
+            z = vector[2]
         if is_closed:
             source += 'Z'
-        return f'<path d="{source}"/>'
+        return f'<path d="{source}"/>', z
 
 
 class SvgCurve(SvgObject):
 
     def svg(self):
-        self.attributes = svg_material_attributes(self.obj.soc_curve_cut_type)
-
-        # if self.object.data.splines[0].type == 'POLY':
-        #     # TODO check if cyclic switch is working
-        #     content = ''.join([
-        #         self.svg_path(s.points, is_closed=s.use_cyclic_u) for s in self.obj.data.splines
-        #     ])
-        #     attributes = svg_material_attributes(self.obj.soc_curve_cut_type)
-        #     return self.svg_object(content, attributes)
-
         mesh_obj = curve2mesh(self.context, self.obj, add_face=True)
+        svg_obj = SvgMesh(self.context, mesh_obj, curve_obj=self.obj)
 
-        self.context.scene.collection.objects.link(mesh_obj)  # TODO: remove
-
-        svg_obj = SvgMesh(self.context, mesh_obj, self.perimeter)
-
-        return svg_obj.svg(self.attributes)
+        return svg_obj.svg()
