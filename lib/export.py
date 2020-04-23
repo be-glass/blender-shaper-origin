@@ -1,8 +1,8 @@
-from ..__init__ import bl_info
-from .constant import SVG_HEADER_TEMPLATE
-from .helper.other import project_name, write
-from .helper.op_export_svg import dimensions
 from . import svg_object
+from .constant import SVG_HEADER_TEMPLATE
+from .helper.gen_helper import boundaries
+from .helper.other import project_name, write
+from ..__init__ import bl_info
 
 
 class Export:
@@ -50,9 +50,11 @@ class Export:
     def svg_header(self, selection):
         version = '.'.join([str(i) for i in bl_info['version']])
 
-        (x0, y0, x1, y1, w, h) = dimensions(self.context, selection)
+        (x0, y0, _), (x1, y1, _) = boundaries(self.context)
 
-        # frame = Preview(self.context) # TODO
+        scale = self.context.scene.unit_settings.scale_length
+        w = (x1 - x0) * scale
+        h = (y1 - y0) * scale
 
         return SVG_HEADER_TEMPLATE.format(
             x0=x0, w=x1 - x0, y0=-y1, h=y1 - y0,

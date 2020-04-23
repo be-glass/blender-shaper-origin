@@ -2,7 +2,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 from ..constant import PREFIX
-from .other import get_solid_collection, delete_object, get_reference_collection
+from .other import get_solid_collection, delete_object, get_reference_collection, find_cuts
 
 
 def find_siblings_by_type(cut_types, sibling=None, collection=None):
@@ -111,18 +111,16 @@ def get_reference(context, obj):
         return reference
 
 
-def boundaries(context, object_list):
+def boundaries(context):
     x = []
     y = []
     z = []
-    for obj in object_list:
+    for obj in find_cuts():
 
         reference = get_reference(context, obj)
-        # reference = get_object_safely(obj.soc_reference_name)
 
         user = reference.matrix_world
         scale = Matrix.Diagonal(obj.matrix_world.to_scale()).to_4x4()
-        transform = user @ scale
 
         bb = obj.bound_box
         for p in range(8):

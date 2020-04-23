@@ -1,13 +1,15 @@
 import bpy
 from mathutils import Matrix, Vector
 
-from .constant import FACE_COLOR
+from .constant import FACE_COLOR, PREFIX
 from .helper.gen_helper import get_reference, boundaries
 from .helper.preview_helper import transform_preview
 from .helper.mesh import create_object
 from .helper.other import (
     length, get_preview_collection, find_cuts, get_soc_collection, warning_msg, get_object_safely
 )
+
+BOUNDING_FRAME_NAME = PREFIX + 'Bounding Frame'
 
 
 class Preview:
@@ -19,7 +21,7 @@ class Preview:
         self.perimeters = [o for o in self.cut_objs if o.soc_mesh_cut_type == 'Perimeter']
 
     def get_bounding_frame(self):
-        name = 'Bounding Frame'
+        name = BOUNDING_FRAME_NAME
         if name in bpy.data.objects.keys():
             return bpy.data.objects[name]
         else:
@@ -53,20 +55,19 @@ class Preview:
 
     def hide_bounding_frame(self):
         collection = get_soc_collection(self.context)
-        search = [o for o in collection.objects if o.name.startswith('Bounding Frame')]
-        if search:
-            search[0].hide_set(True)
+        frame = self.get_bounding_frame()
+        if frame:
+            frame.hide_set(True)
 
     def update_bounding_frame(self):
-        collection = get_soc_collection(self.context)
-        search = [o for o in collection.objects if o.name.startswith('Bounding Frame')]
-        if search:
-            mw = search[0].matrix_world.copy()
-            bpy.data.objects.remove(search[0])
+        frame = self.get_bounding_frame()
+        if frame:
+            mw = frame.matrix_world.copy()
+            bpy.data.objects.remove(frame)
         else:
             mw = Matrix()
 
-        c0, c1 = boundaries(self.context, self.perimeters)
+        c0, c1 = boundaries(self.context)
 
         z = -0.1
         d = length(self.context, '10mm')  # margin of preview sheet
@@ -78,7 +79,8 @@ class Preview:
 
         quad = [m0, m1, m2, m3]
 
-        frame = create_object(quad, collection, "Bounding Frame")
+        collection = get_soc_collection(self.context)
+        frame = create_object(quad, collection, BOUNDING_FRAME_NAME)
         frame.matrix_world = mw
         frame.soc_object_type = "Bounding"
         return frame
