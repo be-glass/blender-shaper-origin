@@ -3,7 +3,7 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
-from .lib import generator
+from .lib.generator import Generator
 from .lib.export import Export
 from .lib.helper.gen_helper import find_perimeters
 from .lib.helper.other import translate_local, find_cuts, store_selection, restore_selection
@@ -76,7 +76,7 @@ class MESH_OT_socut_rebuild(Operator):
         ao, selection = store_selection(context)
 
         for obj in find_cuts():
-            generator.update(context, obj, reset=True)
+            Generator(context).create(obj).reset()
 
         restore_selection(ao, selection)
 

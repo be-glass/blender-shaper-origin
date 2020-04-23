@@ -1,7 +1,7 @@
 from mathutils import Matrix, Vector
 
 from ..constant import PREVIEW_Z
-from .other import length, find_first_perimeter
+from .other import length
 from .gen_helper import get_reference
 
 

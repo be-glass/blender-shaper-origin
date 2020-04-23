@@ -1,6 +1,6 @@
 import bpy
 
-from .lib import generator
+from .lib.generator import Generator
 from .lib.constant import DEFAULTS
 from .lib.preview import Preview
 from .lib.helper.other import consistency_checks, length, store_selection, restore_selection
@@ -31,14 +31,15 @@ def post_ob_updated(scene, depsgraph):
 
 
 def handle_object_types(obj, depsgraph):
+    context = bpy.context
     if obj.soc_object_type == 'Cut':
         for u in depsgraph.updates:
             if u.is_updated_geometry:
-                generator.update(bpy.context, obj, reset=True)
+                Generator(context).create(obj).update(reset=True)
             elif u.is_updated_transform:
-                generator.transform(bpy.context, obj)
+                Generator(context).create(obj).transform()
             else:
-                generator.update_hide_state(bpy.context, obj)
+                Generator(context).create(obj).update_hide_state()
 
     elif obj.soc_object_type == 'Preview':
         for u in depsgraph.updates:
@@ -80,7 +81,7 @@ def update_cut_depth(obj, context):
         elif obj.soc_cut_depth > maximum:
             obj.soc_cut_depth = maximum
         else:
-            generator.update(context, obj)
+            Generator(context).create(obj).update()
 
 
 def update_tool_diameter(obj, context):
@@ -92,7 +93,7 @@ def update_tool_diameter(obj, context):
         elif obj.soc_tool_diameter > maximum:
             obj.soc_tool_diameter = maximum
         else:
-            generator.update(context, obj, reset=True)
+            Generator(context).create(obj).update(reset=True)
 
 
 def initialize_object(obj, context):
@@ -105,7 +106,7 @@ def update_cut_type(obj, context):
     _, selection = store_selection(context, reset=True)
     if not obj.soc_initialized:
         initialize_object(obj, context)
-    generator.update(context, obj, reset=True)
+    Generator(context).create(obj).update(reset=True)
     restore_selection(obj, selection)
 
 

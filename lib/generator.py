@@ -1,12 +1,8 @@
-import bpy
 import math
 
-from .constant import PREFIX
 from .fillet import Fillet
 
-from .helper.gen_helper import find_perimeters, cleanup, delete_modifiers, \
-    find_siblings_by_type, cleanup_meshes, get_reference, delete_solid_objects, boolean_modifier_name, \
-    delete_modifier, perimeter_thickness
+from .helper.gen_helper import *
 from .helper.other import get_solid_collection, err_implementation, get_object_safely, length, \
     delete_object, hide_objects, get_helper_collection
 from .helper.mesh import repair_mesh, shade_mesh_flat, curve2mesh
@@ -14,58 +10,38 @@ from .helper.curve import add_nurbs_square, face_is_down
 from .preview import Preview
 
 
-def update(context, obj, reset=False):
-    if reset:
-        cleanup(context, obj)
-
-    if obj.soc_curve_cut_type == 'None' and obj.soc_mesh_cut_type == 'None':
-        obj.soc_object_type = "None"
-        return
-    if not obj.soc_simulate:
-        return
-
-    obj.soc_object_type = 'Cut'
-    cut = get_generator(obj)
-    generator = cut(context, obj)
-
-    if reset:
-        generator.setup()
-    generator.update()
-
-
-def transform(context, obj):
-    cut = get_generator(obj)
-    generator = cut(context, obj)
-    generator.transform()
-
-
-def update_hide_state(context, obj):
-    cut = get_generator(obj)
-    generator = cut(context, obj)
-    generator.update_hide_state()
-
-
-def get_generator(obj):
-    if obj.soc_mesh_cut_type == 'Perimeter':
-        cut = Perimeter
-    elif obj.soc_curve_cut_type in ['Exterior', 'Interior', 'Online'] and obj.type == 'CURVE':
-        cut = CurveCut
-    elif obj.soc_mesh_cut_type in ['Cutout', 'Pocket'] and obj.type == 'MESH':
-        cut = MeshCut
-    else:
-        err_implementation()
-        return
-    return cut
-
-
 class Generator:
 
-    def __init__(self, context, obj):
-        self.obj = obj
+    def __init__(self, context, obj=None):
         self.context = context
-        self.solid_collection = get_solid_collection(context)
+        self.obj = obj
+
+    def create(self, obj):
+        self.obj = obj
+
+        if not obj.soc_simulate:
+            cut = Disabled
+        elif obj.soc_curve_cut_type == 'None' and obj.soc_mesh_cut_type == 'None':
+            cut = Disabled
+        if self.obj.soc_mesh_cut_type == 'Perimeter':
+            cut = Perimeter
+        elif self.obj.soc_curve_cut_type in ['Exterior', 'Interior', 'Online'] and self.obj.type == 'CURVE':
+            cut = CurveCut
+        elif self.obj.soc_mesh_cut_type in ['Cutout', 'Pocket'] and self.obj.type == 'MESH':
+            cut = MeshCut
+        else:
+            cut = Disabled
+            # err_implementation()
+            # return None
+        return cut(self.context, self.obj)
+
+    def reset(self):
+        cleanup(self.context, self.obj)
+        self.setup()
+        self.update()
 
     def setup(self):
+        self.solid_collection = get_solid_collection(self.context)
         self.obj.display_type = 'WIRE'
 
     def cleanup(self):
@@ -94,8 +70,9 @@ class Generator:
         return length(self.context, quantity_with_unit)
 
     def adjust_boolean_modifiers(self, collection):
+        solid_obj = get_object_safely(self.obj.soc_solid_name)
         for perimeter_obj in find_perimeters(collection):
-            self.rebuild_boolean_modifier(perimeter_obj, self.obj)
+            self.rebuild_boolean_modifier(perimeter_obj, solid_obj)
 
     def reset_preview_object(self):
         name = self.obj.name + '.preview'
@@ -131,6 +108,15 @@ class Generator:
         pass
 
 
+class Disabled(Generator):
+
+    def update(self):
+        self.obj.soc_object_type = "None"
+
+    def setup(self):
+        self.obj.display_type = 'TEXTURED'
+
+
 class Perimeter(Generator):
 
     def setup(self):
@@ -154,6 +140,7 @@ class Perimeter(Generator):
             Preview(self.context).add_object(self.obj, self.obj)
 
     def update(self):
+
         self.adjust_solidify_thickness()
 
         cutouts = find_siblings_by_type('Cutout', sibling=self.context.object)
@@ -257,7 +244,7 @@ class CurveCut(Generator):
         get_solid_collection(self.context).objects.link(mesh_obj)
 
         shade_mesh_flat(mesh_obj)
-        repair_mesh(self.context, mesh_obj)
+        repair_mesh(self.context, mesh_obj)  # TODO: needed?
         hide_objects(mesh_obj.name)
 
         return mesh_obj
