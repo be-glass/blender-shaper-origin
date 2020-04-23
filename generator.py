@@ -1,19 +1,18 @@
 import bpy
 import math
 
-from mathutils import Vector
-
 from .constant import PREFIX
 from .fillet import Fillet
 
 from .helper.gen_helper import find_perimeters, cleanup, delete_modifiers, \
     find_siblings_by_type, cleanup_meshes, get_reference, delete_solid_objects, boolean_modifier_name, \
     delete_modifier, perimeter_thickness
-from .helper.other import get_solid_collection, err_implementation, select_active, get_object_safely, length, \
+from .helper.other import get_solid_collection, err_implementation, get_object_safely, length, \
     move_object, \
     delete_object, hide_objects, get_helper_collection
-from .helper.mesh import repair_mesh, shade_mesh_flat, add_plane
-from .helper.curve import add_nurbs_square, face_normal, face_is_down
+from .helper.mesh import repair_mesh, shade_mesh_flat
+from .helper.curve import add_nurbs_square, face_is_down
+from .helper.mesh import curve2mesh
 from .preview import Preview
 
 
@@ -221,7 +220,7 @@ class CurveCut(Generator):
 
     def update(self):
 
-        sign = int(face_is_down(self.obj)) * 2 - 1
+        sign = int(face_is_down(self.context, self.obj)) * 2 - 1
 
         for p in self.obj.data.splines[0].points:
             p.radius = 1.0
@@ -253,17 +252,11 @@ class CurveCut(Generator):
     def update_mesh(self):
         mesh_name = PREFIX + self.obj.name + '.mesh'
         delete_object(mesh_name)
-        solid_collection = get_solid_collection(self.context)
 
-        # create a MESH version of the curve object
-        depsgraph = self.context.evaluated_depsgraph_get()
-        object_evaluated = self.obj.evaluated_get(depsgraph)
-        mesh = bpy.data.meshes.new_from_object(object_evaluated)
-        mesh_obj = bpy.data.objects.new(mesh_name, mesh)
-        mesh_obj.matrix_world = self.obj.matrix_world
         cleanup_meshes(self.context, self.obj, mesh_name)
-        self.obj.users_collection[0].objects.link(mesh_obj)
-        move_object(mesh_obj, solid_collection)
+        mesh_obj = curve2mesh(self.context, self.obj, mesh_name)
+        get_solid_collection(self.context).objects.link(mesh_obj)
+
         shade_mesh_flat(mesh_obj)
         repair_mesh(self.context, mesh_obj)
         hide_objects(mesh_obj.name)

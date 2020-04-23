@@ -2,7 +2,7 @@ import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
-from .other import select_active
+from .other import select_active, error_msg
 
 
 def apply_mesh_scale(context, obj):
@@ -66,3 +66,28 @@ def add_plane(context, name, size, collection=None):  # TODO: replace without o
             c.objects.unlink(obj)
         collection.objects.link(obj)
     return obj
+
+
+def curve2mesh(context, obj, name='', add_face=False):
+    depsgraph = context.evaluated_depsgraph_get()
+    object_evaluated = obj.evaluated_get(depsgraph)
+    mesh = bpy.data.meshes.new_from_object(object_evaluated)
+    mesh_obj = bpy.data.objects.new(name, mesh)
+    mesh_obj.matrix_world = obj.matrix_world
+
+    if add_face:
+        fill_polygon(mesh_obj)
+
+    mesh_obj.data.update()
+    if mesh_obj.data.validate():
+        error_msg('Curve to mesh conversion yielded invalid data!', context)
+
+    return mesh_obj
+
+
+def fill_polygon(obj):
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bm.faces.new(bm.verts)
+    bm.to_mesh(obj.data)
+    bm.free()

@@ -66,7 +66,7 @@ def error_msg(message, context=bpy.context):
         self.layout.label(text=message)
 
     context.window_manager.popup_menu(msg, title="Error", icon='ERROR')
-    raise Exception("DEBUG me")
+    raise Exception(message)
 
 
 def warning_msg(message, context=bpy.context):
@@ -74,7 +74,7 @@ def warning_msg(message, context=bpy.context):
         self.layout.label(text=message)
 
     context.window_manager.popup_menu(msg, title="Warning", icon='ERROR')
-    raise Exception("DEBUG me")
+    raise Exception(message)
 
 
 def err_implementation(context=bpy.context):
