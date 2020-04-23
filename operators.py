@@ -3,15 +3,17 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
+from .lib import generator
 from .lib.export import Export
 from .lib.helper.gen_helper import find_perimeters
-from .lib.helper.other import translate_local
+from .lib.helper.other import translate_local, find_cuts, store_selection, restore_selection
 
 
 def operators():
     return (
         MESH_OT_socut_export_cuts,
         MESH_OT_socut_align_object,
+        MESH_OT_socut_rebuild,
     )
 
 
@@ -60,6 +62,23 @@ class MESH_OT_socut_align_object(Operator):
         d = distance_point_to_plane(obj.location, perimeters[0].location, perimeters[0].data.polygons[0].normal)
 
         translate_local(obj, mathutils.Vector((0, 0, d + .001)))
+
+        self.report({'INFO'}, "OK")
+        return {'FINISHED'}
+
+
+class MESH_OT_socut_rebuild(Operator):
+    bl_idname = "mesh.socut_rebuild"
+    bl_label = "Rebuild everything"
+    bl_description = "Rebuild all objects"
+
+    def execute(self, context):
+        ao, selection = store_selection(context)
+
+        for obj in find_cuts():
+            generator.update(context, obj, reset=True)
+
+        restore_selection(ao, selection)
 
         self.report({'INFO'}, "OK")
         return {'FINISHED'}

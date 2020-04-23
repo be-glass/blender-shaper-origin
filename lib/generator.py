@@ -162,8 +162,9 @@ class Perimeter(Generator):
 
     def update_hide_state(self):
         hidden = self.obj.hide_get()  # or self.obj.users_collection[0].hide_viewport   # collection cannot work
-        solid = get_object_safely(self.obj.soc_solid_name)
-        solid.hide_set(hidden)
+        solid = get_object_safely(self.obj.soc_solid_name, report_error=False)
+        if solid:
+            solid.hide_set(hidden)
 
 
 class MeshCut(Generator):
