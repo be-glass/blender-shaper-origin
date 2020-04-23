@@ -1,4 +1,4 @@
-from ..constant import SVG_COORD_FORMAT, SVG_HEADER_TEMPLATE, CUT_ENCODING
+from ..constant import SVG_COORD_FORMAT
 from .gen_helper import boundaries
 
 

@@ -8,11 +8,9 @@ from .helper.gen_helper import find_perimeters, cleanup, delete_modifiers, \
     find_siblings_by_type, cleanup_meshes, get_reference, delete_solid_objects, boolean_modifier_name, \
     delete_modifier, perimeter_thickness
 from .helper.other import get_solid_collection, err_implementation, get_object_safely, length, \
-    move_object, \
     delete_object, hide_objects, get_helper_collection
-from .helper.mesh import repair_mesh, shade_mesh_flat
+from .helper.mesh import repair_mesh, shade_mesh_flat, curve2mesh
 from .helper.curve import add_nurbs_square, face_is_down
-from .helper.mesh import curve2mesh
 from .preview import Preview
 
 

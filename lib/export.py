@@ -1,6 +1,6 @@
-from .__init__ import bl_info
+from ..__init__ import bl_info
 from .constant import SVG_HEADER_TEMPLATE
-from .helper.other import project_name, write, err_implementation, warning_msg
+from .helper.other import project_name, write
 from .helper.op_export_svg import dimensions
 from . import svg_object
 

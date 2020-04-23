@@ -1,11 +1,9 @@
-import datetime
-
 import bpy
 
-from . import generator
-from .constant import DEFAULTS
-from .preview import Preview
-from .helper.other import consistency_checks, length, store_selection, restore_selection
+from .lib import generator
+from .lib.constant import DEFAULTS
+from .lib.preview import Preview
+from .lib.helper.other import consistency_checks, length, store_selection, restore_selection
 
 
 def register():

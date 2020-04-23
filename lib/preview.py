@@ -4,7 +4,7 @@ from mathutils import Matrix, Vector
 from .constant import FACE_COLOR
 from .helper.gen_helper import get_reference, boundaries
 from .helper.preview_helper import transform_preview
-from .helper.mesh import apply_mesh_scale, create_object
+from .helper.mesh import create_object
 from .helper.other import (
     length, get_preview_collection, find_cuts, get_soc_collection, warning_msg, get_object_safely
 )

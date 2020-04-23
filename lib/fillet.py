@@ -3,9 +3,9 @@ from math import pi
 import mathutils
 from mathutils import Vector, Matrix
 
+from .constant import PREFIX, FILLET_RESOLUTION
 from .helper.mesh import create_object
 from .helper.other import error_msg, warning_msg, get_solid_collection, delete_object
-from .constant import PREFIX, FILLET_RESOLUTION
 
 
 class Fillet:

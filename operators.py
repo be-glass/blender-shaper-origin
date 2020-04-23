@@ -3,9 +3,9 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
-from .export import Export
-from .helper.gen_helper import find_perimeters
-from .helper.other import translate_local
+from .lib.export import Export
+from .lib.helper.gen_helper import find_perimeters
+from .lib.helper.other import translate_local
 
 
 def operators():

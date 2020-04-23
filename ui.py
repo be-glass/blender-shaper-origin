@@ -2,7 +2,7 @@ import bpy
 from bpy import utils
 from bpy.types import Panel
 
-from .helper import gen_helper
+from .lib.helper import gen_helper
 
 
 def panels():
