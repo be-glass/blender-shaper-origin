@@ -88,6 +88,9 @@ class Generator:
             obj = self.obj
         fillet_obj = get_object_safely(obj.soc_solid_name, report_error=False)
 
+        if obj.soc_mesh_cut_type == 'None':
+            return None
+
         if not fillet_obj:
             fillet = Fillet(self.context, obj)
             fillet_obj = fillet.create(outside)
@@ -101,12 +104,13 @@ class Generator:
         subtract_fillet = self.get_fillet_obj(subtract_obj)
         perimeter_fillet = self.get_fillet_obj(perimeter_obj, outside=True)
 
-        delete_modifier(perimeter_fillet, modifier_name)
-        boolean = perimeter_fillet.modifiers.new(modifier_name, 'BOOLEAN')
-        boolean.operation = 'DIFFERENCE'
-        boolean.object = get_object_safely(subtract_fillet.name)
+        if subtract_fillet and perimeter_fillet:
+            delete_modifier(perimeter_fillet, modifier_name)
+            boolean = perimeter_fillet.modifiers.new(modifier_name, 'BOOLEAN')
+            boolean.operation = 'DIFFERENCE'
+            boolean.object = get_object_safely(subtract_fillet.name)
 
-        subtract_fillet.hide_set(True)
+            subtract_fillet.hide_set(True)
 
     def update_hide_state(self):
         pass
