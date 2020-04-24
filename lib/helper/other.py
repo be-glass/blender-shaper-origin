@@ -193,7 +193,11 @@ def find_cuts():
 
 
 def find_first_perimeter(obj):
-    return [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter'][0]
+    perimeters = [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']
+    if perimeters:
+        return perimeters[0]
+    else:
+        return None
 
 
 def store_selection(context, reset=False):

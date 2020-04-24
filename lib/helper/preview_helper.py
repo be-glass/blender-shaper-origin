@@ -17,7 +17,7 @@ def transform_preview(context, bounding_frame, perimeter, obj):
     return m4 @ m3 @ m2 @ m1 @ m0
 
 
-def transform_export(context, perimeter, obj):
+def transform_export(context, obj, perimeter):
     reference = get_reference(context, perimeter)
 
     m0 = obj.matrix_world
