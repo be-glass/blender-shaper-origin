@@ -1,5 +1,5 @@
-from . import svg_object
 from .constant import SVG_HEADER_TEMPLATE
+from .generator import Generator
 from .helper.gen_helper import boundaries
 from .helper.other import project_name, write
 from ..__init__ import bl_info
@@ -66,9 +66,9 @@ class Export:
         return '</svg>\n'
 
     def svg_body(self, selection):
-        svg_objs = [svg_object.create(self.context, obj) for obj in selection]
 
-        content = [o.svg() for o in svg_objs]
+        cuts = [Generator(self.context).create(obj) for obj in selection]
+        content = [cut.svg() for cut in cuts]
         content_sorted = [item[1] for item in sorted(content, reverse=True)]
 
         return '<g transform="scale(1,-1)">' + ''.join(content_sorted) + '</g>'

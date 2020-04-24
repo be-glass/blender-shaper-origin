@@ -35,7 +35,7 @@ def handle_object_types(obj, depsgraph):
     if obj.soc_object_type == 'Cut':
         for u in depsgraph.updates:
             if u.is_updated_geometry:
-                Generator(context).create(obj).update(reset=True)
+                Generator(context).create(obj).reset()
             elif u.is_updated_transform:
                 Generator(context).create(obj).transform()
             else:
@@ -93,7 +93,7 @@ def update_tool_diameter(obj, context):
         elif obj.soc_tool_diameter > maximum:
             obj.soc_tool_diameter = maximum
         else:
-            Generator(context).create(obj).update(reset=True)
+            Generator(context).create(obj).reset()
 
 
 def initialize_object(obj, context):
@@ -106,7 +106,7 @@ def update_cut_type(obj, context):
     _, selection = store_selection(context, reset=True)
     if not obj.soc_initialized:
         initialize_object(obj, context)
-    Generator(context).create(obj).update(reset=True)
+    Generator(context).create(obj).reset()
     restore_selection(obj, selection)
 
 

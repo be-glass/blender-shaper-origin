@@ -3,10 +3,13 @@ import math
 from .fillet import Fillet
 
 from .helper.gen_helper import *
+from .helper.op_export_svg import vector2string
 from .helper.other import get_solid_collection, err_implementation, get_object_safely, length, \
-    delete_object, hide_objects, get_helper_collection
+    delete_object, hide_objects, get_helper_collection, find_first_perimeter
 from .helper.mesh import repair_mesh, shade_mesh_flat, curve2mesh
 from .helper.curve import add_nurbs_square, face_is_down
+from .helper.preview_helper import transform_export
+from .helper.svg import svg_material_attributes
 from .preview import Preview
 
 
@@ -15,6 +18,7 @@ class Generator:
     def __init__(self, context, obj=None):
         self.context = context
         self.obj = obj
+        self.source_obj = obj
 
     def create(self, obj):
         self.obj = obj
@@ -107,6 +111,43 @@ class Generator:
     def update_hide_state(self):
         pass
 
+    def svg_object(self, content, attributes):
+        return \
+            f'<g id="{self.source_obj.name_full}" class="{self.source_obj.type}" {attributes}>' + \
+            ''.join(content) + \
+            '</g>'
+
+    def svg_polygon(self, obj, vertices, polygon):
+        points = [vertices[i] for i in polygon.vertices]
+        return self.svg_path(points, is_closed=True)
+
+    def svg_path(self, points, is_closed):
+        source = ''
+        path_cmd = 'M'
+        z = 0
+        for point in points:
+            vector = transform_export(self.context, self.source_obj, self.source_obj.perimeter) @ point.co
+            source += path_cmd + vector2string(vector)
+            path_cmd = 'L'
+            z = vector[2]
+        if is_closed:
+            source += 'Z'
+        return f'<path d="{source}"/>', z
+
+    def svg_mesh(self):
+        self.attributes = svg_material_attributes(self.source_obj.cut_type())
+
+        z = 0
+        content = ''
+        for p in self.obj.data.polygons:
+            c, z = self.svg_polygon(self.obj, self.obj.data.vertices, p)
+            content += c
+
+        return z, self.svg_object(content, self.attributes)
+
+    def cut_type(self):
+        return self.obj.soc_mesh_cut_type
+
 
 class Disabled(Generator):
 
@@ -153,6 +194,10 @@ class Perimeter(Generator):
         if solid:
             solid.hide_set(hidden)
 
+    def svg(self):
+        self.perimeter = self.obj
+        self.svg_mesh()
+
 
 class MeshCut(Generator):
 
@@ -194,6 +239,10 @@ class MeshCut(Generator):
             delta = 0.0
 
         self.adjust_solidify_thickness(delta=delta)
+
+    def svg(self):
+        self.perimeter = find_first_perimeter(self.source_obj)
+        self.svg_mesh()
 
 
 class CurveCut(Generator):
@@ -248,3 +297,12 @@ class CurveCut(Generator):
         hide_objects(mesh_obj.name)
 
         return mesh_obj
+
+    def svg(self):
+        mesh_obj = curve2mesh(self.context, self.obj, add_face=True)
+        mesh_cut = Generator(self.context).create(mesh_obj)
+        mesh_cut.source_obj = self
+        return mesh_cut.svg()
+
+    def cut_type(self):
+        return self.obj.soc_curve_cut_type
