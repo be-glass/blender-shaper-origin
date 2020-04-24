@@ -18,25 +18,35 @@ class Generator:
     def __init__(self, context, obj=None):
         self.context = context
         self.obj = obj
-        self.source_obj = obj
+        self.perimeter = None
+
+        items = [('None', 'None', 'None', '', 0),
+                 ('Cut', 'Cut', "Cut", 1),
+                 ('Preview', 'Preview', 'Preview', 2),
+                 ('Reference', 'Reference', 'Reference', '', 3),
+                 ('Bounding', 'Bounding', 'Bounding', '', 4),
+                 ('Helper', 'Helper', 'Helper', '', 5),
+                 ('Proxy', 'Proxy', 'Proxy', '', 6),
+                 ],
 
     def create(self, obj):
         self.obj = obj
 
-        if not obj.soc_simulate:
+        ot = obj.soc_object_type
+
+        if ot == 'None' or not obj.soc_simulate:
             cut = Disabled
-        elif obj.soc_curve_cut_type == 'None' and obj.soc_mesh_cut_type == 'None':
-            cut = Disabled
-        if self.obj.soc_mesh_cut_type == 'Perimeter':
-            cut = Perimeter
-        elif self.obj.soc_curve_cut_type in ['Exterior', 'Interior', 'Online'] and self.obj.type == 'CURVE':
-            cut = CurveCut
-        elif self.obj.soc_mesh_cut_type in ['Cutout', 'Pocket'] and self.obj.type == 'MESH':
-            cut = MeshCut
+        elif ot == 'Cut':
+            if self.obj.soc_mesh_cut_type == 'Perimeter':
+                cut = Perimeter
+            elif self.obj.soc_curve_cut_type in ['Exterior', 'Interior', 'Online'] and self.obj.type == 'CURVE':
+                cut = CurveCut
+            elif self.obj.soc_mesh_cut_type in ['Cutout', 'Pocket'] and self.obj.type == 'MESH':
+                cut = MeshCut
+        elif ot == 'Proxy':
+            cut = Proxy
         else:
             cut = Disabled
-            # err_implementation()
-            # return None
         return cut(self.context, self.obj)
 
     def reset(self):
@@ -117,12 +127,12 @@ class Generator:
 
     def svg_object(self, content, attributes):
         return \
-            f'<g id="{self.source_obj.name_full}" class="{self.source_obj.type}" {attributes}>' + \
+            f'<g id="{self.obj.name_full}" class="{self.obj.type}" {attributes}>' + \
             ''.join(content) + \
             '</g>'
 
-    def svg_polygon(self, obj, vertices, polygon):
-        points = [vertices[i] for i in polygon.vertices]
+    def svg_polygon(self, polygon):
+        points = [self.obj.data.vertices[i] for i in polygon.vertices]
         return self.svg_path(points, is_closed=True)
 
     def svg_path(self, points, is_closed):
@@ -130,7 +140,7 @@ class Generator:
         path_cmd = 'M'
         z = 0
         for point in points:
-            vector = transform_export(self.context, self.source_obj, self.source_obj.perimeter) @ point.co
+            vector = transform_export(self.context, self.obj, self.perimeter) @ point.co
             source += path_cmd + vector2string(vector)
             path_cmd = 'L'
             z = vector[2]
@@ -139,18 +149,17 @@ class Generator:
         return f'<path d="{source}"/>', z
 
     def svg_mesh(self):
-        self.attributes = svg_material_attributes(self.source_obj.cut_type())
 
         z = 0
         content = ''
-        for p in self.obj.data.polygons:
-            c, z = self.svg_polygon(self.obj, self.obj.data.vertices, p)
+        for polygon in self.obj.data.polygons:
+            c, z = self.svg_polygon(polygon)
             content += c
 
-        return z, self.svg_object(content, self.attributes)
+        return content, z
 
-    def cut_type(self):
-        return self.obj.soc_mesh_cut_type
+    def cut_type(self, mesh_obj):
+        return mesh_obj.soc_mesh_cut_type
 
 
 class Disabled(Generator):
@@ -200,8 +209,10 @@ class Perimeter(Generator):
 
     def svg(self):
         self.perimeter = self.obj
-        self.svg_mesh()
+        content, z = self.svg_mesh()
+        attributes = svg_material_attributes(self.cut_type(self.obj))
 
+        return z, self.svg_object(content, attributes)
 
 class MeshCut(Generator):
 
@@ -245,11 +256,35 @@ class MeshCut(Generator):
         self.adjust_solidify_thickness(delta=delta)
 
     def svg(self):
-        self.perimeter = find_first_perimeter(self.source_obj)
-        self.svg_mesh()
+        self.perimeter = find_first_perimeter(self.obj)
+        content, z = self.svg_mesh()
+        attributes = svg_material_attributes(self.obj.soc_mesh_cut_type)
+
+        return z, self.svg_object(content, attributes)
+
+
+class Proxy(Generator):
+
+    def setup_proxy(self, perimeter, reference_name):
+        self.obj.soc_object_type = 'Proxy'
+        self.perimeter = perimeter
+        self.obj.soc_reference_name = reference_name
 
 
 class CurveCut(Generator):
+
+    def svg(self):
+
+        mesh_obj = curve2mesh(self.context, self.obj, add_face=True)
+        proxy = Proxy(self.context, mesh_obj)
+        perimeter = find_first_perimeter(self.obj)
+        reference = get_reference(self.context, self.obj)
+        proxy.setup_proxy(perimeter, reference.name)
+
+        content, z = proxy.svg_mesh()
+        attributes = svg_material_attributes(self.obj.soc_curve_cut_type)
+
+        return z, self.svg_object(content, attributes)
 
     def setup(self):
         super().setup()
@@ -302,11 +337,3 @@ class CurveCut(Generator):
 
         return mesh_obj
 
-    def svg(self):
-        mesh_obj = curve2mesh(self.context, self.obj, add_face=True)
-        mesh_cut = Generator(self.context).create(mesh_obj)
-        mesh_cut.source_obj = self
-        return mesh_cut.svg()
-
-    def cut_type(self):
-        return self.obj.soc_curve_cut_type

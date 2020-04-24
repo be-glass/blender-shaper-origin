@@ -120,6 +120,7 @@ class ObjectProperties(PropertyGroup):
                ('Reference', 'Reference', 'Reference', '', 3),
                ('Bounding', 'Bounding', 'Bounding', '', 4),
                ('Helper', 'Helper', 'Helper', '', 5),
+               ('Proxy', 'Proxy', 'Proxy', '', 6),
                ],
 
         default='None',
