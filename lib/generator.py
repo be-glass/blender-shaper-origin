@@ -3,9 +3,8 @@ import math
 from .fillet import Fillet
 
 from .helper.gen_helper import *
-from .helper.op_export_svg import vector2string
 from .helper.other import get_solid_collection, err_implementation, get_object_safely, length, \
-    delete_object, hide_objects, get_helper_collection, find_first_perimeter
+    delete_object, hide_objects, get_helper_collection, find_first_perimeter, vector2string
 from .helper.mesh import repair_mesh, shade_mesh_flat, curve2mesh
 from .helper.curve import add_nurbs_square, face_is_down
 from .helper.preview_helper import transform_export
@@ -255,8 +254,12 @@ class MeshCut(Generator):
         self.adjust_solidify_thickness(delta=delta)
 
     def svg(self):
-        self.perimeter = find_first_perimeter(self.obj)
-        content, z = self.svg_mesh()
+
+        fillet = Fillet(self.context, self.obj)
+        proxy = Proxy(self.context, fillet.obj)
+        proxy.setup_proxy(self.obj)
+
+        content, z = proxy.svg_mesh()
         attributes = svg_material_attributes(self.obj.soc_mesh_cut_type)
 
         return z, self.svg_object(content, attributes)
@@ -264,10 +267,11 @@ class MeshCut(Generator):
 
 class Proxy(Generator):
 
-    def setup_proxy(self, perimeter, reference_name):
+    def setup_proxy(self, source_obj):
+        reference = get_reference(self.context, source_obj)
+        self.obj.soc_reference_name = reference.name
+        self.perimeter = find_first_perimeter(source_obj)
         self.obj.soc_object_type = 'Proxy'
-        self.perimeter = perimeter
-        self.obj.soc_reference_name = reference_name
 
 
 class CurveCut(Generator):
@@ -276,9 +280,7 @@ class CurveCut(Generator):
 
         mesh_obj = curve2mesh(self.context, self.obj, add_face=True)
         proxy = Proxy(self.context, mesh_obj)
-        perimeter = find_first_perimeter(self.obj)
-        reference = get_reference(self.context, self.obj)
-        proxy.setup_proxy(perimeter, reference.name)
+        proxy.setup_proxy(self.obj)
 
         content, z = proxy.svg_mesh()
         attributes = svg_material_attributes(self.obj.soc_curve_cut_type)

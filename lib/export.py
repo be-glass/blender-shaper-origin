@@ -67,8 +67,32 @@ class Export:
 
     def svg_body(self, selection):
 
-        cuts = [Generator(self.context).create(obj) for obj in selection]
+        groups = self.perimeter_groups(selection)
+
+        content = [self.svg_perimeter_group(group) for group in groups]
+
+        return '<g transform="scale(1,-1)">' + ''.join(content) + '</g>'
+
+    def svg_perimeter_group(self, objs):
+        cuts = [Generator(self.context).create(obj) for obj in objs]
         content = [cut.svg() for cut in cuts]
         content_sorted = [item[1] for item in sorted(content, reverse=True)]
+        return '<g class="Piece">' + ''.join(content_sorted) + '</g>'
 
-        return '<g transform="scale(1,-1)">' + ''.join(content_sorted) + '</g>'
+    def perimeter_groups(self, selection):
+        orphans = set(selection)
+
+        perimeter_objs = [o for o in selection if o.soc_mesh_cut_type == 'Perimeter']
+
+        groups = []
+        for perimeter in perimeter_objs:
+            siblings = set(perimeter.users_collection[0].objects)
+            group = siblings & orphans
+            orphans -= group
+            if group:
+                groups.append(group)
+
+        if orphans:
+            groups.append(orphans)
+
+        return groups

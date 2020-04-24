@@ -1,7 +1,7 @@
 import bpy
 import itertools
 
-from ..constant import PREFIX
+from ..constant import PREFIX, SVG_COORD_FORMAT
 
 
 def write(content, file_name):
@@ -212,3 +212,7 @@ def restore_selection(active_object, selected_objects):
         o.select_set(False)
     for o in selected_objects:
         o.select_set(True)
+
+
+def vector2string(vector):
+    return SVG_COORD_FORMAT.format(vector[0], vector[1])
