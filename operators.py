@@ -3,6 +3,7 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
+from .lib.preview import Preview
 from .lib.generator import Generator
 from .lib.export import Export
 from .lib.helper.gen_helper import find_perimeters
@@ -75,10 +76,15 @@ class MESH_OT_socut_rebuild(Operator):
     def execute(self, context):
         ao, selection = store_selection(context)
 
+        preview = context.scene.so_cut['preview']
+        context.scene.so_cut['preview'] = False
+
         for obj in find_cuts():
             Generator(context).create(obj).reset()
 
-        restore_selection(ao, selection)
+        if preview:
+            Preview(context).create()
+            context.scene.so_cut['preview'] = True
 
         self.report({'INFO'}, "OK")
         return {'FINISHED'}
