@@ -100,7 +100,7 @@ def get_reference(context, obj):
     else:
         reference = bpy.data.objects.new(name, None)
         reference.location = obj.location
-        # reference.matrix_world = obj.matrix_world
+        reference.matrix_world = obj.matrix_world
         reference.matrix_world.identity()
         collection.objects.link(reference)
         reference.empty_display_size = 5

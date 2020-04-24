@@ -106,7 +106,12 @@ def update_cut_type(obj, context):
     _, selection = store_selection(context, reset=True)
     if not obj.soc_initialized:
         initialize_object(obj, context)
-    Generator(context).create(obj).reset()
+
+    g = Generator(context)
+    c = g.create(obj)
+    c.reset()
+
+    # Generator(context).create(obj).reset()
     restore_selection(obj, selection)
 
 

@@ -19,24 +19,18 @@ class Generator:
         self.context = context
         self.obj = obj
         self.perimeter = None
-
-        items = [('None', 'None', 'None', '', 0),
-                 ('Cut', 'Cut', "Cut", 1),
-                 ('Preview', 'Preview', 'Preview', 2),
-                 ('Reference', 'Reference', 'Reference', '', 3),
-                 ('Bounding', 'Bounding', 'Bounding', '', 4),
-                 ('Helper', 'Helper', 'Helper', '', 5),
-                 ('Proxy', 'Proxy', 'Proxy', '', 6),
-                 ],
+        self.soc_object_type = 'None'
 
     def create(self, obj):
         self.obj = obj
 
         ot = obj.soc_object_type
 
-        if ot == 'None' or not obj.soc_simulate:
+        if not obj.soc_simulate:
             cut = Disabled
-        elif ot == 'Cut':
+        if self.obj.soc_mesh_cut_type == 'None' and self.obj.soc_curve_cut_type == 'None':
+            cut = Disabled
+        elif ot in ['None', 'Cut']:
             if self.obj.soc_mesh_cut_type == 'Perimeter':
                 cut = Perimeter
             elif self.obj.soc_curve_cut_type in ['Exterior', 'Interior', 'Online'] and self.obj.type == 'CURVE':
@@ -57,6 +51,7 @@ class Generator:
     def setup(self):
         self.solid_collection = get_solid_collection(self.context)
         self.obj.display_type = 'WIRE'
+        self.obj.soc_known_as = self.obj.name
 
     def cleanup(self):
         delete_modifiers(self.obj)
@@ -165,16 +160,19 @@ class Generator:
 class Disabled(Generator):
 
     def update(self):
-        self.obj.soc_object_type = "None"
+        pass
 
     def setup(self):
         self.obj.display_type = 'TEXTURED'
+        self.soc_object_type = 'None'
 
 
 class Perimeter(Generator):
 
     def setup(self):
         super().setup()
+
+        self.soc_object_type = 'Cut'
 
         self.fillet = Fillet(self.context, self.obj)
         self.fillet.create(outside=True)
@@ -218,6 +216,7 @@ class MeshCut(Generator):
 
     def setup(self):
         super().setup()
+        self.soc_object_type = 'Cut'
 
         self.fillet = Fillet(self.context, self.obj)
         self.fillet.create()
@@ -266,7 +265,7 @@ class MeshCut(Generator):
 class Proxy(Generator):
 
     def setup_proxy(self, perimeter, reference_name):
-        self.obj.soc_object_type = 'Proxy'
+        self.soc_object_type = 'Proxy'
         self.perimeter = perimeter
         self.obj.soc_reference_name = reference_name
 
@@ -289,6 +288,7 @@ class CurveCut(Generator):
     def setup(self):
         super().setup()
 
+        self.soc_object_type = 'Cut'
         self.fillet = None
         self.obj.display_type = 'WIRE'
 
