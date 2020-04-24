@@ -17,3 +17,15 @@ def polygon_angles(self):
 
 def polygon_count(self):
     return len(self.obj.data.polygons)
+
+# def add_Empty_at(*location):
+#     bpy.ops.object.add(type='EMPTY', location=(location))
+
+
+# def transform_if_needed(obj, coordinates):
+#     if obj.soc_reference_frame == 'local':
+#         return coordinates
+#     elif obj.soc_reference_frame == 'object':
+#         return 'TODO'  # a feature missing implementation. TODO will be printed into the SVG file
+#     else:  # 'global'
+#         return obj.matrix_world @ coordinates

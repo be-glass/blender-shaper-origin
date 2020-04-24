@@ -105,7 +105,7 @@ class Preview:
 
         # apply_mesh_scale(self.context, preview_obj)    # TODO: is this needed? for mesh? for curve?
 
-        preview_obj.matrix_world = transform_preview(self.context, self.bounding, perimeter, cut_obj)
+        preview_obj.matrix_world = transform_preview(self.context, cut_obj, perimeter, self.bounding)
         preview_obj.name = name
         cut_obj.soc_preview_name = preview_obj.name
         preview_obj.soc_preview_name = ""
@@ -144,7 +144,7 @@ class Preview:
 
         for obj in perimeter.users_collection[0].objects:
             if obj.soc_mesh_cut_type != 'Perimeter':
-                m = transform_preview(self.context, self.bounding, perimeter, obj)
+                m = transform_preview(self.context, obj, perimeter, self.bounding)
                 preview_obj = get_object_safely(obj.soc_preview_name)
                 preview_obj.matrix_world = m
 
@@ -154,6 +154,6 @@ class Preview:
             for obj in perimeter.users_collection[0].objects:
 
                 if obj.soc_object_type == 'Cut':
-                    matrix = transform_preview(context, frame_obj, perimeter, obj)
+                    matrix = transform_preview(context, obj, perimeter, frame_obj)
                     preview_obj = get_object_safely(obj.soc_preview_name)
                     preview_obj.matrix_world = matrix
