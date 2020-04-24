@@ -7,7 +7,7 @@ from .lib.preview import Preview
 from .lib.generator import Generator
 from .lib.export import Export
 from .lib.helper.gen_helper import find_perimeters
-from .lib.helper.other import translate_local, find_cuts, store_selection, restore_selection
+from .lib.helper.other import translate_local, find_cuts, store_selection, restore_selection, consistency_checks
 
 
 def operators():
@@ -80,6 +80,7 @@ class MESH_OT_socut_rebuild(Operator):
         context.scene.so_cut['preview'] = False
 
         for obj in find_cuts():
+            consistency_checks(obj)
             Generator(context).create(obj).reset()
 
         if preview:

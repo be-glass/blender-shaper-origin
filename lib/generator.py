@@ -172,7 +172,7 @@ class Perimeter(Generator):
     def setup(self):
         super().setup()
 
-        self.soc_object_type = 'Cut'
+        self.obj.soc_object_type = 'Cut'
 
         self.fillet = Fillet(self.context, self.obj)
         self.fillet.create(outside=True)
@@ -216,7 +216,7 @@ class MeshCut(Generator):
 
     def setup(self):
         super().setup()
-        self.soc_object_type = 'Cut'
+        self.obj.soc_object_type = 'Cut'
 
         self.fillet = Fillet(self.context, self.obj)
         self.fillet.create()
@@ -265,7 +265,7 @@ class MeshCut(Generator):
 class Proxy(Generator):
 
     def setup_proxy(self, perimeter, reference_name):
-        self.soc_object_type = 'Proxy'
+        self.obj.soc_object_type = 'Proxy'
         self.perimeter = perimeter
         self.obj.soc_reference_name = reference_name
 
@@ -288,7 +288,7 @@ class CurveCut(Generator):
     def setup(self):
         super().setup()
 
-        self.soc_object_type = 'Cut'
+        self.obj.soc_object_type = 'Cut'
         self.fillet = None
         self.obj.display_type = 'WIRE'
 

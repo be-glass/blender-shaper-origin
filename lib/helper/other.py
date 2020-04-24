@@ -148,7 +148,9 @@ def get_helper_collection(context):
 
 
 def consistency_checks(obj):
-    if obj.soc_object_type == 'Cut':
+    if obj.soc_object_type == None:
+        obj.soc_object_type = 'None'
+    elif obj.soc_object_type == 'Cut':
         check_duplication(obj)
         check_state(obj)
         check_open_curves(obj)
