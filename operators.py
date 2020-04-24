@@ -1,23 +1,20 @@
 import mathutils
 from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
-from mathutils import Vector
 from mathutils.geometry import distance_point_to_plane
-from . import op_export_svg, helper, gen_helper
 
-# bl_info = {
-#     "name": "n/a",
-#     "author": "n/a",
-#     "version": (0, 0, 0),
-# }  # to be filled by __init__
-
-from .__init__ import bl_info
+from .lib.preview import Preview
+from .lib.generator import Generator
+from .lib.export import Export
+from .lib.helper.gen_helper import find_perimeters
+from .lib.helper.other import translate_local, find_cuts, store_selection, restore_selection
 
 
 def operators():
     return (
         MESH_OT_socut_export_cuts,
         MESH_OT_socut_align_object,
+        MESH_OT_socut_rebuild,
     )
 
 
@@ -31,38 +28,22 @@ def unregister():
         unregister_class(widget)
 
 
-def list_export_items(context):
-    if context.scene.so_cut.selected_only:
-        items = context.selected_objects
-    else:
-        items = context.scene.objects
-    return [o for o in items if (o.soc_mesh_cut_type != 'None' or o.soc_curve_cut_type != 'None')]
-
 class MESH_OT_socut_export_cuts(Operator):
     bl_idname = "mesh.socut_export_cuts"
     bl_label = "SO Cuts Export"
     bl_description = "Export shapes to SVG for cutting with SO"
 
     def execute(self, context):
-        dir_name = context.scene.so_cut.export_path
-        items = list_export_items(context)
 
-        if context.scene.so_cut.separate_files:
-            selection_set = {}
-            for obj in items:
-                name = obj.name
-                selection_set[obj.name] = [obj]
+        result = Export(context).run()
+
+        if result:
+            self.report({'INFO'}, result)
+            return {'FINISHED'}
         else:
-            name = helper.project_name()
-            selection_set = {name: items}
+            self.report({'ERROR'}, "Export Failed")
+            return {'CANCELLED'}
 
-        for name, selection in selection_set.items():
-            content = op_export_svg.svg_content(context, selection, bl_info)
-            file_name = f'{dir_name}/{name}.svg'
-            helper.write(content, file_name)
-
-        self.report({'INFO'}, "OK")
-        return {'FINISHED'}
 
 class MESH_OT_socut_align_object(Operator):
     bl_idname = "mesh.socut_align_object"
@@ -70,10 +51,9 @@ class MESH_OT_socut_align_object(Operator):
     bl_description = "Align a cut with the perimeter"
 
     def execute(self, context):
-
         obj = context.object
         collection = obj.users_collection[0]
-        perimeters = gen_helper.find_perimeters(collection)
+        perimeters = find_perimeters(collection)
 
         if not perimeters:
             self.report({'ERROR'}, "No perimeter found.")
@@ -82,9 +62,29 @@ class MESH_OT_socut_align_object(Operator):
         obj.matrix_world = perimeters[0].matrix_world
         d = distance_point_to_plane(obj.location, perimeters[0].location, perimeters[0].data.polygons[0].normal)
 
-
-        helper.translate_local(obj, mathutils.Vector((0, 0, d + .001)))
+        translate_local(obj, mathutils.Vector((0, 0, d + .001)))
 
         self.report({'INFO'}, "OK")
         return {'FINISHED'}
 
+
+class MESH_OT_socut_rebuild(Operator):
+    bl_idname = "mesh.socut_rebuild"
+    bl_label = "Rebuild everything"
+    bl_description = "Rebuild all objects"
+
+    def execute(self, context):
+        ao, selection = store_selection(context)
+
+        preview = context.scene.so_cut['preview']
+        context.scene.so_cut['preview'] = False
+
+        for obj in find_cuts():
+            Generator(context).create(obj).reset()
+
+        if preview:
+            Preview(context).create()
+            context.scene.so_cut['preview'] = True
+
+        self.report({'INFO'}, "OK")
+        return {'FINISHED'}

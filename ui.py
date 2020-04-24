@@ -2,7 +2,7 @@ import bpy
 from bpy import utils
 from bpy.types import Panel
 
-from . import gen_helper, helper
+from .lib.helper import gen_helper
 
 
 def panels():
@@ -42,6 +42,7 @@ class BG_PT_SOC_export(Panel):
         layout.prop(soc, "use_transformations")
         layout.prop(soc, "export_path")
         layout.prop(soc, "separate_files")
+        layout.operator("mesh.socut_rebuild", text="Rebuild")
         layout.operator("mesh.socut_export_cuts", text="Export Cuts")
 
 
@@ -75,6 +76,9 @@ class BG_PT_SOC_select(Panel):
 
             elif typ == 'Reference':
                 self.layout.label(text="Reference Item")
+
+            elif typ == 'Helper':
+                self.layout.label(text="Helper Item")
 
     def draw_cut(self, obj):
         layout = self.layout

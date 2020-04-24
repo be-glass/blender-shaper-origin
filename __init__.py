@@ -16,18 +16,12 @@ bl_info = {
 
 files = [ui, properties, operators, handler]
 
-# operators.bl_info = bl_info
-
 
 def register():
     [file.register() for file in files]
     handler.register()
 
+
 def unregister():
     [file.unregister() for file in files]
     handler.unregister()
-
-
-# TODO boolean only when simulate_cut is true
-
-
