@@ -4,7 +4,7 @@ from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
 from .lib.export import Export
-from .lib.generator import Generator
+from .lib.generator import create_cut
 from .lib.helper.gen_helper import find_perimeters
 from .lib.helper.other import translate_local, find_cuts, store_selection, consistency_checks
 from .lib.preview import Preview
@@ -85,7 +85,7 @@ class MESH_OT_socut_rebuild(Operator):
 
         for obj in find_cuts():
             consistency_checks(obj)
-            Generator(context).create(obj).reset()
+            create_cut(context, obj).reset()
 
         if preview:
             Preview(context).create()

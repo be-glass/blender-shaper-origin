@@ -94,9 +94,16 @@ class Preview:
             is_perimeter = True if cut_obj.soc_mesh_cut_type == 'Perimeter' else False
             fillet = Fillet(self.context, cut_obj)
             preview_obj = fillet.create(reset=False, rounded=False, outside=is_perimeter)
+
+            if not is_perimeter:
+                preview_obj.hide_select = True
+
+
+
         else:
             preview_obj = cut_obj.copy()
             preview_obj.data = cut_obj.data.copy()
+            preview_obj.soc_curve_cut_type = cut_obj.soc_curve_cut_type
 
         self.collection.objects.link(preview_obj)
 

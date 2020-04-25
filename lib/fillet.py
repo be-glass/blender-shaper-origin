@@ -70,8 +70,6 @@ class Fillet:
 
         self.obj.display_type = 'WIRE'
 
-        fillet_obj.hide_select = True
-
         self.obj.soc_solid_name = fillet_obj.name
 
         return fillet_obj
