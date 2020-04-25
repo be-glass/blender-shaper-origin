@@ -29,9 +29,6 @@ class Generator:
         delete_modifiers(self.obj)
         delete_solid_objects(self.context, self.obj)
 
-    def transform(self):
-        fillet_obj = self.get_fillet_obj()
-        fillet_obj.matrix_world = self.obj.matrix_world
 
     def transform_preview(self, matrix):
         name = self.obj.soc_preview_name

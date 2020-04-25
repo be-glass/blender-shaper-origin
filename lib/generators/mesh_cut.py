@@ -49,6 +49,10 @@ class MeshCut(Generator):
 
         self.adjust_solidify_thickness(delta=delta)
 
+    def transform(self):
+        fillet_obj = self.get_fillet_obj()
+        fillet_obj.matrix_world = self.obj.matrix_world
+
     def svg(self):
 
         fillet = Fillet(self.context, self.obj)

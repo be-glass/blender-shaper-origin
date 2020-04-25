@@ -123,6 +123,7 @@ class ObjectProperties(PropertyGroup):
                ('Bounding', 'Bounding', 'Bounding', '', 4),
                ('Helper', 'Helper', 'Helper', '', 5),
                ('Proxy', 'Proxy', 'Proxy', '', 6),
+               ('Solid', 'Solid', 'Solid', '', 7),
                ],
 
         default='None',

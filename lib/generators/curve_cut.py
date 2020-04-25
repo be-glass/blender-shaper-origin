@@ -40,12 +40,13 @@ class CurveCut(Generator):
         solid_obj = self.update_mesh()
         self.obj.data.bevel_object = None
         self.obj.soc_solid_name = solid_obj.name
-        collection = self.obj.users_collection[0]
-        self.adjust_boolean_modifiers(collection)
+        collections = self.obj.users_collection
+        if collections:
+            self.adjust_boolean_modifiers(collections[0])
 
     def get_bevel_object(self):
         if self.obj.soc_bevel_name:
-            bevel_obj = get_object_safely(self.obj.soc_bevel_name)
+            bevel_obj = get_object_safely(self.obj.soc_bevel_name, report_error=False)
             if bevel_obj:
                 return bevel_obj
 
@@ -71,3 +72,8 @@ class CurveCut(Generator):
         hide_objects(mesh_obj.name)
 
         return mesh_obj
+
+    def transform(self):
+        solid_obj = get_object_safely(self.obj.soc_solid_name, report_error=False)
+        if solid_obj:
+            solid_obj.matrix_world = self.obj.matrix_world

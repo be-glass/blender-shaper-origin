@@ -21,17 +21,16 @@ def post_ob_updated(scene, depsgraph):
 
     if obj is not None:
         if obj.mode == 'OBJECT':
-            if obj.soc_object_type != 'None':
-                consistency_checks(obj)
-                for o in selection:
-                    cut = create_cut(bpy.context, o)
-                    for u in depsgraph.updates:
-                        if u.is_updated_geometry:
-                            cut.reset()
-                        elif u.is_updated_transform:
-                            cut.transform()
-                        else:
-                            cut.update_hide_state()
+            consistency_checks(obj)
+            for o in selection:
+                cut = create_cut(bpy.context, o)
+                for u in depsgraph.updates:
+                    if u.is_updated_geometry:
+                        cut.reset()
+                    elif u.is_updated_transform:
+                        cut.transform()
+                    else:
+                        cut.update_hide_state()
     restore_selection(obj, selection)
 
 
