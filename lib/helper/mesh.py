@@ -5,13 +5,6 @@ from mathutils import Matrix, Vector
 from .other import select_active, error_msg
 
 
-def apply_mesh_scale(context, obj):
-    S = Matrix.Diagonal(obj.matrix_world.to_scale())
-
-    for v in obj.data.vertices:
-        v.co = S @ v.co
-
-    obj.scale = Vector([1, 1, 1])  # TODO: Does it work at all?
 
 
 def repair_mesh(context, obj):  # TODO: needed?

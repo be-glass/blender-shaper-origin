@@ -1,31 +1,22 @@
 import bpy
 from mathutils import Matrix, Vector
 
-from .constant import FACE_COLOR, PREFIX
+from .constant import FACE_COLOR
+from .fillet import Fillet
 from .helper.gen_helper import get_reference, boundaries
-from .helper.preview_helper import transform_preview
+from .helper.preview_helper import transform_preview, get_bounding_frame, BOUNDING_FRAME_NAME
 from .helper.mesh import create_object
-from .helper.other import (
-    length, get_preview_collection, find_cuts, get_soc_collection, warning_msg, get_object_safely
-)
-
-BOUNDING_FRAME_NAME = PREFIX + 'Bounding Frame'
+from .helper.other import length, get_preview_collection, find_cuts, get_soc_collection, warning_msg, get_object_safely, \
+    err_implementation
 
 
 class Preview:
     def __init__(self, context):
         self.context = context
         self.collection = get_preview_collection(self.context)
-        self.bounding = self.get_bounding_frame()
+        self.bounding = get_bounding_frame()
         self.cut_objs = find_cuts()
         self.perimeters = [o for o in self.cut_objs if o.soc_mesh_cut_type == 'Perimeter']
-
-    def get_bounding_frame(self):
-        name = BOUNDING_FRAME_NAME
-        if name in bpy.data.objects.keys():
-            return bpy.data.objects[name]
-        else:
-            return None
 
     def create(self):
         if self.perimeters:
@@ -33,7 +24,8 @@ class Preview:
 
             for perimeter in self.perimeters:
                 for obj in perimeter.users_collection[0].objects:
-                    self.add_object(perimeter, obj)
+                    if obj.soc_object_type == 'Cut':
+                        self.add_object(perimeter, obj)
 
             self.set_viewport()
         else:
@@ -54,13 +46,12 @@ class Preview:
         self.hide_bounding_frame()
 
     def hide_bounding_frame(self):
-        collection = get_soc_collection(self.context)
-        frame = self.get_bounding_frame()
+        frame = get_bounding_frame()
         if frame:
             frame.hide_set(True)
 
     def update_bounding_frame(self):
-        frame = self.get_bounding_frame()
+        frame = get_bounding_frame()
         if frame:
             mw = frame.matrix_world.copy()
             bpy.data.objects.remove(frame)
@@ -99,8 +90,14 @@ class Preview:
         if name in bpy.data.objects.keys():
             bpy.data.objects.remove(bpy.data.objects[name])
 
-        preview_obj = cut_obj.copy()
-        preview_obj.data = cut_obj.data.copy()
+        if cut_obj.type == 'MESH':
+            is_perimeter = True if cut_obj.soc_mesh_cut_type == 'Perimeter' else False
+            fillet = Fillet(self.context, cut_obj)
+            preview_obj = fillet.create(reset=False, rounded=False, outside=is_perimeter)
+        else:
+            preview_obj = cut_obj.copy()
+            preview_obj.data = cut_obj.data.copy()
+
         self.collection.objects.link(preview_obj)
 
         # apply_mesh_scale(self.context, preview_obj)    # TODO: is this needed? for mesh? for curve?

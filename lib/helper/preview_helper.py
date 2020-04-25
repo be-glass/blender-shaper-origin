@@ -1,9 +1,11 @@
+import bpy
 from mathutils import Matrix, Vector
 
-from ..constant import PREVIEW_Z
+from ..constant import PREVIEW_Z, PREFIX
 from .other import length
 from .gen_helper import get_reference
 
+BOUNDING_FRAME_NAME = PREFIX + 'Bounding Frame'
 
 def transform_preview(context, obj, perimeter, bounding_frame):
     m0, m1, m2, m3, m4 = transforms(context, obj, perimeter, bounding_frame)
@@ -36,3 +38,11 @@ def lift_z(context, obj):
         z = "0"
     lift = Vector([0, 0, length(context, z)])
     return Matrix.Translation(lift)
+
+
+def get_bounding_frame():
+    name = BOUNDING_FRAME_NAME
+    if name in bpy.data.objects.keys():
+        return bpy.data.objects[name]
+    else:
+        return None

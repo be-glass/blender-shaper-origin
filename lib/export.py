@@ -18,7 +18,6 @@ class Export:
         if self.context.scene.so_cut.separate_files:
             selection_set = {}
             for obj in items:
-                name = obj.name
                 selection_set[obj.name] = [obj]
         else:
             name = project_name()
@@ -50,7 +49,7 @@ class Export:
     def svg_header(self, selection):
         version = '.'.join([str(i) for i in bl_info['version']])
 
-        (x0, y0, _), (x1, y1, _) = boundaries(self.context)
+        (x0, y0, _), (x1, y1, _) = boundaries(self.context)  # TODO: respect selection
 
         scale = self.context.scene.unit_settings.scale_length
         w = (x1 - x0) * scale

@@ -1,12 +1,11 @@
 import math
 
 from .fillet import Fillet
-
-from .helper.gen_helper import *
-from .helper.other import get_solid_collection, err_implementation, get_object_safely, length, \
-    delete_object, hide_objects, get_helper_collection, find_first_perimeter, vector2string
-from .helper.mesh import repair_mesh, shade_mesh_flat, curve2mesh
 from .helper.curve import add_nurbs_square, face_is_down
+from .helper.gen_helper import *
+from .helper.mesh import repair_mesh, shade_mesh_flat, curve2mesh
+from .helper.other import get_solid_collection, get_object_safely, length, \
+    delete_object, hide_objects, get_helper_collection, find_first_perimeter, vector2string
 from .helper.preview_helper import transform_export
 from .helper.svg import svg_material_attributes
 from .preview import Preview
@@ -36,6 +35,8 @@ class Generator:
                 cut = CurveCut
             elif self.obj.soc_mesh_cut_type in ['Cutout', 'Pocket'] and self.obj.type == 'MESH':
                 cut = MeshCut
+            else:
+                cut = Disabled
         elif ot == 'Proxy':
             cut = Proxy
         else:
@@ -152,9 +153,6 @@ class Generator:
 
         return content, z
 
-    def cut_type(self, mesh_obj):
-        return mesh_obj.soc_mesh_cut_type
-
 
 class Disabled(Generator):
 
@@ -205,11 +203,18 @@ class Perimeter(Generator):
             solid.hide_set(hidden)
 
     def svg(self):
-        self.perimeter = self.obj
+        # self.perimeter = self.obj
+
+        fillet = Fillet(self.context, self.obj)
+        fillet_obj = fillet.create(outside=True)
+        proxy = Proxy(self.context, fillet_obj)
+        proxy.setup_proxy(self.obj)
+
         content, z = self.svg_mesh()
-        attributes = svg_material_attributes(self.cut_type(self.obj))
+        attributes = svg_material_attributes(self.obj.soc_mesh_cut_type)
 
         return z, self.svg_object(content, attributes)
+
 
 class MeshCut(Generator):
 
@@ -256,7 +261,8 @@ class MeshCut(Generator):
     def svg(self):
 
         fillet = Fillet(self.context, self.obj)
-        proxy = Proxy(self.context, fillet.obj)
+        fillet_obj = fillet.create(outside=True)
+        proxy = Proxy(self.context, fillet_obj)
         proxy.setup_proxy(self.obj)
 
         content, z = proxy.svg_mesh()
@@ -329,7 +335,7 @@ class CurveCut(Generator):
         mesh_name = PREFIX + self.obj.name + '.mesh'
         delete_object(mesh_name)
 
-        cleanup_meshes(self.context, self.obj, mesh_name)
+        cleanup_meshes(self.context, mesh_name)
         mesh_obj = curve2mesh(self.context, self.obj, mesh_name)
         get_solid_collection(self.context).objects.link(mesh_obj)
 
@@ -338,4 +344,3 @@ class CurveCut(Generator):
         hide_objects(mesh_obj.name)
 
         return mesh_obj
-

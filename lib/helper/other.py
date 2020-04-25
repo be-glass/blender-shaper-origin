@@ -35,8 +35,6 @@ def check_type(obj, valid_types):
     return True if remain else False
 
 
-
-
 def move_object(obj, collection):
     [c.objects.unlink(obj) for c in obj.users_collection]
     collection.objects.link(obj)
@@ -101,7 +99,7 @@ def translate_local(obj, vector):
     obj.location += global_translation
 
 
-def get_collection(context, name, parent):
+def get_collection(name, parent):
     if name in bpy.data.collections.keys():
         return bpy.data.collections[name]
     else:
@@ -111,33 +109,33 @@ def get_collection(context, name, parent):
 
 
 def get_soc_collection(context):
-    return get_collection(context, "SOC", context.scene.collection)
+    return get_collection("SOC", context.scene.collection)
 
 
 def get_preview_collection(context):
     soc = get_soc_collection(context)
-    return get_collection(context, PREFIX + "Preview", soc)
+    return get_collection(PREFIX + "Preview", soc)
 
 
 def get_solid_collection(context):
     soc = get_soc_collection(context)
-    return get_collection(context, PREFIX + "Solid", soc)
+    return get_collection(PREFIX + "Solid", soc)
 
 
 def get_reference_collection(context):
     soc = get_soc_collection(context)
-    collection = get_collection(context, PREFIX + "Reference", soc)
+    collection = get_collection(PREFIX + "Reference", soc)
     return collection
 
 
 def get_helper_collection(context):
     soc = get_soc_collection(context)
-    collection = get_collection(context, PREFIX + "Helper", soc)
+    collection = get_collection(PREFIX + "Helper", soc)
     return collection
 
 
 def consistency_checks(obj):
-    if obj.soc_object_type == None:
+    if obj.soc_object_type is None:
         obj.soc_object_type = 'None'
     elif obj.soc_object_type == 'Cut':
         check_duplication(obj)
@@ -149,6 +147,7 @@ def check_open_curves(obj):
     if obj.soc_curve_cut_type in ['Exterior', 'Interior']:
         if not obj.data.splines[0].use_cyclic_u:
             obj.soc_curve_cut_type = 'Online'
+
 
 def check_state(obj):
     if obj.soc_mesh_cut_type == 'None' and obj.soc_curve_cut_type == 'None':

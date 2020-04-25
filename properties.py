@@ -52,8 +52,6 @@ def unregister():
     del btO.soc_known_as
 
 
-
-
 # Definition
 
 class ObjectProperties(PropertyGroup):
@@ -175,10 +173,6 @@ class ObjectProperties(PropertyGroup):
         description="Internal record of object association",
         default="",
     )
-
-
-# def preview(args):
-#     pass
 
 
 class SceneProperties(PropertyGroup):

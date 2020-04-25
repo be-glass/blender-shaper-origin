@@ -45,10 +45,10 @@ def handle_object_types(obj, depsgraph):
         for u in depsgraph.updates:
             if u.is_updated_transform:
                 if obj.soc_mesh_cut_type == 'Perimeter':
-                    preview = Preview(bpy.context)
-                    preview.transform_reference(obj)
-                    preview.transform_siblings(obj)
-                    preview.update_bounding_frame()
+                    cut_preview = Preview(bpy.context)
+                    cut_preview.transform_reference(obj)
+                    cut_preview.transform_siblings(obj)
+                    cut_preview.update_bounding_frame()
 
     elif obj.soc_object_type == 'Bounding':
         for u in depsgraph.updates:
