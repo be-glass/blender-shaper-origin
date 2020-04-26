@@ -12,15 +12,16 @@ FACE_COLOR = {
     'Interior': (1, 1, 0, 1),
 }
 
-PREVIEW_Z = {
-    'Guide': "0.3 mm",
-    'Cutout': "0.2 mm",
-    'Interior': "0.2 mm",
-    'Exterior': "0.2 mm",
-    'Online': "0.2 mm",
-    'Pocket': "0.1 mm",
-    'Perimeter': "0.0 mm",
+STACK_Z = {
+    'Guide': 6,
+    'Cutout': 5,
+    'Pocket': 4,
+    'Interior': 3,
+    'Exterior': 2,
+    'Online': 1,
+    'Perimeter': 0,
 }
+PREVIEW_STACK_DELTA = "0.1 mm"
 
 CUT_ENCODING = {'Interior': ('black', 'white'),
                 'Exterior': ('black', 'black'),

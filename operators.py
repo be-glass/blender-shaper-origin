@@ -3,11 +3,11 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
-from .lib.preview import Preview
-from .lib.generator import Generator
 from .lib.export import Export
+from .lib.generator import create_cut
 from .lib.helper.gen_helper import find_perimeters
-from .lib.helper.other import translate_local, find_cuts, store_selection, restore_selection
+from .lib.helper.other import translate_local, find_cuts, store_selection, consistency_checks
+from .lib.preview import Preview
 
 
 def operators():
@@ -35,7 +35,11 @@ class MESH_OT_socut_export_cuts(Operator):
 
     def execute(self, context):
 
+        # try:
         result = Export(context).run()
+        # except:
+        #     self.report({'ERROR'}, "Export Failed")
+        #     return {'CANCELLED'}
 
         if result:
             self.report({'INFO'}, result)
@@ -74,13 +78,14 @@ class MESH_OT_socut_rebuild(Operator):
     bl_description = "Rebuild all objects"
 
     def execute(self, context):
-        ao, selection = store_selection(context)
+        _, selection = store_selection(context)
 
         preview = context.scene.so_cut['preview']
         context.scene.so_cut['preview'] = False
 
         for obj in find_cuts():
-            Generator(context).create(obj).reset()
+            consistency_checks(obj)
+            create_cut(context, obj).reset()
 
         if preview:
             Preview(context).create()

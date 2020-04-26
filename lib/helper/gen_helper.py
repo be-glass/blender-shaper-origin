@@ -42,7 +42,7 @@ def delete_solid_objects(context, obj):
             bpy.data.objects.remove(o, do_unlink=True)
 
 
-def cleanup_meshes(context, source_obj, mesh_name):
+def cleanup_meshes(context, mesh_name):
     solid_collection = get_solid_collection(context)
     for o in solid_collection.objects:
         if o.name.startswith(mesh_name):
@@ -57,7 +57,7 @@ def cleanup(context, obj):
     delete_solid_objects(context, obj)
     obj.display_type = 'TEXTURED'
 
-    cleanup_boolean_modifiers(context, obj)
+    cleanup_boolean_modifiers(obj)
 
     if obj.type == 'CURVE':
         obj.data.bevel_object = None
@@ -81,7 +81,7 @@ def boolean_modifier_name(cut_obj):
     return PREFIX + "Boolean." + cut_obj.name
 
 
-def cleanup_boolean_modifiers(context, target_obj):
+def cleanup_boolean_modifiers(target_obj):
     collection = target_obj.users_collection[0]
     for perimeter in find_perimeters(collection):
         delete_modifier(perimeter, boolean_modifier_name(target_obj))

@@ -1,7 +1,7 @@
 from ..constant import CUT_ENCODING
 
 
-def svg_material_attributes(id):
+def svg_material_attributes(key):
     style_map = {
         'Perimeter': 'Exterior',
         'Exterior': 'Exterior',
@@ -12,6 +12,6 @@ def svg_material_attributes(id):
         'Guide': 'Guide',
     }
 
-    style = style_map[id]
+    style = style_map[key]
     (stroke, fill) = CUT_ENCODING[style]
     return f'stroke="{stroke}" fill="{fill}"'

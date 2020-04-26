@@ -1,7 +1,7 @@
 import bpy
 import itertools
 
-from ..constant import PREFIX
+from ..constant import PREFIX, SVG_COORD_FORMAT
 
 
 def write(content, file_name):
@@ -33,19 +33,6 @@ def filter_valid(object_list, valid_types):
 def check_type(obj, valid_types):
     remain = filter_valid([obj], valid_types)
     return True if remain else False
-
-
-def add_Empty_at(*location):
-    bpy.ops.object.add(type='EMPTY', location=(location))
-
-
-# def transform_if_needed(obj, coordinates):
-#     if obj.soc_reference_frame == 'local':
-#         return coordinates
-#     elif obj.soc_reference_frame == 'object':
-#         return 'TODO'  # a feature missing implementation. TODO will be printed into the SVG file
-#     else:  # 'global'
-#         return obj.matrix_world @ coordinates
 
 
 def move_object(obj, collection):
@@ -112,7 +99,7 @@ def translate_local(obj, vector):
     obj.location += global_translation
 
 
-def get_collection(context, name, parent):
+def get_collection(name, parent):
     if name in bpy.data.collections.keys():
         return bpy.data.collections[name]
     else:
@@ -122,33 +109,35 @@ def get_collection(context, name, parent):
 
 
 def get_soc_collection(context):
-    return get_collection(context, "SOC", context.scene.collection)
+    return get_collection("SOC", context.scene.collection)
 
 
 def get_preview_collection(context):
     soc = get_soc_collection(context)
-    return get_collection(context, PREFIX + "Preview", soc)
+    return get_collection(PREFIX + "Preview", soc)
 
 
 def get_solid_collection(context):
     soc = get_soc_collection(context)
-    return get_collection(context, PREFIX + "Solid", soc)
+    return get_collection(PREFIX + "Solid", soc)
 
 
 def get_reference_collection(context):
     soc = get_soc_collection(context)
-    collection = get_collection(context, PREFIX + "Reference", soc)
+    collection = get_collection(PREFIX + "Reference", soc)
     return collection
 
 
 def get_helper_collection(context):
     soc = get_soc_collection(context)
-    collection = get_collection(context, PREFIX + "Helper", soc)
+    collection = get_collection(PREFIX + "Helper", soc)
     return collection
 
 
 def consistency_checks(obj):
-    if obj.soc_object_type == 'Cut':
+    if obj.soc_object_type is None:
+        obj.soc_object_type = 'None'
+    elif obj.soc_object_type == 'Cut':
         check_duplication(obj)
         check_state(obj)
         check_open_curves(obj)
@@ -158,6 +147,7 @@ def check_open_curves(obj):
     if obj.soc_curve_cut_type in ['Exterior', 'Interior']:
         if not obj.data.splines[0].use_cyclic_u:
             obj.soc_curve_cut_type = 'Online'
+
 
 def check_state(obj):
     if obj.soc_mesh_cut_type == 'None' and obj.soc_curve_cut_type == 'None':
@@ -191,7 +181,11 @@ def find_cuts():
 
 
 def find_first_perimeter(obj):
-    return [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter'][0]
+    perimeters = [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']
+    if perimeters:
+        return perimeters[0]
+    else:
+        return None
 
 
 def store_selection(context, reset=False):
@@ -210,3 +204,7 @@ def restore_selection(active_object, selected_objects):
         o.select_set(False)
     for o in selected_objects:
         o.select_set(True)
+
+
+def vector2string(vector):
+    return SVG_COORD_FORMAT.format(vector[0], vector[1])

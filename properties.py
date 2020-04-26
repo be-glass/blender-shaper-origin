@@ -13,41 +13,43 @@ def register():
 
     bpy.types.Scene.so_cut = PointerProperty(type=SceneProperties)
 
-    bpy.types.Object.soc_cut_depth = ObjectProperties.cut_depth
-    bpy.types.Object.soc_tool_diameter = ObjectProperties.tool_diameter
-    bpy.types.Object.soc_reference_frame = ObjectProperties.reference_frame
-    bpy.types.Object.soc_mesh_cut_type = ObjectProperties.mesh_cut_type
-    bpy.types.Object.soc_curve_cut_type = ObjectProperties.curve_cut_type
-    bpy.types.Object.soc_object_type = ObjectProperties.object_type
-    bpy.types.Object.soc_simulate = ObjectProperties.simulate
-    bpy.types.Object.soc_initialized = ObjectProperties.initialized
-    bpy.types.Object.soc_dogbone = ObjectProperties.dogbone
-    bpy.types.Object.soc_solid_name = ObjectProperties.solid_name
-    bpy.types.Object.soc_reference_name = ObjectProperties.reference_name
-    bpy.types.Object.soc_preview_name = ObjectProperties.preview_name
-    bpy.types.Object.soc_bevel_name = ObjectProperties.bevel_name
-    bpy.types.Object.soc_known_as = ObjectProperties.known_as
+    btO = bpy.types.Object
+    oP = ObjectProperties
+
+    btO.soc_cut_depth = oP.cut_depth
+    btO.soc_tool_diameter = oP.tool_diameter
+    btO.soc_reference_frame = oP.reference_frame
+    btO.soc_mesh_cut_type = oP.mesh_cut_type
+    btO.soc_curve_cut_type = oP.curve_cut_type
+    btO.soc_object_type = oP.object_type
+    btO.soc_simulate = oP.simulate
+    btO.soc_initialized = oP.initialized
+    btO.soc_dogbone = oP.dogbone
+    btO.soc_solid_name = oP.solid_name
+    btO.soc_reference_name = oP.reference_name
+    btO.soc_preview_name = oP.preview_name
+    btO.soc_bevel_name = oP.bevel_name
+    btO.soc_known_as = oP.known_as
 
 
 def unregister():
     bpy.utils.unregister_class(SceneProperties)
+    btO = bpy.types.Object
 
-    del bpy.types.Object.soc_cut_depth
-    del bpy.types.Object.soc_tool_diameter
-    del bpy.types.Object.soc_reference_frame
-    del bpy.types.Object.soc_mesh_cut_type
-    del bpy.types.Object.soc_curve_cut_type
-    del bpy.types.Object.soc_object_type
-    del bpy.types.Object.soc_simulate
-    del bpy.types.Object.soc_initialized
-    del bpy.types.Object.soc_dogbone
-    del bpy.types.Object.soc_solid_name
-    del bpy.types.Object.soc_reference_name
-    del bpy.types.Object.soc_preview_name
-    del bpy.types.Object.soc_bevel_name
-    del bpy.types.Object.soc_known_as
-
-
+    del btO.soc_cut_depth
+    del btO.soc_tool_diameter
+    del btO.soc_reference_frame
+    del btO.soc_mesh_cut_type
+    del btO.soc_curve_cut_type
+    del btO.soc_object_type
+    del btO.soc_simulate
+    del btO.soc_initialized
+    del btO.soc_dogbone
+    del btO.soc_solid_name
+    del btO.soc_reference_name
+    del btO.soc_preview_name
+    del btO.soc_bevel_name
+    del btO.soc_known_as
 
 
 # Definition
@@ -121,6 +123,7 @@ class ObjectProperties(PropertyGroup):
                ('Bounding', 'Bounding', 'Bounding', '', 4),
                ('Helper', 'Helper', 'Helper', '', 5),
                ('Proxy', 'Proxy', 'Proxy', '', 6),
+               ('Solid', 'Solid', 'Solid', '', 7),
                ],
 
         default='None',
@@ -171,10 +174,6 @@ class ObjectProperties(PropertyGroup):
         description="Internal record of object association",
         default="",
     )
-
-
-# def preview(args):
-#     pass
 
 
 class SceneProperties(PropertyGroup):

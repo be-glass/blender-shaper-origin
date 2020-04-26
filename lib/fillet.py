@@ -52,15 +52,16 @@ class Fillet:
         d = abc_normal.dot(self.polygon.normal)
         return d > 0  # > 0 if inside, = 0 if straight
 
-    def create(self, outside=False):
+    def create(self, outside=False, reset=True, rounded=True):
         fillet = []
         collection = get_solid_collection(self.context)
 
         for shift in range(self.corner_count()):
             corner = self.corner_vectors(shift)
-            fillet += self.corner_fillet(corner, outside)
+            fillet += self.corner_fillet(corner, outside, rounded)
 
-        delete_object(self.obj.soc_solid_name)
+        if reset:
+            delete_object(self.obj.soc_solid_name)
 
         fillet_obj = create_object(fillet, collection, self.name)
         fillet_obj.matrix_world = self.obj.matrix_world
@@ -68,8 +69,6 @@ class Fillet:
         self.obj.soc_solid_name = fillet_obj.name
 
         self.obj.display_type = 'WIRE'
-
-        fillet_obj.hide_select = True
 
         self.obj.soc_solid_name = fillet_obj.name
 
@@ -96,7 +95,7 @@ class Fillet:
             P.append(M + self.radius * rotation @ MB1)
         return P
 
-    def corner_fillet(self, corner, outside):
+    def corner_fillet(self, corner, outside, rounded):
         corner_point = corner[1:2]
 
         if self.corner_angle(corner) < math.radians(5):
@@ -105,8 +104,10 @@ class Fillet:
         if self.is_inside(corner) ^ outside:
             if self.obj.soc_dogbone:
                 return self.dogbone(corner)
-            else:
+            elif rounded:
                 return self.rounded(corner)
+            else:
+                return corner_point
         else:
             return corner_point
 
