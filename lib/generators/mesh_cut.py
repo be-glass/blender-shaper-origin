@@ -4,6 +4,7 @@ from .base import Generator
 from .proxy import Proxy
 from ..fillet import Fillet
 from ..helper.gen_helper import *
+from ..helper.preview_helper import lift_z
 from ..helper.svg import svg_material_attributes
 
 
@@ -60,7 +61,9 @@ class MeshCut(Generator):
         proxy = Proxy(self.context, fillet_obj)
         proxy.setup_proxy(self.obj)
 
-        content, z = proxy.svg_mesh()
+        content = proxy.svg_mesh()
         attributes = svg_material_attributes(self.obj.soc_mesh_cut_type)
+        contents = self.svg_object(content, attributes)
+        z = lift_z(self.context, self.obj)
 
-        return z, self.svg_object(content, attributes)
+        return z, contents

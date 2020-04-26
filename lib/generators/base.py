@@ -102,22 +102,19 @@ class Generator:
     def svg_path(self, points, is_closed):
         source = ''
         path_cmd = 'M'
-        z = 0
         for point in points:
             vector = transform_export(self.context, self.obj, self.perimeter) @ point.co
             source += path_cmd + vector2string(vector)
             path_cmd = 'L'
-            z = vector[2]
         if is_closed:
             source += 'Z'
-        return f'<path d="{source}"/>', z
+        return f'<path d="{source}"/>'
 
     def svg_mesh(self):
 
-        z = 0
         content = ''
         for polygon in self.obj.data.polygons:
-            c, z = self.svg_polygon(polygon)
+            c = self.svg_polygon(polygon)
             content += c
 
-        return content, z
+        return content

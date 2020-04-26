@@ -66,7 +66,7 @@ class Export:
 
     def svg_body(self, selection):
         groups = self.perimeter_groups(selection)
-        content = [self.svg_perimeter_group(group) for group in groups]
+        content = [self.svg_perimeter_group(name_and_group) for name_and_group in groups]
         return '<g transform="scale(1,-1)">' + ''.join(content) + '</g>'
 
     def perimeter_groups(self, selection):
@@ -75,17 +75,19 @@ class Export:
 
         groups = []
         for perimeter in perimeter_objs:
+            collection_name = perimeter.users_collection[0].name
             siblings = set(perimeter.users_collection[0].objects)
             group = siblings & orphans
             orphans -= group
             if group:
-                groups.append(group)
+                groups.append([collection_name, group])
         if orphans:
-            groups.append(orphans)
+            groups.append(['orphans', orphans])
         return groups
 
-    def svg_perimeter_group(self, objs):
+    def svg_perimeter_group(self, name_and_group):
+        name, objs = name_and_group
         cuts = [create_cut(self.context, obj) for obj in objs]
         content = [cut.svg() for cut in cuts]
-        content_sorted = [item[1] for item in sorted(content, reverse=True)]
-        return '<g class="Piece">' + ''.join(content_sorted) + '</g>'
+        content_sorted = [item[1] for item in sorted(content, reverse=False)]
+        return f'<g class="Collection" id="{name}">' + ''.join(content_sorted) + '</g>'

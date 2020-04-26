@@ -3,6 +3,7 @@ from ..helper.curve import add_nurbs_square, face_is_down
 from ..helper.gen_helper import *
 from ..helper.mesh import repair_mesh, shade_mesh_flat, curve2mesh
 from ..helper.other import get_solid_collection, get_object_safely, delete_object, hide_objects, get_helper_collection
+from ..helper.preview_helper import lift_z
 from ..helper.svg import svg_material_attributes
 from .proxy import Proxy
 
@@ -15,8 +16,9 @@ class CurveCut(Generator):
         proxy = Proxy(self.context, mesh_obj)
         proxy.setup_proxy(self.obj)
 
-        content, z = proxy.svg_mesh()
+        content = proxy.svg_mesh()
         attributes = svg_material_attributes(self.obj.soc_curve_cut_type)
+        z = lift_z(self.context, self.obj)
 
         return z, self.svg_object(content, attributes)
 

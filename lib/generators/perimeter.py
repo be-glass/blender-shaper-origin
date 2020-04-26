@@ -3,6 +3,7 @@ from .proxy import Proxy
 from ..fillet import Fillet
 from ..helper.gen_helper import *
 from ..helper.other import get_object_safely
+from ..helper.preview_helper import lift_z
 from ..helper.svg import svg_material_attributes
 from ..preview import Preview
 
@@ -51,7 +52,9 @@ class Perimeter(Generator):
         proxy = Proxy(self.context, fillet_obj)
         proxy.setup_proxy(self.obj)
 
-        content, z = self.svg_mesh()
         attributes = svg_material_attributes(self.obj.soc_mesh_cut_type)
+        content = proxy.svg_mesh()
+        z = lift_z(self.context, self.obj)
+        contents = self.svg_object(content, attributes)
 
-        return z, self.svg_object(content, attributes)
+        return z, contents

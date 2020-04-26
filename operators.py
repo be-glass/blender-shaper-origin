@@ -35,11 +35,11 @@ class MESH_OT_socut_export_cuts(Operator):
 
     def execute(self, context):
 
-        try:
-            result = Export(context).run()
-        except:
-            self.report({'ERROR'}, "Export Failed")
-            return {'CANCELLED'}
+        # try:
+        result = Export(context).run()
+        # except:
+        #     self.report({'ERROR'}, "Export Failed")
+        #     return {'CANCELLED'}
 
         if result:
             self.report({'INFO'}, result)
