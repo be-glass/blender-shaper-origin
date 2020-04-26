@@ -101,7 +101,7 @@ class BG_PT_SOC_select(Panel):
         self.draw_type_select(obj)
 
         if obj.soc_mesh_cut_type != 'None' or obj.soc_curve_cut_type != 'None':
-            layout.prop(obj, "soc_reference_frame")
+            # layout.prop(obj, "soc_reference_frame")
             layout.prop(obj, "soc_cut_depth")
             layout.prop(obj, "soc_tool_diameter")
             layout.prop(obj, "soc_simulate")

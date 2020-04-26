@@ -72,7 +72,7 @@ class MeshCut(Generator):
     def svg(self):
 
         fillet = Fillet(self.context, self.obj)
-        fillet_obj = fillet.create(outside=True)
+        fillet_obj = fillet.create()
         proxy = Proxy(self.context, fillet_obj)
         proxy.setup_proxy(self.obj)
 
