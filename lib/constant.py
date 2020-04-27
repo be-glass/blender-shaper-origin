@@ -28,12 +28,12 @@ FACE_COLOR = {
 
 STACK_Z = {
     'GuidePath': 7,
-    'GuideArea': 6,
-    'Cutout': 5,
-    'Pocket': 4,
-    'Interior': 3,
-    'Exterior': 2,
-    'Online': 1,
+    'Interior': 6,
+    'Exterior': 5,
+    'Online': 4,
+    'Cutout': 3,
+    'Pocket': 2,
+    'GuideArea': 1,
     'Perimeter': 0,
 }
 PREVIEW_STACK_DELTA = "0.1 mm"
@@ -42,7 +42,7 @@ SO_CUT_ENCODING = {'Interior': ('black', 'white'),
                    'Exterior': ('black', 'black'),
                    'Online': ('grey', 'none'),
                    'Pocket': ('none', 'grey'),
-                   'Guide': ('blue', 'none')
+                   'Guide': ('blue', 'blue')
                    }
 
 SVG_COORD_FORMAT = '{:.2f} {:.2f}'

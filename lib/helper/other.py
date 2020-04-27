@@ -118,7 +118,7 @@ def get_collection(name, parent):
 
 
 def get_soc_collection(context):
-    return get_collection("SOC", context.scene.collection)
+    return get_collection(PREFIX + "Internal", context.scene.collection)
 
 
 def get_preview_collection(context):
