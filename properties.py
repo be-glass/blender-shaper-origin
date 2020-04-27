@@ -33,7 +33,6 @@ def register():
 
     btO.soc_cut_depth = oP.cut_depth
     btO.soc_tool_diameter = oP.tool_diameter
-    btO.soc_reference_frame = oP.reference_frame
     btO.soc_mesh_cut_type = oP.mesh_cut_type
     btO.soc_curve_cut_type = oP.curve_cut_type
     btO.soc_object_type = oP.object_type
@@ -53,7 +52,6 @@ def unregister():
 
     del btO.soc_cut_depth
     del btO.soc_tool_diameter
-    del btO.soc_reference_frame
     del btO.soc_mesh_cut_type
     del btO.soc_curve_cut_type
     del btO.soc_object_type
