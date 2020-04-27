@@ -51,14 +51,13 @@ class MESH_OT_socut_export_cuts(Operator):
 
     def execute(self, context):
 
-        # try:
         result = Export(context).run()
-        # except:
-        #     self.report({'ERROR'}, "Export Failed")
-        #     return {'CANCELLED'}
 
-        if result:
-            self.report({'INFO'}, result)
+        if result == True:
+            self.report({'INFO'}, 'Export done')
+            return {'FINISHED'}
+        elif result:
+            self.report({'WARNING'}, result)
             return {'FINISHED'}
         else:
             self.report({'ERROR'}, "Export Failed")
@@ -96,7 +95,7 @@ class MESH_OT_socut_rebuild(Operator):
     def execute(self, context):
         _, selection = store_selection(context)
 
-        preview = context.scene.so_cut['preview']
+        preview = context.scene.so_cut.preview
         context.scene.so_cut['preview'] = False
 
         for obj in find_cuts():

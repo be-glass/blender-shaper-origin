@@ -190,12 +190,6 @@ class ObjectProperties(PropertyGroup):
 
 
 class SceneProperties(PropertyGroup):
-    use_transformations: BoolProperty(
-        name="Apply transformations",
-        description="Apply object transformations during export",
-        default=True,
-        options={'HIDDEN'},
-    )
     selected_only: BoolProperty(
         name="Selected Only",
         description="Export only selected objects",

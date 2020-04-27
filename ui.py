@@ -54,7 +54,6 @@ class BG_PT_SOC_export(Panel):
         # Widgets
         layout.prop(soc, "preview")
         layout.prop(soc, "selected_only")
-        layout.prop(soc, "use_transformations")
         layout.prop(soc, "export_path")
         layout.prop(soc, "separate_files")
         layout.operator("mesh.socut_rebuild", text="Rebuild")
