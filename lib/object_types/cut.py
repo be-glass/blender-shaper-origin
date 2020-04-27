@@ -13,17 +13,40 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
-from .base import Generator
+from ..helper.gen_helper import *
+from ..helper.other import get_solid_collection, err_implementation
+
+from .simulation import Simulation
+from .reference import Reference
+from .preview import Preview
 
 
-class PreviewPerimeter(Generator):
-    def transform(self):
-        self.preview.transform_reference(self.obj)
-        self.preview.transform_siblings(self.obj)
-        self.preview.update_bounding_frame()
+class Cut:
+
+    def __init__(self, context, obj):
+        self.context = context
+        self.obj = obj
+
+        self.sim = Simulation(context, obj)
+        self.preview = Preview(context, obj)
+
+    def reset(self):
+        # self.obj.soc_suppress_next_update = True
+        self.cleanup()
+        self.setup()
+        self.update()
 
     def setup(self):
-        pass
+        self.sim.setup()
+        self.preview.setup()
 
     def update(self):
+        self.sim.update()
+        self.preview.update()
+
+    def cleanup(self):
+        self.sim.cleanup()
+        self.preview.cleanup()
+
+    def svg(self):
         pass

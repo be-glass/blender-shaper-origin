@@ -20,7 +20,7 @@ from .generators.gen_preview import PreviewPerimeter
 from .generators.mesh_cut import MeshCut
 from .generators.mesh_guide import MeshGuide
 from .generators.perimeter import Perimeter
-from .generators.proxy import Proxy
+from lib.object_types.shape.proxy import Proxy
 from .generators.ignore import Ignore
 from .helper.other import err_implementation
 
@@ -31,17 +31,6 @@ def create_cut(context, obj):
     if not obj.soc_simulate:
         cut = Disabled
 
-    elif ot in ['None', 'Cut']:
-        if obj.soc_mesh_cut_type == 'Perimeter':
-            cut = Perimeter
-        elif obj.soc_curve_cut_type in ['Exterior', 'Interior', 'Online'] and obj.type == 'CURVE':
-            cut = CurveCut
-        elif obj.soc_mesh_cut_type in ['Cutout', 'Pocket'] and obj.type == 'MESH':
-            cut = MeshCut
-        elif obj.soc_mesh_cut_type == 'GuideArea':
-            cut = MeshGuide
-        else:
-            cut = Disabled
 
     elif ot == 'Preview':
         if obj.soc_mesh_cut_type == 'Perimeter':

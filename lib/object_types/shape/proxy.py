@@ -14,8 +14,8 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
 from .base import Generator
-from ..helper.gen_helper import *
-from ..helper.other import find_first_perimeter
+from lib.helper.gen_helper import *
+from lib.helper.other import find_first_perimeter
 
 
 class Proxy(Generator):

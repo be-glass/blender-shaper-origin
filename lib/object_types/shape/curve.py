@@ -1,28 +1,3 @@
-#  This file is part of Blender_Shaper_Origin.
-#
-#  Blender_Shaper_Origin is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  Blender_Shaper_Origin is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
-
-from .base import Generator
-from ..helper.curve import add_nurbs_square, face_is_down
-from ..helper.gen_helper import *
-from ..helper.mesh import repair_mesh, shade_mesh_flat, curve2mesh
-from ..helper.other import get_solid_collection, get_object_safely, delete_object, hide_objects, get_helper_collection
-from ..helper.preview_helper import lift_z
-from ..helper.svg import svg_material_attributes
-from .proxy import Proxy
-
-
 class CurveCut(Generator):
 
     def svg(self):
@@ -61,20 +36,6 @@ class CurveCut(Generator):
         if collections:
             self.adjust_boolean_modifiers(collections[0])
 
-    def get_bevel_object(self):
-        if self.obj.soc_bevel_name:
-            bevel_obj = get_object_safely(self.obj.soc_bevel_name, report_error=False)
-            if bevel_obj:
-                return bevel_obj
-
-        collection = get_helper_collection(self.context)
-        name = f'{PREFIX}{self.obj.name}.bevel'
-        bevel_obj = add_nurbs_square(collection, name, self.obj.soc_curve_cut_type)
-        bevel_obj.soc_object_type = 'Helper'
-        bevel_obj.hide_set(True)
-        self.obj.soc_bevel_name = bevel_obj.name
-
-        return bevel_obj
 
     def update_mesh(self):
         mesh_name = PREFIX + self.obj.name + '.mesh'
