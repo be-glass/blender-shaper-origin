@@ -78,9 +78,11 @@ class BG_PT_SOC_select(Panel):
 
             if typ == 'None':
                 self.draw_type_select(obj)
+                self.draw_align_with_perimeter(obj)
 
             elif typ == 'Cut':
                 self.draw_cut(obj)
+                self.draw_align_with_perimeter(obj)
 
             elif typ == 'Bounding':
                 self.layout.label(text="Bounding Frame")
@@ -105,10 +107,11 @@ class BG_PT_SOC_select(Panel):
             layout.prop(obj, "soc_simulate")
             layout.prop(obj, "soc_dogbone")
 
+    def draw_align_with_perimeter(self, obj):
         collection = obj.users_collection[0]
         perimeters = gen_helper.find_perimeters(collection)
         if obj.soc_mesh_cut_type != 'Perimeter' and len(perimeters) > 0:
-            layout.operator("mesh.socut_align_object")
+            self.layout.operator("mesh.socut_align_object")
 
     def draw_type_select(self, obj):
         if obj.type == 'MESH':
