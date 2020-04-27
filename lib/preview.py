@@ -22,7 +22,7 @@ from .helper.gen_helper import get_reference, boundaries
 from .helper.preview_helper import transform_preview, get_bounding_frame, BOUNDING_FRAME_NAME
 from .helper.mesh import create_object
 from .helper.other import length, get_preview_collection, find_cuts, get_soc_collection, warning_msg, get_object_safely, \
-    err_implementation
+    err_implementation, move_object
 
 
 class Preview:
@@ -115,7 +115,7 @@ class Preview:
             preview_obj.data = cut_obj.data.copy()
             preview_obj.soc_curve_cut_type = cut_obj.soc_curve_cut_type
 
-        self.collection.objects.link(preview_obj)
+        move_object(preview_obj, self.collection)
         if cut_obj.soc_mesh_cut_type != 'Perimeter':
             preview_obj.hide_select = True
 

@@ -54,7 +54,6 @@ class BG_PT_SOC_export(Panel):
         # Widgets
         layout.prop(soc, "preview")
         layout.prop(soc, "selected_only")
-        layout.prop(soc, "use_transformations")
         layout.prop(soc, "export_path")
         layout.prop(soc, "separate_files")
         layout.operator("mesh.socut_rebuild", text="Rebuild")
@@ -79,9 +78,11 @@ class BG_PT_SOC_select(Panel):
 
             if typ == 'None':
                 self.draw_type_select(obj)
+                self.draw_align_with_perimeter(obj)
 
             elif typ == 'Cut':
                 self.draw_cut(obj)
+                self.draw_align_with_perimeter(obj)
 
             elif typ == 'Bounding':
                 self.layout.label(text="Bounding Frame")
@@ -101,16 +102,16 @@ class BG_PT_SOC_select(Panel):
         self.draw_type_select(obj)
 
         if obj.soc_mesh_cut_type != 'None' or obj.soc_curve_cut_type != 'None':
-            # layout.prop(obj, "soc_reference_frame")
             layout.prop(obj, "soc_cut_depth")
             layout.prop(obj, "soc_tool_diameter")
             layout.prop(obj, "soc_simulate")
             layout.prop(obj, "soc_dogbone")
 
+    def draw_align_with_perimeter(self, obj):
         collection = obj.users_collection[0]
         perimeters = gen_helper.find_perimeters(collection)
         if obj.soc_mesh_cut_type != 'Perimeter' and len(perimeters) > 0:
-            layout.operator("mesh.socut_align_object")
+            self.layout.operator("mesh.socut_align_object")
 
     def draw_type_select(self, obj):
         if obj.type == 'MESH':

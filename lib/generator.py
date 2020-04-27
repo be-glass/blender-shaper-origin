@@ -18,6 +18,7 @@ from .generators.curve_cut import CurveCut
 from .generators.disabled import Disabled
 from .generators.gen_preview import PreviewPerimeter
 from .generators.mesh_cut import MeshCut
+from .generators.mesh_guide import MeshGuide
 from .generators.perimeter import Perimeter
 from .generators.proxy import Proxy
 from .generators.ignore import Ignore
@@ -37,6 +38,8 @@ def create_cut(context, obj):
             cut = CurveCut
         elif obj.soc_mesh_cut_type in ['Cutout', 'Pocket'] and obj.type == 'MESH':
             cut = MeshCut
+        elif obj.soc_mesh_cut_type == 'GuideArea':
+            cut = MeshGuide
         else:
             cut = Disabled
 

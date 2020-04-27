@@ -16,23 +16,17 @@
 import bpy
 import itertools
 
-from ..constant import PREFIX, SVG_COORD_FORMAT
+from ..constant import PREFIX, SVG_COORD_FORMAT, DEFAULTS
 
 
 def write(content, file_name):
-    file = open(file_name, 'w')
-    if file:
-        if file.writelines(content):
-            file.close()
-            return True
-        else:
-            file.close()
-    return False
+    try:
+        with open(file_name, 'w') as file:
+            file.writelines(content)
+    except IOError as err:
+        return str(err)
 
-
-def write_nested_list(nested_list, file_name):
-    content = list(itertools.chain(*nested_list))
-    return write(content, file_name)
+    return False  # no error
 
 
 def project_name():
@@ -124,7 +118,7 @@ def get_collection(name, parent):
 
 
 def get_soc_collection(context):
-    return get_collection("SOC", context.scene.collection)
+    return get_collection(PREFIX + "Internal", context.scene.collection)
 
 
 def get_preview_collection(context):
@@ -173,6 +167,10 @@ def reset_obj(obj):
     obj.soc_object_type = 'None'
     obj.soc_mesh_cut_type = 'None'
     obj.soc_curve_cut_type = 'None'
+    reset_relations(obj)
+
+
+def reset_relations(obj):
     obj.soc_reference_name = ""
     obj.soc_preview_name = ""
     obj.soc_solid_name = ""
@@ -223,3 +221,20 @@ def restore_selection(active_object, selected_objects):
 
 def vector2string(vector):
     return SVG_COORD_FORMAT.format(vector[0], vector[1])
+
+
+def minmax(context, property_name):
+    d0, dd, d1 = DEFAULTS[property_name]
+    return length(context, d0), \
+           length(context, d1)
+
+
+def default(context, property_name):
+    d0, dd, d1 = DEFAULTS[property_name]
+    return length(context, dd)
+
+
+def initialize_object(obj, context):
+    obj.soc_cut_depth = default(context, 'cut_depth')
+    obj.soc_tool_diameter = default(context, 'tool_diameter')
+    obj.soc_initialized = True

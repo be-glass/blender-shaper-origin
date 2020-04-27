@@ -31,7 +31,8 @@ class Generator:
         self.preview = Preview(context)
 
     def reset(self):
-        cleanup(self.context, self.obj)
+        self.obj.soc_suppress_next_update = True
+        cleanup(self.context, self.obj)  # TODO: fillet object nor rmoved!
         self.setup()
         self.update()
 
@@ -63,9 +64,8 @@ class Generator:
         return length(self.context, quantity_with_unit)
 
     def adjust_boolean_modifiers(self, collection):
-        solid_obj = get_object_safely(self.obj.soc_solid_name)
         for perimeter_obj in find_perimeters(collection):
-            self.rebuild_boolean_modifier(perimeter_obj, solid_obj)
+            self.rebuild_boolean_modifier(perimeter_obj, self.obj)
 
     def reset_preview_object(self):
         name = self.obj.name + '.preview'

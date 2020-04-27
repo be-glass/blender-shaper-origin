@@ -73,3 +73,7 @@ class Perimeter(Generator):
         contents = self.svg_object(content, attributes)
 
         return z, contents
+
+    def transform(self):
+        fillet_obj = self.get_fillet_obj()
+        fillet_obj.matrix_world = self.obj.matrix_world

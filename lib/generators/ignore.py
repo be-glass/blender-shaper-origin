@@ -23,3 +23,6 @@ class Ignore(Generator):
 
     def update(self):
         pass
+
+    def transform(self):
+        pass

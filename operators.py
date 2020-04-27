@@ -22,7 +22,7 @@ from mathutils.geometry import distance_point_to_plane
 from .lib.export import Export
 from .lib.generator import create_cut
 from .lib.helper.gen_helper import find_perimeters
-from .lib.helper.other import translate_local, find_cuts, store_selection, consistency_checks
+from .lib.helper.other import translate_local, find_cuts, store_selection, consistency_checks, reset_relations
 from .lib.preview import Preview
 
 
@@ -51,14 +51,13 @@ class MESH_OT_socut_export_cuts(Operator):
 
     def execute(self, context):
 
-        # try:
         result = Export(context).run()
-        # except:
-        #     self.report({'ERROR'}, "Export Failed")
-        #     return {'CANCELLED'}
 
-        if result:
-            self.report({'INFO'}, result)
+        if result == False:
+            self.report({'INFO'}, 'Export done')
+            return {'FINISHED'}
+        elif result:
+            self.report({'WARNING'}, result)
             return {'FINISHED'}
         else:
             self.report({'ERROR'}, "Export Failed")
@@ -96,10 +95,11 @@ class MESH_OT_socut_rebuild(Operator):
     def execute(self, context):
         _, selection = store_selection(context)
 
-        preview = context.scene.so_cut['preview']
+        preview = context.scene.so_cut.preview
         context.scene.so_cut['preview'] = False
 
         for obj in find_cuts():
+            reset_relations(obj)
             consistency_checks(obj)
             create_cut(context, obj).reset()
 

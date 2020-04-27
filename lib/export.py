@@ -28,6 +28,10 @@ class Export:
     def run(self):
 
         items = self.list_export_items()
+
+        if not items:
+            return "Nothing to export"
+
         dir_name = self.context.scene.so_cut.export_path
 
         if self.context.scene.so_cut.separate_files:
@@ -38,15 +42,16 @@ class Export:
             name = project_name()
             selection_set = {name: items}
 
-        if not selection_set:
-            return "Nothing to export"
-
+        err = "no items"
         for name, selection in selection_set.items():
             content = self.svg_content(selection)
             file_name = f'{dir_name}/{name}.svg'
-            write(content, file_name)
+            err = write(content, file_name)
 
-        return "Export Done"
+        if err:
+            return err
+        else:
+            return False  # no error
 
     def list_export_items(self):
         if self.context.scene.so_cut.selected_only:
