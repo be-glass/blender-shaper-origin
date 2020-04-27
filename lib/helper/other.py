@@ -16,7 +16,7 @@
 import bpy
 import itertools
 
-from ..constant import PREFIX, SVG_COORD_FORMAT
+from ..constant import PREFIX, SVG_COORD_FORMAT, DEFAULTS
 
 
 def write(content, file_name):
@@ -217,3 +217,20 @@ def restore_selection(active_object, selected_objects):
 
 def vector2string(vector):
     return SVG_COORD_FORMAT.format(vector[0], vector[1])
+
+
+def minmax(context, property_name):
+    d0, dd, d1 = DEFAULTS[property_name]
+    return length(context, d0), \
+           length(context, d1)
+
+
+def default(context, property_name):
+    d0, dd, d1 = DEFAULTS[property_name]
+    return length(context, dd)
+
+
+def initialize_object(obj, context):
+    obj.soc_cut_depth = default(context, 'cut_depth')
+    obj.soc_tool_diameter = default(context, 'tool_diameter')
+    obj.soc_initialized = True
