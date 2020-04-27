@@ -31,6 +31,7 @@ class Generator:
         self.preview = Preview(context)
 
     def reset(self):
+        self.obj.soc_suppress_next_update = True
         cleanup(self.context, self.obj)
         self.setup()
         self.update()

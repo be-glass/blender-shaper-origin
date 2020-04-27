@@ -44,6 +44,7 @@ def register():
     btO.soc_preview_name = oP.preview_name
     btO.soc_bevel_name = oP.bevel_name
     btO.soc_known_as = oP.known_as
+    btO.soc_suppress_next_update = oP.suppress_next_update
 
 
 def unregister():
@@ -63,6 +64,7 @@ def unregister():
     del btO.soc_preview_name
     del btO.soc_bevel_name
     del btO.soc_known_as
+    del btO.soc_suppress_next_udate
 
 
 # Definition
@@ -154,6 +156,11 @@ class ObjectProperties(PropertyGroup):
         description="Object is initialized (for internal use)",
         default=False,
         options={'HIDDEN'},
+    )
+    suppress_next_update = BoolProperty(
+        name="Suppress next update",
+        description="Inhibits next update interrupt (for internal use)",
+        default=False,
     )
     dogbone = BoolProperty(
         name="Dogbone Fillets",

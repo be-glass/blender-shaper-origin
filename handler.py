@@ -34,6 +34,11 @@ def unregister():
 def post_ob_updated(scene, depsgraph):
     obj, selection = store_selection(bpy.context, reset=True)
 
+    # extinguish interrupt chain
+    if obj.soc_suppress_next_update:
+        obj.soc_suppress_next_update = False
+        return
+
     if obj is not None:
         if obj.mode == 'OBJECT':
             consistency_checks(obj)

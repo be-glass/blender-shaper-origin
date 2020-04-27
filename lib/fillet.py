@@ -33,6 +33,29 @@ class Fillet:
         self.resolution = FILLET_RESOLUTION
         self.name = PREFIX + self.obj.name + ".fillets"
 
+    def create(self, outside=False, reset=True, rounded=True):
+        fillet = []
+        collection = get_solid_collection(self.context)
+
+        for shift in range(self.corner_count()):
+            corner = self.corner_vectors(shift)
+            fillet += self.corner_fillet(corner, outside, rounded)
+
+        if reset:
+            delete_object(self.obj.soc_solid_name)
+
+        fillet_obj = create_object(fillet, collection, self.name)
+        fillet_obj.matrix_world = self.obj.matrix_world
+        fillet_obj.soc_object_type = 'Solid'
+
+        self.obj.soc_solid_name = fillet_obj.name
+
+        self.obj.display_type = 'WIRE'
+
+        self.obj.soc_solid_name = fillet_obj.name
+
+        return fillet_obj
+
     def get_polygon_safely(self):
         polygons = self.obj.data.polygons
         n = len(polygons)
@@ -42,9 +65,6 @@ class Fillet:
         elif n > 1:
             warning_msg(f'Object "{self.obj.name}" has more than 1 faces! Using the first one.')
         return self.obj.data.polygons[0]
-
-    # def get_obj(self):
-    #     return get_object_safely(self.name)
 
     def corner_count(self):
         return len(self.polygon.vertices)
@@ -67,27 +87,6 @@ class Fillet:
         d = abc_normal.dot(self.polygon.normal)
         return d > 0  # > 0 if inside, = 0 if straight
 
-    def create(self, outside=False, reset=True, rounded=True):
-        fillet = []
-        collection = get_solid_collection(self.context)
-
-        for shift in range(self.corner_count()):
-            corner = self.corner_vectors(shift)
-            fillet += self.corner_fillet(corner, outside, rounded)
-
-        if reset:
-            delete_object(self.obj.soc_solid_name)
-
-        fillet_obj = create_object(fillet, collection, self.name)
-        fillet_obj.matrix_world = self.obj.matrix_world
-
-        self.obj.soc_solid_name = fillet_obj.name
-
-        self.obj.display_type = 'WIRE'
-
-        self.obj.soc_solid_name = fillet_obj.name
-
-        return fillet_obj
 
     def corner_angle(self, corner):
         A, B, C = corner
