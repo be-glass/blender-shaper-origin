@@ -13,20 +13,21 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
-from ..constant import CUT_ENCODING
+from ..constant import SO_CUT_ENCODING
 
 
 def svg_material_attributes(key):
     style_map = {
-        'Perimeter': 'Exterior',
         'Exterior': 'Exterior',
-        'Cutout': 'Pocket',
         'Interior': 'Interior',
-        'Pocket': 'Pocket',
         'Online': 'Online',
-        'Guide': 'Guide',
+        'Pocket': 'Pocket',
+        'Cutout': 'Pocket',
+        'Perimeter': 'Exterior',
+        'GuideArea': 'Guide',
+        'GuidePath': 'Guide',
     }
 
     style = style_map[key]
-    (stroke, fill) = CUT_ENCODING[style]
+    (stroke, fill) = SO_CUT_ENCODING[style]
     return f'stroke="{stroke}" fill="{fill}"'

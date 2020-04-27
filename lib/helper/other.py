@@ -20,19 +20,13 @@ from ..constant import PREFIX, SVG_COORD_FORMAT
 
 
 def write(content, file_name):
-    file = open(file_name, 'w')
-    if file:
-        if file.writelines(content):
-            file.close()
-            return True
-        else:
-            file.close()
-    return False
+    try:
+        with open(file_name, 'w') as file:
+            file.writelines(content)
+    except IOError as err:
+        return str(err)
 
-
-def write_nested_list(nested_list, file_name):
-    content = list(itertools.chain(*nested_list))
-    return write(content, file_name)
+    return False  # no error
 
 
 def project_name():

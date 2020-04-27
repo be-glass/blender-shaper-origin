@@ -100,12 +100,12 @@ class ObjectProperties(PropertyGroup):
 
     curve_cut_type = EnumProperty(
         name="Cut Type",
-        description="SO cut type",
+        description="SO curve cut type",
         items=[('None', 'None', 'No Cut', '', 0),
                ('Exterior', 'Exterior', 'Exterior Cut', '', 2),
                ('Interior', 'Interior', 'Interior Cut', '', 4),
                ('Online', 'On Line', 'On Line Cut', '', 6),
-               ('GuidePath', 'Guide Path', '', 'Guide Line', 7),
+               ('GuidePath', 'Guide Path', '', 'Guide Path', 7),
                ],
 
         default='None',
@@ -114,12 +114,12 @@ class ObjectProperties(PropertyGroup):
     )
     mesh_cut_type = EnumProperty(
         name="Cut Type",
-        description="SO cut type",
+        description="SO mesh cut type",
         items=[('None', 'None', 'No Cut', '', 0),
                ('Perimeter', 'Perimeter', "Defines the outer perimeter of work piece", 1),
                ('Cutout', 'Cutout', 'Cutout', 3),
                ('Pocket', 'Pocketing', 'Pocketing', '', 5),
-               ('GuideArea', 'Guide Area', '', 'Guide Line', 7),
+               ('GuideArea', 'Guide Area', '', 'Guide Area', 7),
                ],
 
         default='None',

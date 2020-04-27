@@ -42,13 +42,16 @@ class Export:
             name = project_name()
             selection_set = {name: items}
 
-
+        err = "no items"
         for name, selection in selection_set.items():
             content = self.svg_content(selection)
             file_name = f'{dir_name}/{name}.svg'
-            write(content, file_name)
+            err = write(content, file_name)
 
-        return True
+        if err:
+            return err
+        else:
+            return False  # no error
 
     def list_export_items(self):
         if self.context.scene.so_cut.selected_only:
