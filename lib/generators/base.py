@@ -32,7 +32,7 @@ class Generator:
 
     def reset(self):
         self.obj.soc_suppress_next_update = True
-        cleanup(self.context, self.obj)
+        cleanup(self.context, self.obj)  # TODO: fillet object nor rmoved!
         self.setup()
         self.update()
 

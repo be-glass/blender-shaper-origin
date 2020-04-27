@@ -167,6 +167,10 @@ def reset_obj(obj):
     obj.soc_object_type = 'None'
     obj.soc_mesh_cut_type = 'None'
     obj.soc_curve_cut_type = 'None'
+    reset_relations(obj)
+
+
+def reset_relations(obj):
     obj.soc_reference_name = ""
     obj.soc_preview_name = ""
     obj.soc_solid_name = ""

@@ -22,7 +22,7 @@ from mathutils.geometry import distance_point_to_plane
 from .lib.export import Export
 from .lib.generator import create_cut
 from .lib.helper.gen_helper import find_perimeters
-from .lib.helper.other import translate_local, find_cuts, store_selection, consistency_checks
+from .lib.helper.other import translate_local, find_cuts, store_selection, consistency_checks, reset_relations
 from .lib.preview import Preview
 
 
@@ -99,6 +99,7 @@ class MESH_OT_socut_rebuild(Operator):
         context.scene.so_cut['preview'] = False
 
         for obj in find_cuts():
+            reset_relations(obj)
             consistency_checks(obj)
             create_cut(context, obj).reset()
 
