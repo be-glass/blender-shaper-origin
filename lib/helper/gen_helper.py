@@ -17,7 +17,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 from ..constant import PREFIX
-from .other import get_solid_collection, delete_object, get_reference_collection, find_cuts
+from .other import get_solid_collection, delete_object, get_reference_collection, find_cuts, get_object_safely
 
 
 def find_siblings_by_type(cut_types, sibling=None, collection=None):
@@ -97,9 +97,12 @@ def boolean_modifier_name(cut_obj):
 
 
 def cleanup_boolean_modifiers(target_obj):
-    collection = target_obj.users_collection[0]
-    for perimeter in find_perimeters(collection):
-        delete_modifier(perimeter, boolean_modifier_name(target_obj))
+    solid_obj = get_object_safely(target_obj.soc_solid_name, report_error=False)
+
+    if solid_obj:
+        collection = target_obj.users_collection[0]
+        for perimeter in find_perimeters(collection):
+            delete_modifier(perimeter, boolean_modifier_name(solid_obj))
 
 
 def get_reference(context, obj):

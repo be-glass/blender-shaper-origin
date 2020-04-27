@@ -64,9 +64,8 @@ class Generator:
         return length(self.context, quantity_with_unit)
 
     def adjust_boolean_modifiers(self, collection):
-        solid_obj = get_object_safely(self.obj.soc_solid_name)
         for perimeter_obj in find_perimeters(collection):
-            self.rebuild_boolean_modifier(perimeter_obj, solid_obj)
+            self.rebuild_boolean_modifier(perimeter_obj, self.obj)
 
     def reset_preview_object(self):
         name = self.obj.name + '.preview'

@@ -34,24 +34,31 @@ def unregister():
 def post_ob_updated(scene, depsgraph):
     obj, selection = store_selection(bpy.context, reset=True)
 
-    # extinguish interrupt chain
-    if obj.soc_suppress_next_update:
-        obj.soc_suppress_next_update = False
+    if obj is None:
         return
 
-    if obj is not None:
-        if obj.mode == 'OBJECT':
-            consistency_checks(obj)
-            for o in selection:
-                cut = create_cut(bpy.context, o)
-                for u in depsgraph.updates:
-                    if u.is_updated_geometry:
+    # # extinguish interrupt chain
+    # if obj.soc_suppress_next_update:
+    #     obj.soc_suppress_next_update = False
+    #     return
+
+    if obj.mode == 'OBJECT':
+        consistency_checks(obj)
+        for o in selection:
+            cut = create_cut(bpy.context, o)
+            for u in depsgraph.updates:
+                if u.is_updated_geometry:
+
+                    if not obj.soc_suppress_next_update:  # extinguish interrupt chain
                         cut.reset()
-                    elif u.is_updated_transform:
-                        cut.transform()
-                    else:
-                        cut.update_hide_state()
+
+                elif u.is_updated_transform:
+                    cut.transform()
+                else:
+                    cut.update_hide_state()
     restore_selection(obj, selection)
+
+    obj.soc_suppress_next_update = False
 
 
 # Update handlers
