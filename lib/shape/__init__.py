@@ -17,3 +17,9 @@ class Shape:
 
     def is_exterior(self):
         return False
+
+    def is_perimeter(self):
+        return False
+
+    def is_guide(self):
+        return False

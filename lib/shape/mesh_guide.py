@@ -1,5 +1,13 @@
-class MeshGuide():
-    pass
+from . import Shape
+
+
+class MeshGuide(Shape):
+
+    def setup(self):
+        self.obj.display_type = 'TEXTURED'
+
+    def is_guide(self):
+        return True
 
     # def svg(self):
     #     content = self.svg_mesh()

@@ -28,7 +28,7 @@ class Solid:
         self.body.setup()
 
         # extrude
-        if self.body:
+        if self.body and self.body.is_solid():
             self.mod_solidify = self.body.obj.modifiers.new(self.mod_solidify_name, 'SOLIDIFY')
 
     def update(self):

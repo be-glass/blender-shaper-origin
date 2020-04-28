@@ -31,8 +31,11 @@ class Perimeter(MeshShape):
 
         ### private
 
-        def is_perimeter(self):
-            return False
+    def is_exterior(self):
+        return True
+
+    def is_perimeter(self):
+        return True
 
 # from .fillet import Fillet
 # from ..helper.gen_helper import *
