@@ -16,7 +16,7 @@
 import bpy
 from mathutils import Vector
 
-from .mesh import curve2mesh
+from .mesh_helper import curve2mesh
 
 
 def add_nurbs_square(collection, name, curve_cut_type):
@@ -46,11 +46,11 @@ def add_nurbs_square(collection, name, curve_cut_type):
     return obj
 
 
-def face_normal(context, obj):
-    mesh_obj = curve2mesh(context, obj, add_face=True)
+def face_normal(obj):
+    mesh_obj = curve2mesh(obj, add_face=True)
     normal = mesh_obj.data.polygons[0].normal
     return normal
 
 
-def face_is_down(context, obj):
-    return face_normal(context, obj).dot(Vector([0, 0, 1])) < 0
+def face_is_down(obj):
+    return face_normal(obj).dot(Vector([0, 0, 1])) < 0

@@ -17,6 +17,7 @@ import bpy
 from bpy import utils
 from bpy.types import Panel
 
+from .lib.helper.other import active_object
 from .lib.helper import gen_helper
 
 
@@ -71,7 +72,7 @@ class BG_PT_SOC_select(Panel):
         self.layout.use_property_split = True
         self.layout.use_property_decorate = True
 
-        obj = bpy.context.active_object
+        obj = context.object
 
         if obj:
             typ = obj.soc_object_type

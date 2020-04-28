@@ -1,4 +1,3 @@
-PREFIX = "SOC_"
 
 #  This file is part of Blender_Shaper_Origin.
 #
@@ -62,3 +61,5 @@ xml:space="preserve" style="background-color:#d0d0d0" stroke-width="5%"
 width="{width:.2f}{unit}" height="{height:.2f}{unit}"          
 viewBox="{x0:.2f} {y0:.2f} {w:.2f} {h:.2f}">
 '''
+
+PREFIX = "SOC_"

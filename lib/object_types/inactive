@@ -1,4 +1,4 @@
-class Disabled(Generator):
+class Inactive:
 
     def update(self):
         pass

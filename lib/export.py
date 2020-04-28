@@ -14,9 +14,9 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
 from .constant import SVG_HEADER_TEMPLATE
-from .generator import create_cut
 from .helper.gen_helper import boundaries
 from .helper.other import project_name, write
+from .cut import Cut
 from ..__init__ import bl_info
 
 
@@ -107,7 +107,7 @@ class Export:
 
     def svg_perimeter_group(self, name_and_group):
         name, objs = name_and_group
-        cuts = [create_cut(self.context, obj) for obj in objs]
+        cuts = [Cut(self.obj) for obj in objs]
         content = [cut.svg() for cut in cuts]
         content_sorted = [item[1] for item in sorted(content, reverse=False)]
         return f'<g class="Collection" id="{name}">' + ''.join(content_sorted) + '</g>'

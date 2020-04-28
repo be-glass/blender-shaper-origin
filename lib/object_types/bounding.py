@@ -1,6 +1,7 @@
+
 class Bounding:
     def transform(self):
-        self.preview.transform_previews(self.context, self.obj)
+        self.preview.transform_previews(self.obj)
 
     def setup(self):
         pass

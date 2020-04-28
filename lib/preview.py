@@ -16,19 +16,20 @@
 import bpy
 from mathutils import Matrix, Vector
 
+from .collection import Collection, Collect
 from .constant import FACE_COLOR
 from .fillet import Fillet
 from .helper.gen_helper import get_reference, boundaries
 from .helper.preview_helper import transform_preview, get_bounding_frame, BOUNDING_FRAME_NAME
-from .helper.mesh import create_object
-from .helper.other import length, get_preview_collection, find_cuts, get_soc_collection, warning_msg, get_object_safely, \
-    err_implementation, move_object
+from .helper.mesh_helper import create_object
+from .helper.other import length, find_cuts, warning_msg, get_object_safely, \
+    move_object
 
 
 class Preview:
     def __init__(self, context):
         self.context = context
-        self.collection = get_preview_collection(self.context)
+        self.collection = Collection(Collect.Preview).get()
         self.bounding = get_bounding_frame()
         self.cut_objs = find_cuts()
         self.perimeters = [o for o in self.cut_objs if o.soc_mesh_cut_type == 'Perimeter']
@@ -76,7 +77,7 @@ class Preview:
         c0, c1 = boundaries(self.context)
 
         z = -0.1
-        d = length(self.context, '10mm')  # margin of preview sheet
+        d = length('10mm')  # margin of preview sheet
 
         m0 = Vector([c1.x + d, c0.y - d, z])
         m1 = Vector([c1.x + d, c1.y + d, z])
@@ -85,7 +86,7 @@ class Preview:
 
         quad = [m0, m1, m2, m3]
 
-        collection = get_soc_collection(self.context)
+        collection = Collection(Collect.Internal).get()
         frame = create_object(quad, collection, BOUNDING_FRAME_NAME)
         frame.matrix_world = mw
         frame.soc_object_type = "Bounding"
@@ -107,7 +108,7 @@ class Preview:
 
         if cut_obj.type == 'MESH':
             is_perimeter = True if cut_obj.soc_mesh_cut_type == 'Perimeter' else False
-            fillet = Fillet(self.context, cut_obj)
+            fillet = Fillet(self.cut_obj)
             preview_obj = fillet.create(reset=False, rounded=False, outside=is_perimeter)
 
         else:
@@ -119,9 +120,9 @@ class Preview:
         if cut_obj.soc_mesh_cut_type != 'Perimeter':
             preview_obj.hide_select = True
 
-        # apply_mesh_scale(self.context, preview_obj)    # TODO: is this needed? for mesh? for curve?
+        # apply_mesh_scale(self.preview_obj)    # TODO: is this needed? for mesh? for curve?
 
-        preview_obj.matrix_world = transform_preview(self.context, cut_obj, perimeter, self.bounding)
+        preview_obj.matrix_world = transform_preview(self.cut_obj, perimeter, self.bounding)
         preview_obj.name = name
         cut_obj.soc_preview_name = preview_obj.name
         preview_obj.soc_preview_name = ""
@@ -143,7 +144,7 @@ class Preview:
         if matches:
             obj = matches[0]
 
-            reference_obj = get_reference(self.context, obj)
+            reference_obj = get_reference(self.obj)
 
             if reference_obj is not None:
                 frame_1 = self.bounding.matrix_world.copy()
@@ -162,16 +163,16 @@ class Preview:
 
         for obj in perimeter.users_collection[0].objects:
             if obj.soc_mesh_cut_type != 'Perimeter':
-                m = transform_preview(self.context, obj, perimeter, self.bounding)
+                m = transform_preview(self.obj, perimeter, self.bounding)
                 preview_obj = get_object_safely(obj.soc_preview_name)
                 preview_obj.matrix_world = m
 
-    def transform_previews(self, context, frame_obj):
+    def transform_previews(self, frame_obj):
 
         for perimeter in self.perimeters:
             for obj in perimeter.users_collection[0].objects:
 
                 if obj.soc_object_type == 'Cut':
-                    matrix = transform_preview(context, obj, perimeter, frame_obj)
+                    matrix = transform_preview(obj, perimeter, frame_obj)
                     preview_obj = get_object_safely(obj.soc_preview_name)
                     preview_obj.matrix_world = matrix

@@ -15,16 +15,13 @@
 
 import bmesh
 import bpy
-from mathutils import Matrix, Vector
 
-from .other import select_active, error_msg
-
+from .other import select_active, error_msg, active_object
 
 
-
-def repair_mesh(context, obj):  # TODO: needed?
-    active = context.object
-    select_active(context, obj)
+def repair_mesh(obj):  # TODO: needed?
+    active = active_object()
+    select_active(obj)
 
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='SELECT')
@@ -35,7 +32,7 @@ def repair_mesh(context, obj):  # TODO: needed?
     bpy.ops.object.mode_set(mode='OBJECT')
 
     if active:
-        select_active(context, active)
+        select_active(active)
 
 
 def shade_mesh_flat(obj):
@@ -56,17 +53,18 @@ def create_object(polygon, collection=None, name=''):
     return obj
 
 
-def add_plane(context, name, size, collection=None):  # TODO: replace without ops
+def add_plane(name, size, collection=None):  # TODO: replace without ops
     bpy.ops.mesh.primitive_plane_add(size=size)
+
+    obj = active_object()
 
     # delete face
     bpy.ops.object.mode_set(mode='EDIT')
-    bpy.context.object.data.polygons[0].select = True
+    obj.data.polygons[0].select = True
     bpy.ops.mesh.delete(type='ONLY_FACE')
     bpy.ops.object.mode_set(mode='OBJECT')
-    select_active(context, context.object)  # TODO
+    select_active(obj)  # TODO
 
-    obj = context.active_object
     obj.name = name
 
     if collection:
@@ -76,7 +74,8 @@ def add_plane(context, name, size, collection=None):  # TODO: replace without o
     return obj
 
 
-def curve2mesh(context, obj, name='', add_face=False):
+def curve2mesh(obj, name='', add_face=False):
+    context = bpy.context
     depsgraph = context.evaluated_depsgraph_get()
     object_evaluated = obj.evaluated_get(depsgraph)
     mesh = bpy.data.meshes.new_from_object(object_evaluated)

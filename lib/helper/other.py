@@ -14,7 +14,6 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
 import bpy
-import itertools
 
 from ..constant import PREFIX, SVG_COORD_FORMAT, DEFAULTS
 
@@ -49,7 +48,8 @@ def move_object(obj, collection):
     collection.objects.link(obj)
 
 
-def select_active(context, obj):
+def select_active(obj):
+    context = bpy.context
     for o in context.selected_objects:
         o.select_set(False)
 
@@ -57,7 +57,9 @@ def select_active(context, obj):
     context.view_layer.objects.active = obj
 
 
-def error_msg(message, context=bpy.context):
+def error_msg(message):
+    context = bpy.context
+
     def msg(self, text):
         self.layout.label(text=message)
 
@@ -65,16 +67,16 @@ def error_msg(message, context=bpy.context):
     raise Exception(message)
 
 
-def warning_msg(message, context=bpy.context):
+def warning_msg(message):
     def msg(self, text):
         self.layout.label(text=message)
 
-    context.window_manager.popup_menu(msg, title="Warning", icon='ERROR')
+    bpy.context.window_manager.popup_menu(msg, title="Warning", icon='ERROR')
     # raise Exception(message)
 
 
-def err_implementation(context=bpy.context):
-    error_msg("missing implementation", context)
+def err_implementation():
+    error_msg("missing implementation")
 
 
 def get_object_safely(obj_name, report_error=True):
@@ -97,8 +99,9 @@ def hide_objects(name):
             obj.hide_set(True)
 
 
-def length(context, quantity_with_unit):
-    return bpy.utils.units.to_value('METRIC', 'LENGTH', quantity_with_unit) / context.scene.unit_settings.scale_length
+def length(quantity_with_unit):
+    return bpy.utils.units.to_value('METRIC', 'LENGTH',
+                                    quantity_with_unit) / bpy.context.scene.unit_settings.scale_length
 
 
 def translate_local(obj, vector):
@@ -106,41 +109,6 @@ def translate_local(obj, vector):
     rotation.invert()
     global_translation = vector @ rotation
     obj.location += global_translation
-
-
-def get_collection(name, parent):
-    if name in bpy.data.collections.keys():
-        return bpy.data.collections[name]
-    else:
-        collection = bpy.data.collections.new(name)
-        parent.children.link(collection)
-        return collection
-
-
-def get_soc_collection(context):
-    return get_collection(PREFIX + "Internal", context.scene.collection)
-
-
-def get_preview_collection(context):
-    soc = get_soc_collection(context)
-    return get_collection(PREFIX + "Preview", soc)
-
-
-def get_solid_collection(context):
-    soc = get_soc_collection(context)
-    return get_collection(PREFIX + "Solid", soc)
-
-
-def get_reference_collection(context):
-    soc = get_soc_collection(context)
-    collection = get_collection(PREFIX + "Reference", soc)
-    return collection
-
-
-def get_helper_collection(context):
-    soc = get_soc_collection(context)
-    collection = get_collection(PREFIX + "Helper", soc)
-    return collection
 
 
 def consistency_checks(obj):
@@ -201,19 +169,21 @@ def find_first_perimeter(obj):
         return None
 
 
-def store_selection(context, reset=False):
+def store_selection(reset=False):
+    context = bpy.context
     active_object = context.object
     selected_objects = context.selected_objects
     context.view_layer.objects.active = None
     if reset:
-        for o in bpy.context.selected_objects:
+        for o in context.selected_objects:
             o.select_set(False)
     return active_object, selected_objects
 
 
 def restore_selection(active_object, selected_objects):
-    bpy.context.view_layer.objects.active = active_object
-    for o in bpy.context.selected_objects:
+    c = bpy.context
+    c.view_layer.objects.active = active_object
+    for o in c.selected_objects:
         o.select_set(False)
     for o in selected_objects:
         o.select_set(True)
@@ -223,18 +193,26 @@ def vector2string(vector):
     return SVG_COORD_FORMAT.format(vector[0], vector[1])
 
 
-def minmax(context, property_name):
+def minmax(property_name):
     d0, dd, d1 = DEFAULTS[property_name]
-    return length(context, d0), \
-           length(context, d1)
+    return length(d0), \
+           length(d1)
 
 
-def default(context, property_name):
+def default(property_name):
     d0, dd, d1 = DEFAULTS[property_name]
-    return length(context, dd)
+    return length(dd)
 
 
-def initialize_object(obj, context):
-    obj.soc_cut_depth = default(context, 'cut_depth')
-    obj.soc_tool_diameter = default(context, 'tool_diameter')
+def initialize_object(obj):
+    obj.soc_cut_depth = default('cut_depth')
+    obj.soc_tool_diameter = default('tool_diameter')
     obj.soc_initialized = True
+
+
+def active_object():
+    bpy.context.object
+
+
+def remove_by_name(name):
+    bpy.data.objects.remove(bpy.data.objects[name])

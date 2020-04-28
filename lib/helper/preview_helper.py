@@ -22,21 +22,21 @@ from .gen_helper import get_reference
 
 BOUNDING_FRAME_NAME = PREFIX + 'Bounding Frame'
 
-def transform_preview(context, obj, perimeter, bounding_frame):
-    m0, m1, m2, m3, m4 = transforms(context, obj, perimeter, bounding_frame)
+def transform_preview(obj, perimeter, bounding_frame):
+    m0, m1, m2, m3, m4 = transforms(obj, perimeter, bounding_frame)
     return m4 @ m3 @ m2 @ m1 @ m0
 
 
-def transform_export(context, obj, perimeter):
-    m0, m1, m2, m3, _ = transforms(context, obj, perimeter)
+def transform_export(obj, perimeter):
+    m0, m1, m2, m3, _ = transforms(obj, perimeter)
     return m3 @ m2 @ m1 @ m0
 
 
-def transforms(context, obj, perimeter, bounding=None):
-    reference = get_reference(context, perimeter) if perimeter else None
+def transforms(obj, perimeter, bounding=None):
+    reference = get_reference(perimeter) if perimeter else None
 
-    z = lift_z(context, obj)
-    lift = Vector([0, 0, z * length(context, PREVIEW_STACK_DELTA)])
+    z = lift_z(obj)
+    lift = Vector([0, 0, z * length(PREVIEW_STACK_DELTA)])
 
     m0 = obj.matrix_world.copy() if perimeter else Matrix()
     m1 = perimeter.matrix_world.inverted() if perimeter else Matrix()
@@ -47,7 +47,7 @@ def transforms(context, obj, perimeter, bounding=None):
     return m0, m1, m2, m3, m4
 
 
-def lift_z(context, obj):
+def lift_z(obj):
     if obj.soc_mesh_cut_type != 'None':
         z = STACK_Z[obj.soc_mesh_cut_type]
     elif obj.soc_curve_cut_type != 'None':

@@ -19,8 +19,8 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
+from .lib.cut import Cut
 from .lib.export import Export
-from .lib.generator import create_cut
 from .lib.helper.gen_helper import find_perimeters
 from .lib.helper.other import translate_local, find_cuts, store_selection, consistency_checks, reset_relations
 from .lib.preview import Preview
@@ -51,7 +51,7 @@ class MESH_OT_socut_export_cuts(Operator):
 
     def execute(self, context):
 
-        result = Export(context).run()
+        result = Export().run()
 
         if result == False:
             self.report({'INFO'}, 'Export done')
@@ -93,7 +93,7 @@ class MESH_OT_socut_rebuild(Operator):
     bl_description = "Rebuild all objects"
 
     def execute(self, context):
-        _, selection = store_selection(context)
+        _, selection = store_selection()
 
         preview = context.scene.so_cut.preview
         context.scene.so_cut['preview'] = False
@@ -101,10 +101,10 @@ class MESH_OT_socut_rebuild(Operator):
         for obj in find_cuts():
             reset_relations(obj)
             consistency_checks(obj)
-            create_cut(context, obj).reset()
+            Cut(obj).reset()
 
         if preview:
-            Preview(context).create()
+            Preview().create()
             context.scene.so_cut['preview'] = True
 
         self.report({'INFO'}, "OK")

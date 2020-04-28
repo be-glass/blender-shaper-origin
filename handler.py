@@ -15,10 +15,9 @@
 
 import bpy
 
-from .lib.generator import create_cut
 from .lib.preview import Preview
 from .lib.helper.other import consistency_checks, store_selection, restore_selection, minmax, initialize_object
-
+from .lib.cut import Cut
 
 def register():
     bpy.app.handlers.depsgraph_update_post.clear()
@@ -31,7 +30,7 @@ def unregister():
 
 @bpy.app.handlers.persistent
 def post_ob_updated(scene, depsgraph):
-    obj, selection = store_selection(bpy.context, reset=True)
+    obj, selection = store_selection(reset=True)
 
     if obj is None:
         return
@@ -39,17 +38,19 @@ def post_ob_updated(scene, depsgraph):
     if obj.mode == 'OBJECT':
         consistency_checks(obj)
         for o in selection:
-            cut = create_cut(bpy.context, o)
+            cut = Cut(o)
             for u in depsgraph.updates:
                 if u.is_updated_geometry:
 
                     if not obj.soc_suppress_next_update:  # extinguish interrupt chain
+                        obj.soc_suppress_next_update = True
                         cut.reset()
 
                 elif u.is_updated_transform:
                     cut.transform()
                 else:
-                    cut.update_hide_state()
+                    # cut.update_hide_state()   #TMP
+                    pass
 
     restore_selection(obj, selection)
     obj.soc_suppress_next_update = False
@@ -59,7 +60,7 @@ def post_ob_updated(scene, depsgraph):
 
 
 def update_cut_depth(obj, context):
-    minimum, maximum = minmax(context, 'cut_depth')
+    minimum, maximum = minmax('cut_depth')
 
     if obj.soc_initialized:
         if obj.soc_cut_depth < minimum:
@@ -67,11 +68,11 @@ def update_cut_depth(obj, context):
         elif obj.soc_cut_depth > maximum:
             obj.soc_cut_depth = maximum
         else:
-            create_cut(context, obj).update()
+            Cut(obj).update()
 
 
 def update_tool_diameter(obj, context):
-    minimum, maximum = minmax(context, 'tool_diameter')
+    minimum, maximum = minmax('tool_diameter')
 
     if obj.soc_initialized:
         if obj.soc_tool_diameter < minimum:
@@ -79,22 +80,22 @@ def update_tool_diameter(obj, context):
         elif obj.soc_tool_diameter > maximum:
             obj.soc_tool_diameter = maximum
         else:
-            create_cut(context, obj).reset()
+            Cut(obj).reset()
 
 
 def update_cut_type(obj, context):
-    _, selection = store_selection(context, reset=True)
+    _, selection = store_selection(reset=True)
     if not obj.soc_initialized:
-        initialize_object(obj, context)
+        initialize_object(obj)
 
-    create_cut(context, obj).reset()
+    Cut(obj).reset()
 
     restore_selection(obj, selection)
 
 
 def preview(scene_properties, context):
     if scene_properties.preview:
-        Preview(context).create()
+        Preview().create()
         pass
     else:
-        Preview(context).delete()
+        Preview().delete()

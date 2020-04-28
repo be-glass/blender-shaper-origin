@@ -17,7 +17,9 @@ import bpy
 from mathutils import Matrix, Vector
 
 from ..constant import PREFIX
-from .other import get_solid_collection, delete_object, get_reference_collection, find_cuts, get_object_safely
+from .other import delete_object, find_cuts, get_object_safely
+
+from ..collection import Collection, Collect
 
 
 def find_siblings_by_type(cut_types, sibling=None, collection=None):
@@ -50,26 +52,26 @@ def delete_modifiers(obj):
             obj.modifiers.remove(modifier)
 
 
-def delete_solid_objects(context, obj):
-    solid_collection = get_solid_collection(context)
+def delete_solid_objects(obj):
+    solid_collection = get_solid_collection()
     for o in solid_collection.objects:
         if o.name == PREFIX + obj.name + ".fillets":
             bpy.data.objects.remove(o, do_unlink=True)
 
 
-def cleanup_meshes(context, mesh_name):
-    solid_collection = get_solid_collection(context)
+def cleanup_meshes(mesh_name):
+    solid_collection = get_solid_collection()
     for o in solid_collection.objects:
         if o.name.startswith(mesh_name):
             bpy.data.objects.remove(o, do_unlink=True)
 
 
-def cleanup(context, obj):
+def cleanup(obj):
     if obj.soc_known_as != obj.name:
         return
 
     delete_modifiers(obj)
-    delete_solid_objects(context, obj)
+    delete_solid_objects(obj)
     obj.display_type = 'TEXTURED'
 
     cleanup_boolean_modifiers(obj)
@@ -105,8 +107,8 @@ def cleanup_boolean_modifiers(target_obj):
             delete_modifier(perimeter, boolean_modifier_name(solid_obj))
 
 
-def get_reference(context, obj):
-    collection = get_reference_collection(context)
+def get_reference(obj):
+    collection = get_reference_collection()
 
     name = obj.soc_reference_name
 
@@ -129,13 +131,13 @@ def get_reference(context, obj):
         return reference
 
 
-def boundaries(context):
+def boundaries():
     x = []
     y = []
     z = []
     for obj in find_cuts():
 
-        reference = get_reference(context, obj)
+        reference = get_reference(obj)
 
         user = reference.matrix_world
         scale = Matrix.Diagonal(obj.matrix_world.to_scale()).to_4x4()

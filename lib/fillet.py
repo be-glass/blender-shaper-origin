@@ -16,45 +16,30 @@
 import math
 from math import pi
 import mathutils
+from bpy.types import Mesh
 from mathutils import Vector, Matrix
 
 from .constant import PREFIX, FILLET_RESOLUTION
-from .helper.mesh import create_object
-from .helper.other import error_msg, warning_msg, get_solid_collection, delete_object
+from .helper.mesh_helper import create_object
+from .helper.other import error_msg, warning_msg, delete_object
 
 
 class Fillet:
 
-    def __init__(self, context, obj):
-        self.context = context
-        self.obj = obj
-        self.radius = obj.soc_tool_diameter / 2
+    def __init__(self, shape):
+        self.obj = shape.obj
+
+        # config
+        self.radius = self.obj.soc_tool_diameter / 2
         self.polygon = self.get_polygon_safely()
         self.resolution = FILLET_RESOLUTION
-        self.name = PREFIX + self.obj.name + ".fillets"
 
-    def create(self, outside=False, reset=True, rounded=True):
+    def create(self, outside=False, rounded=True):
         fillet = []
-        collection = get_solid_collection(self.context)
-
         for shift in range(self.corner_count()):
             corner = self.corner_vectors(shift)
             fillet += self.corner_fillet(corner, outside, rounded)
-
-        if reset:
-            delete_object(self.obj.soc_solid_name)
-
-        fillet_obj = create_object(fillet, collection, self.name)
-        fillet_obj.matrix_world = self.obj.matrix_world
-        fillet_obj.soc_object_type = 'Solid'
-
-        self.obj.soc_solid_name = fillet_obj.name
-
-        self.obj.display_type = 'WIRE'
-
-        self.obj.soc_solid_name = fillet_obj.name
-
-        return fillet_obj
+        return create_object(fillet)  # , collection, self.name)
 
     def get_polygon_safely(self):
         polygons = self.obj.data.polygons
