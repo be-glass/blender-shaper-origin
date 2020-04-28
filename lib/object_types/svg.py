@@ -18,7 +18,7 @@ def svg_path(self, points, is_closed):
     source = ''
     path_cmd = 'M'
     for point in points:
-        vector = transform_export(self.cut_obj, self.perimeter) @ point.co
+        vector = transform_export(self.cut_obj, self.perimeter_obj) @ point.co
         source += path_cmd + vector2string(vector)
         path_cmd = 'L'
     if is_closed:

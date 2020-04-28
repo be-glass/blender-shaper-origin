@@ -19,6 +19,8 @@ class Solid:
         self.mod_boolean = None
 
     def setup(self):
+        self.collection = Collection(name=Collect.Solid)
+
         # config
         self.mod_solidify_name = PREFIX + 'Solidify'
         self.mod_boolean_name = PREFIX + 'Boolean.' + self.cut_obj.name
@@ -27,9 +29,9 @@ class Solid:
         self.body = self.body_factory()
         self.body.setup()
 
-        # extrude
         if self.body and self.body.is_solid():
-            self.mod_solidify = self.body.obj.modifiers.new(self.mod_solidify_name, 'SOLIDIFY')
+            self.solidify()
+            self.subtract_from_perimeter()
 
     def update(self):
         if self.body:
@@ -40,7 +42,32 @@ class Solid:
         Body(self.cut_obj).clean()
         self.defaults()
 
+    def transform(self):
+        if self.cut_obj:
+            matrix = self.cut_obj.matrix_world
+            Body(self.cut_obj).transform(matrix)
+
+    def subtract(self, body, modifier_name):
+        b = self.body_factory()
+        minuend = b.get()
+        subtrahend = body.get()
+        if minuend and subtrahend:
+            modifier = minuend.modifiers.new(modifier_name, 'BOOLEAN')
+            modifier.operation = 'DIFFERENCE'
+            modifier.object = subtrahend
+
+            # subtrahend.hide_set(True)   # TODO: activate later
+
     # private
+
+    def subtract_from_perimeter(self):
+        if self.body.shape and not self.body.shape.is_perimeter():
+            perimeter_objs = Collection(obj=self.cut_obj).perimeter_obj()
+            if perimeter_objs:
+                Solid(perimeter_objs[0]).subtract(self.body, self.mod_boolean_name)
+
+    def solidify(self):
+        self.mod_solidify = self.body.obj.modifiers.new(self.mod_solidify_name, 'SOLIDIFY')
 
     def body_factory(self):
         if self.cut_obj.soc_mesh_cut_type:

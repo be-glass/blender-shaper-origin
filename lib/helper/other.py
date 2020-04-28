@@ -151,10 +151,13 @@ def check_duplication(obj):
         obj.soc_known_as = obj.name
     else:
         if obj.soc_known_as != obj.name:
-            if obj.soc_known_as in bpy.data.objects.keys():
-                reset_obj(obj)
-            else:  # obj appears to be renamed
-                obj.soc_known_as = obj.name
+            reset_obj(obj)
+
+            # TODO: handle object renaming:
+            # if obj.soc_known_as in bpy.data.objects.keys():
+            #     reset_obj(obj)
+            # else:  # obj appears to be renamed
+            #     obj.soc_known_as = obj.name
 
 
 def find_cuts():

@@ -25,7 +25,7 @@ class Cut:
         self.valid = self.check()
 
     def defaults(self):
-        self.obj.soc_object_type = 'None'
+        # self.obj.soc_object_type = 'None'
         self.solid = None
 
     def reset(self):
@@ -66,6 +66,10 @@ class Cut:
     def update_hide_state(self):
         hidden = self.obj.hide_get()  # or self.obj.users_collection[0].hide_viewport   # collection cannot work
         self.solid.hide_set(hidden)
+
+    def transform(self):
+        if self.obj:
+            Solid(self.obj).transform()
 
     # private
 

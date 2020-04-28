@@ -14,13 +14,18 @@ class Collect(Enum):
 
 class Collection:
 
-    def __init__(self, name: Collect):
-        self.type = name
-        self.name = PREFIX + name.value
-        self.collection = self.get_collection()
+    def __init__(self, name: Collect = None, obj=None):
+
+        if name:
+            self.type = name
+            self.name = PREFIX + name.value
+            self.collection = self.get_collection()
+        elif obj:
+            self.type = None
+            self.collection = obj.users_collection[0]
 
     def get(self):
-        return bpy.data.collections[self.name]
+        return self.collection
 
     def collect(self, obj, name):
         self.remove(name)
@@ -29,6 +34,11 @@ class Collection:
         for c in obj.users_collection:
             c.objects.unlink(obj)
         self.collection.objects.link(obj)
+
+    def perimeter_obj(self):
+        objs = self.collection.objects
+        obj = [o for o in objs if o.soc_mesh_cut_type == 'Perimeter' and o.soc_object_type == 'Cut']
+        return obj
 
     # private
 
@@ -39,7 +49,7 @@ class Collection:
             if self.type == Collect.Internal:
                 parent = bpy.context.scene.collection  # master scene
             else:
-                parent = Collection(Collect.Internal).get()
+                parent = Collection(name=Collect.Internal).get()
 
             collection = bpy.data.collections.new(self.name)
             parent.children.link(collection)
