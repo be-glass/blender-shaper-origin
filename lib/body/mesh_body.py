@@ -21,6 +21,8 @@ class MeshBody(Body):
             else:
                 self.obj.display_type = 'WIRE'
 
+            self.obj.hide_select = True
+
     def is_solid(self):
         return not self.shape.is_guide()
 

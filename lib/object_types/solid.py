@@ -13,7 +13,6 @@ class Solid:
         self.cut_obj = cut_obj
         self.defaults()
 
-        # config
         self.mod_solidify_name = PREFIX + 'Solidify'
         self.mod_boolean_name = PREFIX + 'Boolean.' + self.cut_obj.name
 
@@ -24,7 +23,6 @@ class Solid:
     def setup(self):
         self.collection = Collection.by_enum(Collect.Solid)
 
-        # build
         self.body = self.body_factory()
         self.body.setup()
 
@@ -93,27 +91,3 @@ class Solid:
             Modifier(body_obj).set_thickness(self.mod_solidify_name,
                                              self.cut_obj.soc_cut_depth + body.thickness_delta())
 
-    def hide_set(self, state):
-        pass
-        # if self.obj:
-        #     self.obj.hide_set(state)
-
-# def adjust_boolean_modifiers(self, collection):
-#     for perimeter_obj in find_perimeters(collection):
-#         self.rebuild_boolean_modifier(perimeter_obj, self.obj)
-#
-#
-#
-# def rebuild_boolean_modifier(self, perimeter_obj, subtract_obj):
-#     modifier_name = boolean_modifier_name(subtract_obj)
-#
-#     subtract_fillet = self.get_fillet_obj(subtract_obj)
-#     perimeter_fillet = self.get_fillet_obj(perimeter_obj, outside=True)
-#
-#     if subtract_fillet and perimeter_fillet:
-#         delete_modifier(perimeter_fillet, modifier_name)
-#         boolean = perimeter_fillet.modifiers.new(modifier_name, 'BOOLEAN')
-#         boolean.operation = 'DIFFERENCE'
-#         boolean.object = get_object_safely(subtract_fillet.name)
-#
-#         subtract_fillet.hide_set(True)

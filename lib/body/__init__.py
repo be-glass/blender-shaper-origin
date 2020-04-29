@@ -38,3 +38,8 @@ class Body:
         obj = self.get()
         if obj:
             obj.matrix_world = matrix
+
+    def hide(self):
+        pass
+        if self.obj:
+            self.obj.hide_set(state)
