@@ -1,8 +1,9 @@
+
+
 class Shape:
     def __init__(self, obj):
         self.obj = obj
         self.obj.soc_known_as = self.obj.name
-
 
     def setup(self):
         self.obj.display_type = 'TEXTURED'
@@ -25,3 +26,4 @@ class Shape:
 
     def is_guide(self):
         return False
+

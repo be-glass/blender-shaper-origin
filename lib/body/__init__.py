@@ -16,7 +16,7 @@ class Body:
         self.cut_obj.soc_known_as = self.cut_obj.name
         self.name = PREFIX + self.cut_obj.name + ".body"
         self.collection = Collection.by_enum(Collect.Solid)
-        pass
+        self.shape = self.shape_factory(cut_obj)
 
     def defaults(self):
         self.shape = None
@@ -26,7 +26,7 @@ class Body:
         Shape(self.cut_obj).clean()
 
     def update(self):
-        self.shape_factory().update()
+        self.shape.update()
 
     def get(self):
         if self.name in bpy.data.objects.keys():
@@ -39,7 +39,19 @@ class Body:
         if obj:
             obj.matrix_world = matrix
 
-    def hide(self):
-        pass
-        if self.obj:
-            self.obj.hide_set(state)
+    def shape_factory(_, cut_obj):
+        shape = None
+
+        if cut_obj.type == 'MESH':
+            if cut_obj.soc_mesh_cut_type == 'Perimeter':
+                shape = Perimeter
+            elif cut_obj.soc_mesh_cut_type == 'GuideArea':
+                shape = MeshGuide
+            elif cut_obj.soc_mesh_cut_type:
+                shape = MeshShape
+
+        elif cut_obj.type == 'CURVE':
+            if cut_obj.soc_curve_cut_type:
+                shape = Curve
+
+        return shape(cut_obj)

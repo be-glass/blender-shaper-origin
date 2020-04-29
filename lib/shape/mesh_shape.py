@@ -21,26 +21,6 @@ class MeshShape(Shape):
                 if not math.isclose(self.obj.soc_cut_depth, cutout_depth, abs_tol=length('0.01mm')):
                     self.obj.soc_cut_depth = cutout_depth
 
-# private
-
-# if cut_type == 'Cutout':
-#
-#     thickness = perimeter_thickness(self.obj)
-#     if thickness:
-#         cutout_depth = thickness + self.length('1mm')
-#     else:
-#         cutout_depth = self.length('1cm')
-#
-#     if not math.isclose(self.obj.soc_cut_depth, cutout_depth, abs_tol=self.length('0.01mm')):
-#         self.obj.soc_cut_depth = cutout_depth
-#         return
-#
-#     delta = 0.0
-# elif cut_type == 'Pocket':
-#     delta = self.length('0.1mm')
-# else:
-#     delta = 0.0
-
 
 #
 # def svg(self):
