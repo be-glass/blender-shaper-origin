@@ -2,6 +2,7 @@ import bpy
 
 from ..collection import Collection, Collect
 from ..constant import PREFIX
+from ..helper.other import delete_obj
 from ..shape import Shape
 
 
@@ -14,13 +15,14 @@ class Body:
         # config
         self.cut_obj.soc_known_as = self.cut_obj.name
         self.name = PREFIX + self.cut_obj.name + ".body"
-        self.collection = Collection(name=Collect.Solid)
+        self.collection = Collection.by_enum(Collect.Solid)
+        pass
 
     def defaults(self):
         self.shape = None
 
     def clean(self):
-        self.collection.remove(self.name)
+        delete_obj(self.name)
         Shape(self.cut_obj).clean()
 
     def update(self):

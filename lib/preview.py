@@ -29,7 +29,7 @@ from .helper.other import length, find_cuts, warning_msg, get_object_safely, \
 class Preview:
     def __init__(self, context):
         self.context = context
-        self.collection = Collection(name=Collect.Preview).get()
+        self.collection = Collection.by_enum(Collect.Preview).get()
         self.bounding = get_bounding_frame()
         self.cut_objs = find_cuts()
         self.perimeters = [o for o in self.cut_objs if o.soc_mesh_cut_type == 'Perimeter']
@@ -86,7 +86,7 @@ class Preview:
 
         quad = [m0, m1, m2, m3]
 
-        collection = Collection(name=Collect.Internal).get()
+        collection = Collection.by_enum(Collect.Internal).get()
         frame = create_object(quad, collection, BOUNDING_FRAME_NAME)
         frame.matrix_world = mw
         frame.soc_object_type = "Bounding"

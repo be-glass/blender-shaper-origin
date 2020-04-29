@@ -217,5 +217,6 @@ def active_object():
     bpy.context.object
 
 
-def remove_by_name(name):
-    bpy.data.objects.remove(bpy.data.objects[name])
+def delete_obj(name):
+    if name in bpy.data.objects.keys():
+        bpy.data.objects.remove(bpy.data.objects[name])

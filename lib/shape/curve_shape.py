@@ -72,7 +72,7 @@ class Curve(Shape):
             if bevel_obj:
                 return bevel_obj
 
-        collection = Collection(name=Collect.Helper)
+        collection = Collection.by_enum(Collect.Helper)
 
         name = f'{PREFIX}{self.obj.name}.bevel'
         bevel_obj = add_nurbs_square(collection, name, self.obj.soc_curve_cut_type)

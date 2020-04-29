@@ -22,7 +22,7 @@ class Solid:
         self.body = None
 
     def setup(self):
-        self.collection = Collection(name=Collect.Solid)
+        self.collection = Collection.by_enum(Collect.Solid)
 
         # build
         self.body = self.body_factory()
@@ -59,10 +59,19 @@ class Solid:
     # private
 
     def subtract_from_perimeter(self):
-        if self.body.shape and not self.body.shape.is_perimeter():
-            perimeter_objs = Collection(obj=self.cut_obj).perimeter_obj()
-            if perimeter_objs:
-                Solid(perimeter_objs[0]).subtract(self.body, self.mod_boolean_name)
+        if self.body.shape:
+            if self.body.shape.is_perimeter():
+                subtrahend_objs = Collection.by_obj(self.cut_obj).subtrahend_objs()
+                for s_obj in subtrahend_objs:
+                    solid = Solid(s_obj)
+                    body = solid.body_factory()
+                    if body:
+                        self.subtract(body, solid.mod_boolean_name)
+
+            else:
+                perimeter_objs = Collection.by_obj(obj=self.cut_obj).perimeter_objs()
+                if perimeter_objs:
+                    Solid(perimeter_objs[0]).subtract(self.body, self.mod_boolean_name)
 
     def solidify(self):
         self.body.obj.modifiers.new(self.mod_solidify_name, 'SOLIDIFY')
