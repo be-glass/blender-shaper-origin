@@ -86,10 +86,12 @@ class Solid:
             return None
         return body(self.cut_obj)
 
-    def set_thickness(self, delta=0.0):
-        body = self.body_factory().get()
+    def set_thickness(self):
+        body = self.body_factory()
         if body:
-            Modifier(body).set_thickness(self.mod_solidify_name, self.cut_obj.soc_cut_depth + delta)
+            body_obj = body.get()
+            Modifier(body_obj).set_thickness(self.mod_solidify_name,
+                                             self.cut_obj.soc_cut_depth + body.thickness_delta())
 
     def hide_set(self, state):
         pass

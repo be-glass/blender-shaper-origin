@@ -1,6 +1,6 @@
 from . import Body
 from ..fillet import Fillet
-from ..helper.other import err_implementation
+from ..helper.other import err_implementation, length
 from ..shape.mesh_guide import MeshGuide
 from ..shape.mesh_shape import MeshShape
 from ..shape.perimeter import Perimeter
@@ -46,3 +46,8 @@ class MeshBody(Body):
             shape = None
         return shape(self.cut_obj)
 
+    def thickness_delta(self):
+        if self.cut_obj.soc_mesh_cut_type == 'Cutout':
+            return length('1 mm')
+        else:
+            return length('0.1 mm')
