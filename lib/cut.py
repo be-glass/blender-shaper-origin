@@ -55,9 +55,9 @@ class Cut:
                 self.preview.config()
                 self.preview.setup()
 
+
     def update(self):
-        if self.solid:
-            self.solid.update()
+        Solid(self.obj).update()
             # self.preview.update()
 
     def svg(self):

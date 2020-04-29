@@ -21,7 +21,7 @@ class Perimeter(MeshShape):
         pass
 
     def setup(self):
-        pass
+        self.obj.display_type = 'WIRE'
 
     def update(self):
         pass

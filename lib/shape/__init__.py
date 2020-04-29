@@ -1,16 +1,18 @@
 class Shape:
     def __init__(self, obj):
         self.obj = obj
-        self.obj.display_type = 'WIRE'
         self.obj.soc_known_as = self.obj.name
 
+
     def setup(self):
+        self.obj.display_type = 'TEXTURED'
         pass
 
     def update(self):
         pass
 
     def clean(self):
+        self.obj.display_type = 'TEXTURED'
         pass
 
     ### private

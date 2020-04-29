@@ -4,6 +4,7 @@ from ..body.meshed_curve import MeshedCurve
 from ..collection import Collection, Collect
 from ..constant import PREFIX
 from ..helper.other import err_implementation
+from ..modifier import Modifier
 
 
 class Solid:
@@ -12,18 +13,16 @@ class Solid:
         self.cut_obj = cut_obj
         self.defaults()
 
-    def defaults(self):
-        self.solidify_name = None
-        self.body = None
-        self.mod_solidify = None
-        self.mod_boolean = None
-
-    def setup(self):
-        self.collection = Collection(name=Collect.Solid)
-
         # config
         self.mod_solidify_name = PREFIX + 'Solidify'
         self.mod_boolean_name = PREFIX + 'Boolean.' + self.cut_obj.name
+
+    def defaults(self):
+        self.solidify_name = None
+        self.body = None
+
+    def setup(self):
+        self.collection = Collection(name=Collect.Solid)
 
         # build
         self.body = self.body_factory()
@@ -34,8 +33,9 @@ class Solid:
             self.subtract_from_perimeter()
 
     def update(self):
-        if self.body:
-            self.body.update()
+        body = self.body_factory()
+        if body:
+            body.update()
             self.set_thickness()
 
     def clean(self):
@@ -52,9 +52,7 @@ class Solid:
         minuend = b.get()
         subtrahend = body.get()
         if minuend and subtrahend:
-            modifier = minuend.modifiers.new(modifier_name, 'BOOLEAN')
-            modifier.operation = 'DIFFERENCE'
-            modifier.object = subtrahend
+            Modifier(minuend).subtract(subtrahend, modifier_name)
 
             # subtrahend.hide_set(True)   # TODO: activate later
 
@@ -67,7 +65,7 @@ class Solid:
                 Solid(perimeter_objs[0]).subtract(self.body, self.mod_boolean_name)
 
     def solidify(self):
-        self.mod_solidify = self.body.obj.modifiers.new(self.mod_solidify_name, 'SOLIDIFY')
+        self.body.obj.modifiers.new(self.mod_solidify_name, 'SOLIDIFY')
 
     def body_factory(self):
         if self.cut_obj.soc_mesh_cut_type:
@@ -80,8 +78,9 @@ class Solid:
         return body(self.cut_obj)
 
     def set_thickness(self, delta=0.0):
-        if self.mod_solidify:
-            self.mod_solidify.thickness = self.cut_obj.soc_cut_depth + delta
+        body = self.body_factory().get()
+        if body:
+            Modifier(body).set_thickness(self.mod_solidify_name, self.cut_obj.soc_cut_depth + delta)
 
     def hide_set(self, state):
         pass

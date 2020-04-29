@@ -41,15 +41,6 @@ def perimeter_thickness(obj):
         return None
 
 
-def delete_modifier(obj, name):
-    if name in obj.modifiers.keys():
-        obj.modifiers.remove(obj.modifiers[name])
-
-
-def delete_modifiers(obj):
-    for modifier in obj.modifiers:
-        if modifier.name.startswith(PREFIX):
-            obj.modifiers.remove(modifier)
 
 
 def delete_solid_objects(obj):
@@ -94,17 +85,6 @@ def find_perimeters(collection):
     return [o for o in all_perimeters if o.name in collection.objects.keys()]
 
 
-def boolean_modifier_name(cut_obj):
-    return PREFIX + "Boolean." + cut_obj.name
-
-
-def cleanup_boolean_modifiers(target_obj):
-    solid_obj = get_object_safely(target_obj.soc_solid_name, report_error=False)
-
-    if solid_obj:
-        collection = target_obj.users_collection[0]
-        for perimeter in find_perimeters(collection):
-            delete_modifier(perimeter, boolean_modifier_name(solid_obj))
 
 
 def get_reference(obj):

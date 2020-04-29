@@ -2,7 +2,9 @@ from . import Shape
 
 
 class MeshShape(Shape):
-    pass
+
+    def setup(self):
+        self.obj.display_type = 'WIRE'
 
 # private
 
@@ -23,12 +25,8 @@ class MeshShape(Shape):
 #     delta = self.length('0.1mm')
 # else:
 #     delta = 0.0
-#
-# self.adjust_solidify_thickness(delta=delta)
 
-# def transform(self):
-#     fillet_obj = self.get_fillet_obj()
-#     fillet_obj.matrix_world = self.obj.matrix_world
+
 #
 # def svg(self):
 #

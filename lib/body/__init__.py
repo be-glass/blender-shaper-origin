@@ -12,7 +12,6 @@ class Body:
         self.defaults()
 
         # config
-        self.cut_obj.display_type = 'WIRE'
         self.cut_obj.soc_known_as = self.cut_obj.name
         self.name = PREFIX + self.cut_obj.name + ".body"
         self.collection = Collection(name=Collect.Solid)
@@ -25,7 +24,7 @@ class Body:
         Shape(self.cut_obj).clean()
 
     def update(self):
-        self.shape.update()
+        self.shape_factory().update()
 
     def get(self):
         if self.name in bpy.data.objects.keys():

@@ -12,7 +12,9 @@ def get_solid_collection():
 
 
 class Curve(Shape):
-    pass
+
+    def setup(self):
+        self.obj.display_type = 'WIRE'
 
     # def svg(self):
     #
