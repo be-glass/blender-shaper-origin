@@ -70,8 +70,9 @@ class Solid:
 
     def set_thickness(self):
         body_obj = self.body.get()
-        Modifier(body_obj).set_thickness(self.mod_solidify_name,
-                                         self.cut_obj.soc_cut_depth + self.body.thickness_delta())
+        if body_obj:
+            Modifier(body_obj).set_thickness(self.mod_solidify_name,
+                                             self.cut_obj.soc_cut_depth + self.body.thickness_delta())
 
     def body_factory(_, cut_obj):
         if cut_obj.soc_mesh_cut_type:

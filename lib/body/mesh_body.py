@@ -1,4 +1,5 @@
 from . import Body
+from ..collection import Collection
 from ..fillet import Fillet
 from ..helper.other import length
 
@@ -16,7 +17,10 @@ class MeshBody(Body):
                 self.obj.display_type = 'TEXTURED'
             else:
                 self.obj.display_type = 'WIRE'
-
+                if Collection.by_obj(self.cut_obj).perimeter_objs():
+                    self.obj.hide_set(True)
+                else:
+                    self.obj.hide_set(False)
             self.obj.hide_select = True
 
     def is_solid(self):

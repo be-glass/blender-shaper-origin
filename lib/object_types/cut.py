@@ -50,7 +50,6 @@ class Cut:
         # Solid
         self.solid = Solid(self.obj)
         self.solid.setup()
-        self.x = 4
 
         # Preview
         if False:

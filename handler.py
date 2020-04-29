@@ -90,7 +90,7 @@ def update_cut_type(obj, context):
     if not obj.soc_initialized:
         initialize_object(obj)
 
-        Cut(obj).reset()
+    Cut(obj).reset()
 
     restore_selection(obj, selection)
 
