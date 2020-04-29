@@ -4,6 +4,10 @@ from ..collection import Collection, Collect
 from ..constant import PREFIX
 from ..helper.other import delete_obj
 from ..shape import Shape
+from ..shape.curve_shape import Curve
+from ..shape.mesh_guide import MeshGuide
+from ..shape.mesh_shape import MeshShape
+from ..shape.perimeter import Perimeter
 
 
 class Body:
