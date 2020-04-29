@@ -58,7 +58,7 @@ class Solid:
                 subtrahend_objs = Collection.by_obj(self.cut_obj).subtrahend_objs()
                 for s_obj in subtrahend_objs:
                     solid = Solid(s_obj)
-                    self.subtract(self.body, solid.mod_boolean_name)
+                    self.subtract(solid.body, solid.mod_boolean_name)
 
             else:
                 perimeter_objs = Collection.by_obj(obj=self.cut_obj).perimeter_objs()

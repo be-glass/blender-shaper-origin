@@ -19,7 +19,7 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
-from .lib.cut import Cut
+from .lib.object_types.cut import Cut
 from .lib.export import Export
 from .lib.helper.gen_helper import find_perimeters
 from .lib.helper.other import translate_local, find_cuts, store_selection, consistency_checks, reset_relations

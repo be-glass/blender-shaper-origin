@@ -14,7 +14,7 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from .object_types.solid import Solid
+from .solid import Solid
 
 
 class Cut:
@@ -42,23 +42,27 @@ class Cut:
 
     def setup(self):
 
-        if self.valid:
-            self.obj.soc_object_type = 'Cut'
+        if not self.valid:
+            return
 
-            # Solid
-            self.solid = Solid(self.obj)
-            self.solid.setup()
+        self.obj.soc_object_type = 'Cut'
 
-            # Preview
-            if False:
-                self.preview = Preview(obj)
-                self.preview.config()
-                self.preview.setup()
+        # Solid
+        self.solid = Solid(self.obj)
+        self.solid.setup()
+        self.x = 4
+
+        # Preview
+        if False:
+            self.preview = Preview(obj)
+            self.preview.config()
+            self.preview.setup()
 
 
     def update(self):
         Solid(self.obj).update()
             # self.preview.update()
+        pass
 
     def svg(self):
         pass

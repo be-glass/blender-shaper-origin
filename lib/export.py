@@ -16,7 +16,7 @@
 from .constant import SVG_HEADER_TEMPLATE
 from .helper.gen_helper import boundaries
 from .helper.other import project_name, write
-from .cut import Cut
+from .object_types.cut import Cut
 from ..__init__ import bl_info
 
 
