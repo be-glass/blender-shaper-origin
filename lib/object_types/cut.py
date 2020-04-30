@@ -48,8 +48,9 @@ class Cut:
         self.obj.soc_object_type = 'Cut'
 
         # Solid
-        self.solid = Solid(self.obj)
-        self.solid.setup()
+        if self.obj.soc_simulate:
+            self.solid = Solid(self.obj)
+            self.solid.setup()
 
         # Preview
         if False:

@@ -15,7 +15,7 @@
 
 import bpy
 from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty
-from bpy.types import PropertyGroup
+from bpy.types import PropertyGroup, Object
 
 from . import handler
 
@@ -222,5 +222,16 @@ class SceneProperties(PropertyGroup):
         default="//",
         maxlen=1024,
         subtype="DIR_PATH",
+        options={'HIDDEN'},
+    )
+    pre_obj: PointerProperty(
+        name="Pre Update Object",
+        description="Last active object when depsgraph_pre_update was called",
+        options={'HIDDEN'},
+        type=Object,
+    )
+    pre_obj_name: StringProperty(
+        name="Pre Update Object Name",
+        description="Name of last active object when depsgraph_pre_update was called",
         options={'HIDDEN'},
     )

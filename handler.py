@@ -24,6 +24,7 @@ from .lib.object_types.inactive import Inactive
 def register():
     bpy.app.handlers.depsgraph_update_post.clear()
     bpy.app.handlers.depsgraph_update_post.append(post_ob_updated)
+    bpy.app.handlers.depsgraph_update_pre.append(pre_ob_updated)
 
 
 def unregister():

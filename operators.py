@@ -12,9 +12,9 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
-
-
+import bpy
 import mathutils
+from bpy.props import BoolProperty
 from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
@@ -38,10 +38,14 @@ def register():
     for widget in operators():
         register_class(widget)
 
+    bpy.utils.register_class(delete_override)
+
 
 def unregister():
     for widget in operators():
         unregister_class(widget)
+
+    bpy.utils.unregister_class(delete_override)
 
 
 class MESH_OT_socut_export_cuts(Operator):
@@ -108,4 +112,23 @@ class MESH_OT_socut_rebuild(Operator):
             context.scene.so_cut['preview'] = True
 
         self.report({'INFO'}, "OK")
+        return {'FINISHED'}
+
+
+# delete override
+
+
+class delete_override(bpy.types.Operator):
+    """delete objects and their derivatives"""
+    bl_idname = "object.delete"
+    bl_label = "Object Delete Operator"
+
+    @classmethod
+    def poll(cls, context):
+        return context.active_object is not None
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            Cut(obj).clean()
+            bpy.data.objects.remove(obj)
         return {'FINISHED'}
