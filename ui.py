@@ -13,12 +13,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
-import bpy
 from bpy import utils
 from bpy.types import Panel
 
-from .lib.helper.other import active_object
-from .lib.helper import gen_helper
+from .lib.collection import Collection
 
 
 def panels():
@@ -109,9 +107,8 @@ class BG_PT_SOC_select(Panel):
             layout.prop(obj, "soc_dogbone")
 
     def draw_align_with_perimeter(self, obj):
-        collection = obj.users_collection[0]
-        perimeters = gen_helper.find_perimeters(collection)
-        if obj.soc_mesh_cut_type != 'Perimeter' and len(perimeters) > 0:
+        perimeters = Collection.by_obj(obj).perimeter_objs()
+        if obj.soc_mesh_cut_type != 'Perimeter' and perimeters:
             self.layout.operator("mesh.socut_align_object")
 
     def draw_type_select(self, obj):

@@ -22,8 +22,8 @@ from .gen_helper import get_reference
 
 BOUNDING_FRAME_NAME = PREFIX + 'Bounding Frame'
 
-def transform_preview(obj, perimeter, bounding_frame):
-    m0, m1, m2, m3, m4 = transforms(obj, perimeter, bounding_frame)
+def transform_preview(obj, perimeter, bounding_mw):
+    m0, m1, m2, m3, m4 = transforms(obj, perimeter, bounding_mw)
     return m4 @ m3 @ m2 @ m1 @ m0
 
 
@@ -32,7 +32,7 @@ def transform_export(obj, perimeter):
     return m3 @ m2 @ m1 @ m0
 
 
-def transforms(obj, perimeter, bounding=None):
+def transforms(obj, perimeter, bounding_mw=None):
     reference = get_reference(perimeter) if perimeter else None
 
     z = lift_z(obj)
@@ -42,7 +42,7 @@ def transforms(obj, perimeter, bounding=None):
     m1 = perimeter.matrix_world.inverted() if perimeter else Matrix()
     m2 = Matrix.Translation(lift)
     m3 = reference.matrix_world.copy() if reference else Matrix()
-    m4 = bounding.matrix_world.copy() if bounding else Matrix()
+    m4 = bounding_mw.copy() if bounding_mw else Matrix()
 
     return m0, m1, m2, m3, m4
 
@@ -57,9 +57,3 @@ def lift_z(obj):
     return z
 
 
-def get_bounding_frame():
-    name = BOUNDING_FRAME_NAME
-    if name in bpy.data.objects.keys():
-        return bpy.data.objects[name]
-    else:
-        return None

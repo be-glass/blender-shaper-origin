@@ -19,9 +19,9 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
+from .lib.collection import Collection
 from .lib.object_types.cut import Cut
 from .lib.export import Export
-from .lib.helper.gen_helper import find_perimeters
 from .lib.helper.other import translate_local, find_cuts, store_selection, consistency_checks, reset_relations
 from .lib.preview import Preview
 
@@ -75,8 +75,8 @@ class MESH_OT_socut_align_object(Operator):
 
     def execute(self, context):
         obj = context.object
-        collection = obj.users_collection[0]
-        perimeters = find_perimeters(collection)
+
+        perimeters = Collection.by_obj(obj).perimeter_objs()
 
         if not perimeters:
             self.report({'ERROR'}, "No perimeter found.")

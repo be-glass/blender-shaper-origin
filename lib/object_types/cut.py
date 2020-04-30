@@ -38,7 +38,6 @@ class Cut:
         Solid(self.obj).clean()
         # self.preview.cleanup()
 
-        self.defaults()
 
     def setup(self):
 

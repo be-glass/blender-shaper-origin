@@ -14,29 +14,26 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
 import bpy
-from mathutils import Matrix, Vector
+from mathutils import Vector
 
 from .collection import Collection, Collect
 from .constant import FACE_COLOR
 from .fillet import Fillet
-from .helper.gen_helper import get_reference, boundaries
-from .helper.preview_helper import transform_preview, get_bounding_frame, BOUNDING_FRAME_NAME
-from .helper.mesh_helper import create_object
-from .helper.other import length, find_cuts, warning_msg, get_object_safely, \
-    move_object
+from .helper.gen_helper import get_reference
+from .helper.other import warning_msg, get_object_safely, move_object
+from .helper.preview_helper import transform_preview
+from .object_types.bounding import Bounding
 
 
 class Preview:
-    def __init__(self, context):
-        self.context = context
+    def __init__(self):
         self.collection = Collection.by_enum(Collect.Preview).get()
-        self.bounding = get_bounding_frame()
-        self.cut_objs = find_cuts()
-        self.perimeters = [o for o in self.cut_objs if o.soc_mesh_cut_type == 'Perimeter']
+        self.bounding = Bounding()
+        self.perimeters = self.collection.perimeter_objs()
 
     def create(self):
         if self.perimeters:
-            self.bounding = self.update_bounding_frame()
+            self.bounding.reset()
 
             for perimeter in self.perimeters:
                 for obj in perimeter.users_collection[0].objects:
@@ -45,10 +42,10 @@ class Preview:
 
             self.set_viewport()
         else:
-            self.bounding = None
+            self.bounding.hide()
 
     def set_viewport(self):
-        for area in self.context.screen.areas:
+        for area in bpy.context.screen.areas:
             if area.type == 'VIEW_3D':
                 for space in area.spaces:
                     if space.type == 'VIEW_3D':
@@ -59,38 +56,8 @@ class Preview:
         for obj in self.collection.objects:
             bpy.data.objects.remove(obj)
         bpy.data.collections.remove(self.collection)
-        self.hide_bounding_frame()
+        self.bounding.hide()
 
-    def hide_bounding_frame(self):
-        frame = get_bounding_frame()
-        if frame:
-            frame.hide_set(True)
-
-    def update_bounding_frame(self):
-        frame = get_bounding_frame()
-        if frame:
-            mw = frame.matrix_world.copy()
-            bpy.data.objects.remove(frame)
-        else:
-            mw = Matrix()
-
-        c0, c1 = boundaries(self.context)
-
-        z = -0.1
-        d = length('10mm')  # margin of preview sheet
-
-        m0 = Vector([c1.x + d, c0.y - d, z])
-        m1 = Vector([c1.x + d, c1.y + d, z])
-        m2 = Vector([c0.x - d, c1.y + d, z])
-        m3 = Vector([c0.x - d, c0.y - d, z])
-
-        quad = [m0, m1, m2, m3]
-
-        collection = Collection.by_enum(Collect.Internal).get()
-        frame = create_object(quad, collection, BOUNDING_FRAME_NAME)
-        frame.matrix_world = mw
-        frame.soc_object_type = "Bounding"
-        return frame
 
     def add_object(self, perimeter, cut_obj):
 
@@ -122,7 +89,7 @@ class Preview:
 
         # apply_mesh_scale(self.preview_obj)    # TODO: is this needed? for mesh? for curve?
 
-        preview_obj.matrix_world = transform_preview(self.cut_obj, perimeter, self.bounding)
+        preview_obj.matrix_world = transform_preview(self.cut_obj, perimeter, self.bounding.frame())
         preview_obj.name = name
         cut_obj.soc_preview_name = preview_obj.name
         preview_obj.soc_preview_name = ""
@@ -147,9 +114,7 @@ class Preview:
             reference_obj = get_reference(self.obj)
 
             if reference_obj is not None:
-                frame_1 = self.bounding.matrix_world.copy()
-                frame_1.invert()
-                # frame_1 = self.bounding.matrix_world.inverted()
+                frame_1 = Bounding.matrix_inverted()
 
                 reference_obj.matrix_world = frame_1 @ preview_obj.matrix_world
                 reference_obj.location.z = 0
@@ -163,16 +128,7 @@ class Preview:
 
         for obj in perimeter.users_collection[0].objects:
             if obj.soc_mesh_cut_type != 'Perimeter':
-                m = transform_preview(self.obj, perimeter, self.bounding)
+                m = transform_preview(self.obj, perimeter, self.bounding.matrix())
                 preview_obj = get_object_safely(obj.soc_preview_name)
                 preview_obj.matrix_world = m
 
-    def transform_previews(self, frame_obj):
-
-        for perimeter in self.perimeters:
-            for obj in perimeter.users_collection[0].objects:
-
-                if obj.soc_object_type == 'Cut':
-                    matrix = transform_preview(obj, perimeter, frame_obj)
-                    preview_obj = get_object_safely(obj.soc_preview_name)
-                    preview_obj.matrix_world = matrix

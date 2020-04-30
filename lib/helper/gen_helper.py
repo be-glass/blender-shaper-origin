@@ -80,11 +80,6 @@ def cleanup(obj):
     obj.soc_bevel_name = ''
 
 
-def find_perimeters(collection):
-    all_perimeters = find_siblings_by_type('Perimeter', collection=collection)
-    return [o for o in all_perimeters if o.name in collection.objects.keys()]
-
-
 
 
 def get_reference(obj):
