@@ -1,7 +1,7 @@
 from ..body import Body
-from ..collection import Collection, Collect
+from ..blender.collection import Collection, Collect
 from ..constant import PREFIX
-from ..modifier import Modifier
+from ..blender.modifier import Modifier
 
 
 class Solid:

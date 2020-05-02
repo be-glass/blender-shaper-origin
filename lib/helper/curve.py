@@ -16,7 +16,8 @@
 import bpy
 from mathutils import Vector
 
-from .mesh_helper import curve2mesh
+from .mesh_helper import fill_polygon
+from .other import error_msg
 
 
 def add_nurbs_square(collection, name, curve_cut_type):
@@ -54,3 +55,21 @@ def face_normal(obj):
 
 def face_is_down(obj):
     return face_normal(obj).dot(Vector([0, 0, 1])) < 0
+
+
+def curve2mesh(obj, name='', add_face=False):
+    context = bpy.context
+    depsgraph = context.evaluated_depsgraph_get()
+    object_evaluated = obj.evaluated_get(depsgraph)
+    mesh = bpy.data.meshes.new_from_object(object_evaluated)
+    mesh_obj = bpy.data.objects.new(name, mesh)
+    mesh_obj.matrix_world = obj.matrix_world
+
+    if add_face:
+        fill_polygon(mesh_obj)
+
+    mesh_obj.data.update()
+    if mesh_obj.data.validate():
+        error_msg('Curve to mesh conversion yielded invalid data!', context)
+
+    return mesh_obj

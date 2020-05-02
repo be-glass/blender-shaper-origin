@@ -1,9 +1,8 @@
-from . import Shape
-from ..collection import Collection, Collect
+from .__init__ import Shape
+from ..blender.collection import Collection, Collect, cleanup_meshes
 from ..constant import PREFIX
-from ..helper.curve import face_is_down, add_nurbs_square
-from ..helper.gen_helper import cleanup_meshes
-from ..helper.mesh_helper import curve2mesh, shade_mesh_flat, repair_mesh
+from ..helper.curve import face_is_down, add_nurbs_square, curve2mesh
+from ..helper.mesh_helper import shade_mesh_flat, repair_mesh
 from ..helper.other import get_object_safely, delete_object, hide_objects
 
 

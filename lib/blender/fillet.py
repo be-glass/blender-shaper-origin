@@ -15,13 +15,13 @@
 
 import math
 from math import pi
+
 import mathutils
-from bpy.types import Mesh
 from mathutils import Vector, Matrix
 
-from .constant import PREFIX, FILLET_RESOLUTION
-from .helper.mesh_helper import create_object
-from .helper.other import error_msg, warning_msg, delete_object
+from ..constant import FILLET_RESOLUTION
+from ..helper.mesh_helper import create_object
+from ..helper.other import error_msg, warning_msg
 
 
 class Fillet:

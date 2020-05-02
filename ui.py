@@ -16,7 +16,7 @@
 from bpy import utils
 from bpy.types import Panel
 
-from .lib.collection import Collection
+from .lib.blender.collection import Collection
 
 
 def panels():

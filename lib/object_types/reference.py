@@ -1,8 +1,6 @@
 import bpy
-from mathutils import Matrix
 
-from .bounding import Bounding
-from ..collection import Collection, Collect
+from ..blender.collection import Collection, Collect
 from ..constant import PREFIX
 
 
@@ -43,8 +41,3 @@ class Reference:
         reference.name = self.name
         reference.hide_set(True)
         return reference
-
-    def transform(self, preview_obj):
-        obj = self.get()
-        obj.matrix_world = Bounding.matrix_inverted() @ preview_obj.matrix_world
-        obj.location.z = 0

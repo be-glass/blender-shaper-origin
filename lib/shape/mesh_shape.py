@@ -1,7 +1,7 @@
 import math
 
-from . import Shape
-from ..collection import Collection
+from .__init__ import Shape
+from ..blender.collection import Collection
 from ..helper.other import length
 
 

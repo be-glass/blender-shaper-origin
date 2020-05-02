@@ -1,11 +1,12 @@
 import bpy
 from mathutils import Matrix, Vector
 
-from ..collection import Collection, Collect
+from .reference import Reference
+from ..blender.collection import Collection, Collect
 from ..constant import PREFIX
 from ..helper.mesh_helper import create_object
-from ..helper.other import get_object_safely, length
-from ..project import Project
+from ..helper.other import length
+from ..shape.perimeter import Perimeter
 
 BOUNDING_FRAME_NAME = PREFIX + 'Bounding Frame'
 
@@ -26,16 +27,17 @@ class Bounding:
         return frame
 
     def transform(self):
+        from .preview import Preview
 
         frame_mw = Bounding().matrix()
 
-        for perimeter in Project.perimeters():
+        for perimeter in Perimeter.all():
 
             perimeter_mw_1 = perimeter.matrix().inverted()
-            reference_mw = perimeter.reference().matrix()
+            reference_mw = Reference(perimeter).matrix()
 
-            for preview in perimeter.previews():
-                preview.transform(perimeter_mw_1, reference_mw, frame_mw)
+            for preview_obj in perimeter.preview_objs():
+                Preview(preview_obj).transform(perimeter_mw_1, reference_mw, frame_mw)
 
     def hide(self):
         self.frame.hide_set(True)
@@ -77,9 +79,9 @@ def boundaries():
     y = []
     z = []
 
-    for perimeter in Project.perimeters():
+    for perimeter in Perimeter.all():
 
-        reference = perimeter.reference()
+        reference = Reference(perimeter)
         user = reference.matrix()
 
         scale = Matrix.Diagonal(perimeter.matrix().to_scale()).to_4x4()

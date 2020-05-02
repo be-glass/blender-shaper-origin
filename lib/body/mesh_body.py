@@ -1,6 +1,6 @@
-from . import Body
-from ..collection import Collection
-from ..fillet import Fillet
+from .__init__ import Body
+from ..blender.collection import Collection
+from ..blender.fillet import Fillet
 from ..helper.other import length
 
 

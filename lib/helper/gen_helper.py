@@ -13,13 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
-import bpy
-
-from ..constant import PREFIX
-from .other import delete_object
-
-from ..collection import Collection, Collect
-from ..modifier import Modifier
+# from ..blender.collection import Collection, Collect
 
 
 def find_siblings_by_type(cut_types, sibling=None, collection=None):
@@ -40,36 +34,23 @@ def perimeter_thickness(obj):
     else:
         return None
 
-
-def delete_solid_objects(obj):
-    for o in Collection.by_enum(Collect.Solid).objects():
-        if o.name == PREFIX + obj.name + ".fillets":
-            bpy.data.objects.remove(o, do_unlink=True)
-
-
-def cleanup_meshes(mesh_name):
-    for o in Collection.by_enum(Collect.Solid).objects():
-        if o.name.startswith(mesh_name):
-            bpy.data.objects.remove(o, do_unlink=True)
-
-
-def cleanup(obj):
-    if obj.soc_known_as != obj.name:
-        return
-
-    Modifier(obj).delete_all()
-
-    delete_solid_objects(obj)
-    obj.display_type = 'TEXTURED'
-
-    if obj.type == 'CURVE':
-        obj.data.bevel_object = None
-
-    delete_object(obj.soc_reference_name)
-    delete_object(obj.soc_preview_name)
-    delete_object(obj.soc_solid_name)
-    delete_object(obj.soc_bevel_name)
-    obj.soc_reference_name = ''
-    obj.soc_preview_name = ''
-    obj.soc_solid_name = ''
-    obj.soc_bevel_name = ''
+# def cleanup(obj):
+#     if obj.soc_known_as != obj.name:
+#         return
+#
+#     Modifier(obj).delete_all()
+#
+#     delete_solid_objects(obj)
+#     obj.display_type = 'TEXTURED'
+#
+#     if obj.type == 'CURVE':
+#         obj.data.bevel_object = None
+#
+#     delete_object(obj.soc_reference_name)
+#     delete_object(obj.soc_preview_name)
+#     delete_object(obj.soc_solid_name)
+#     delete_object(obj.soc_bevel_name)
+#     obj.soc_reference_name = ''
+#     obj.soc_preview_name = ''
+#     obj.soc_solid_name = ''
+#     obj.soc_bevel_name = ''

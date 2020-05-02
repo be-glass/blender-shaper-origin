@@ -12,13 +12,16 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
-from . import Shape
+from .__init__ import Shape
 from .mesh_shape import MeshShape
-from ..object_types.preview import Preview
-from ..object_types.reference import Reference
+from ..blender.project import Project
 
 
 class Perimeter(MeshShape):
+
+    @classmethod
+    def all(cls):
+        return [Perimeter(o) for o in Project.perimeter_objs()]
 
     def config(self):
         pass
@@ -38,9 +41,6 @@ class Perimeter(MeshShape):
     def is_perimeter(self):
         return True
 
-    def reference(self):
-        return Reference(self.obj)
-
     def shapes(self):
         objs = self.obj.users_collection[0].objects
         return [Shape.factory(o) for o in objs if o.soc_object_type == 'Cut']
@@ -48,50 +48,15 @@ class Perimeter(MeshShape):
     def others(self):
         return [o for o in self.shapes() if o.soc_mesh_cut_type != 'Perimeter']
 
-    def previews(self):
+    def preview_objs(self):
         objs = self.obj.users_collection[0].objects
-        return [Preview(o) for o in objs if o.soc_object_type == 'Cut']
+        return [o for o in objs if o.soc_object_type == 'Cut']
 
     def matrix(self):
         return self.obj.matrix_world
 
-# from .fillet import Fillet
-# from ..helper.gen_helper import *
-# from ..helper.other import get_object_safely
-# from ..helper.preview_helper import lift_z
-# from ..helper.svg import svg_material_attributes
-# from lib.object_types.preview import Preview
-#
 #
 # class Perimeter(Generator):
-#
-#     def setup(self):
-#         super().setup()
-#
-#         self.obj.soc_object_type = 'Cut'
-#
-#         self.fillet = Fillet(self.self.obj)
-#         self.fillet.create(outside=True)
-#         self.fillet.display_type = 'WIRE'
-#
-#
-#         types = ['Cutout', 'Pocket', 'Exterior', 'Interior', 'Online']
-#         for cut_obj in find_siblings_by_type(types, sibling=self.obj):
-#             self.rebuild_boolean_modifier(self.obj, cut_obj)
-#
-#         self.reference = get_reference(self.self.obj)
-#
-#         if self.context.scene.so_cut.preview:
-#             Preview(self.context).add_object(self.obj, self.obj)
-#
-#     def update(self):
-#
-#         self.adjust_solidify_thickness()
-#
-#         cutouts = find_siblings_by_type('Cutout', sibling=self.context.object)
-#         for cut in cutouts:
-#             cut.soc_cut_depth = self.obj.soc_cut_depth + self.length('1mm')
-#
 #
 #     def svg(self):
 #         fillet = Fillet(self.self.obj)
@@ -106,6 +71,3 @@ class Perimeter(MeshShape):
 #
 #         return z, contents
 #
-#     def transform(self):
-#         fillet_obj = self.get_fillet_obj()
-#         fillet_obj.matrix_world = self.obj.matrix_world

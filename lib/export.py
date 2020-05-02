@@ -17,8 +17,7 @@ from .constant import SVG_HEADER_TEMPLATE
 from .object_types.bounding import boundaries
 from .helper.other import write
 from .object_types.cut import Cut
-from .project import Project
-from ..__init__ import bl_info
+from .blender.project import Project
 
 
 class Export:

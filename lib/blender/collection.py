@@ -1,7 +1,7 @@
 import bpy
 from enum import Enum
 
-from .constant import PREFIX
+from ..constant import PREFIX
 
 
 class Collect(Enum):
@@ -74,3 +74,15 @@ class Collection:
     def remove(self, name):
         if name in bpy.data.objects.keys():
             bpy.data.objects.remove(bpy.data.objects[name])
+
+
+def delete_solid_objects(obj):
+    for o in Collection.by_enum(Collect.Solid).objects():
+        if o.name == PREFIX + obj.name + ".fillets":
+            bpy.data.objects.remove(o, do_unlink=True)
+
+
+def cleanup_meshes(mesh_name):
+    for o in Collection.by_enum(Collect.Solid).objects():
+        if o.name.startswith(mesh_name):
+            bpy.data.objects.remove(o, do_unlink=True)

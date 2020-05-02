@@ -16,7 +16,7 @@
 import bmesh
 import bpy
 
-from .other import select_active, error_msg, active_object
+from .other import select_active, active_object
 
 
 def repair_mesh(obj):  # TODO: needed?
@@ -72,24 +72,6 @@ def add_plane(name, size, collection=None):  # TODO: replace without ops
             c.objects.unlink(obj)
         collection.objects.link(obj)
     return obj
-
-
-def curve2mesh(obj, name='', add_face=False):
-    context = bpy.context
-    depsgraph = context.evaluated_depsgraph_get()
-    object_evaluated = obj.evaluated_get(depsgraph)
-    mesh = bpy.data.meshes.new_from_object(object_evaluated)
-    mesh_obj = bpy.data.objects.new(name, mesh)
-    mesh_obj.matrix_world = obj.matrix_world
-
-    if add_face:
-        fill_polygon(mesh_obj)
-
-    mesh_obj.data.update()
-    if mesh_obj.data.validate():
-        error_msg('Curve to mesh conversion yielded invalid data!', context)
-
-    return mesh_obj
 
 
 def fill_polygon(obj):

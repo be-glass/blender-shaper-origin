@@ -1,4 +1,4 @@
-from . import Shape
+from .__init__ import Shape
 
 
 class MeshGuide(Shape):

@@ -1,6 +1,6 @@
 import bpy
 
-from ..collection import Collection, Collect
+from ..blender.collection import Collection, Collect
 from ..constant import PREFIX
 from ..helper.other import delete_obj
 from ..shape import Shape

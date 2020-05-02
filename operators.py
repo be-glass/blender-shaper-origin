@@ -18,8 +18,8 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
-from .lib.project import Project
-from .lib.collection import Collection
+from .lib.blender.project import Project
+from .lib.blender.collection import Collection
 from .lib.object_types.cut import Cut
 from .lib.export import Export
 from .lib.helper.other import translate_local, store_selection, consistency_checks, reset_relations

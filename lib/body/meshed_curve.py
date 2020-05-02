@@ -1,4 +1,4 @@
-from . import Body
+from .__init__ import Body
 
 
 class MeshedCurve(Body):

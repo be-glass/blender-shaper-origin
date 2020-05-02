@@ -15,9 +15,14 @@
 import bpy
 
 from .solid import Solid
+from ..blender.project import Project
 
 
 class Cut:
+
+    @classmethod
+    def all(cls):
+        return [cls(o) for o in Project.cut_objs()]
 
     def __init__(self, obj):
         self.obj = obj

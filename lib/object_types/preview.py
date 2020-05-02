@@ -3,11 +3,11 @@ from mathutils import Vector, Matrix
 
 from .bounding import Bounding
 from .reference import Reference
-from ..collection import Collection, Collect
 from ..constant import PREVIEW_STACK_DELTA, STACK_Z, FACE_COLOR, PREFIX
-from ..fillet import Fillet
+from ..blender.collection import Collection, Collect
+from ..blender.project import Project
+from ..blender.fillet import Fillet
 from ..helper.other import length, warning_msg, move_object, remove_object, find_first_perimeter
-from ..project import Project
 from ..shape.perimeter import Perimeter
 
 
@@ -68,7 +68,7 @@ class Preview:
             perimeter = Perimeter(self.cut_obj)
 
             reference = Reference(perimeter)
-            reference.transform(self.obj)
+            transform_reference(reference)
             bounding = Bounding()
 
             for shape in perimeter.others():
@@ -91,7 +91,7 @@ class Preview:
 
         perimeter = Perimeter(find_first_perimeter(self.cut_obj))
 
-        self.transform_others(perimeter.matrix().inverted(), perimeter.reference.matrix(), self.bounding.matrix())
+        self.transform_others(perimeter.matrix().inverted(), Reference(perimeter).matrix(), self.bounding.matrix())
         self.configure()
 
         return obj
@@ -131,3 +131,8 @@ class Preview:
         elif cct != 'None':
             o.color = FACE_COLOR[cct]
             o.soc_curve_cut_type = cct
+
+    def transform_reference(self, reference):
+        obj = reference.get()
+        obj.matrix_world = Bounding().matrix_inverted() @ self.obj.matrix_world
+        obj.location.z = 0

@@ -16,7 +16,7 @@
 import bpy
 from mathutils import Matrix
 
-from .collection import Collection, Collect
+from .blender.collection import Collection, Collect
 from .object_types.bounding import Bounding
 from .object_types.reference import Reference
 
@@ -54,7 +54,6 @@ class ProjectPreview:
         bpy.data.collections.remove(self.collection)
         self.bounding.hide()
 
-    ABC
 
     def matrix_ref_bound(self, perimeter_mw, bounding_mw):
 

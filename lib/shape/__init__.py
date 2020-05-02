@@ -1,3 +1,4 @@
+from ..blender.project import Project
 
 
 class Shape:
@@ -28,6 +29,10 @@ class Shape:
                 shape = Curve
 
         return shape(cut_obj)
+
+    @classmethod
+    def all(self):
+        return [Shape.factory(o) for o in Project.cut_objs()]
 
     def setup(self):
         self.obj.display_type = 'TEXTURED'
