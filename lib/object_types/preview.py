@@ -21,15 +21,18 @@ class Preview:
         self.name = None
         if obj:
             self.cut_obj = self.find_cut_obj(obj.name)
-            self.name = PREFIX + self.cut_obj.name + '.preview'
+            self.name = self.get_name()
 
     @classmethod
     def add(cls, cut_obj):
         Preview().setup(cut_obj)
 
+    def get_name(self):
+        return PREFIX + self.cut_obj.name + '.preview'
+
     def setup(self, cut_obj):
         self.cut_obj = cut_obj
-        self.name = PREFIX + self.cut_obj.name + '.preview'
+        self.name = self.get_name()
         self.add_object()
         self.cut_obj.soc_preview_name = self.obj.name
 
@@ -48,7 +51,7 @@ class Preview:
     # private
 
     def find_cut_obj(self, name):
-        match = [o for o in Project.cuts() if o.soc_preview_name == name]
+        match = [o for o in Project.cut_objs() if o.soc_preview_name == name]
         if match:
             return match[0]
         else:
@@ -124,6 +127,10 @@ class Preview:
         obj.matrix_world = Bounding().matrix_inverted() @ self.obj.matrix_world
         obj.location.z = 0
 
+    def remove(self):
+        if self.name in bpy.data.objects.keys():
+            bpy.data.objects.remove(bpy.data.objects[self.name])
+
     @classmethod
     def create(cls):
         bounding = Bounding()
@@ -139,21 +146,14 @@ class Preview:
         else:
             bounding.hide()
 
+    @classmethod
     def delete(self):
-        for obj in self.compartment.objects:
-            bpy.data.objects.remove(obj)
-        bpy.data.collections.remove(self.compartment)
-        self.bounding.hide()
-    #
-    #
-    # def matrix_ref_bound(self, perimeter_mw, bounding_mw):
-    #
-    #     reference_mw = Reference(perimeter)
-    #
-    #     m3 = reference.matrix_world if reference else Matrix()
-    #     m4 = bounding_mw if bounding_mw else Matrix()
-    #
-    #     return m4 @ m3
+
+        objs = Project.cut_objs()
+        for o in objs:
+            remove_object(o.soc_preview_name)
+            o.soc_preview_name = ""
+        Bounding().hide()
 
 
 def check_scale(cut_obj):

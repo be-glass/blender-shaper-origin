@@ -5,7 +5,7 @@ from .reference import Reference
 from ..blender.compartment import Compartment, Collect
 from ..constant import PREFIX
 from ..helper.mesh_helper import create_object
-from ..helper.other import length
+from ..helper.other import length, remove_object
 from ..shape.perimeter import Perimeter
 
 BOUNDING_FRAME_NAME = PREFIX + 'Bounding Frame'
@@ -21,6 +21,7 @@ class Bounding:
     def reset(self):
 
         mw = self.old_matrix()
+        remove_object(BOUNDING_FRAME_NAME)
         quad = self.boundary_quad()
         frame = create_object(quad, self.compartment.get(), BOUNDING_FRAME_NAME)
         frame.matrix_world = mw
