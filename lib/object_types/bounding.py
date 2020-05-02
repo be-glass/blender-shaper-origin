@@ -2,7 +2,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 from .reference import Reference
-from ..blender.collection import Collection, Collect
+from ..blender.compartment import Compartment, Collect
 from ..constant import PREFIX
 from ..helper.mesh_helper import create_object
 from ..helper.other import length
@@ -14,14 +14,15 @@ BOUNDING_FRAME_NAME = PREFIX + 'Bounding Frame'
 class Bounding:
 
     def __init__(self):
-        self.collection = Collection.by_enum(Collect.Internal).get()
+        self.compartment = Compartment.by_enum(Collect.Internal)
+        self.compartment = Compartment.by_enum(Collect.Internal)
         self.frame = self.reset()
 
     def reset(self):
 
         mw = self.old_matrix()
         quad = self.boundary_quad()
-        frame = create_object(quad, self.collection.get(), BOUNDING_FRAME_NAME)
+        frame = create_object(quad, self.compartment.get(), BOUNDING_FRAME_NAME)
         frame.matrix_world = mw
         frame.soc_object_type = "Bounding"
         return frame

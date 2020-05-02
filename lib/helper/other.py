@@ -37,9 +37,9 @@ def check_type(obj, valid_types):
     return True if remain else False
 
 
-def move_object(obj, collection):
+def move_obj(obj, col):
     [c.objects.unlink(obj) for c in obj.users_collection]
-    collection.objects.link(obj)
+    col.objects.link(obj)
 
 
 def select_active(obj):
@@ -215,3 +215,12 @@ def delete_obj(name):
 def remove_object(name):
     if name in bpy.data.objects.keys():
         bpy.data.objects.remove(bpy.data.objects[name])
+
+
+def set_viewport():
+    for area in bpy.context.screen.areas:
+        if area.type == 'VIEW_3D':
+            for space in area.spaces:
+                if space.type == 'VIEW_3D':
+                    space.shading.type = 'SOLID'
+                    space.shading.color_type = 'OBJECT'

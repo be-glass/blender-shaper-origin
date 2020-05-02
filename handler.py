@@ -15,9 +15,9 @@
 
 import bpy
 
-from .lib.projectpreview import ProjectPreview
 from .lib.helper.other import consistency_checks, store_selection, restore_selection, minmax, initialize_object
 from .lib.object_types.cut import Cut
+from .lib.object_types.preview import Preview
 
 
 def register():
@@ -96,7 +96,7 @@ def update_cut_type(obj, context):
 
 def preview(scene_properties, context):
     if scene_properties.preview:
-        ProjectPreview().create()
+        Preview.create()
         pass
     else:
-        ProjectPreview().delete()
+        Preview.delete()

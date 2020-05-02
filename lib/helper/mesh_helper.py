@@ -40,7 +40,7 @@ def shade_mesh_flat(obj):
         f.use_smooth = False
 
 
-def create_object(polygon, collection=None, name=''):
+def create_object(polygon, col=None, name=''):
     bm = bmesh.new()
     [bm.verts.new(v) for v in polygon]
     bm.faces.new(bm.verts)
@@ -48,12 +48,12 @@ def create_object(polygon, collection=None, name=''):
     me = bpy.data.meshes.new("")
     bm.to_mesh(me)
     obj = bpy.data.objects.new(name, me)
-    if collection:
-        collection.objects.link(obj)
+    if col:
+        col.objects.link(obj)
     return obj
 
 
-def add_plane(name, size, collection=None):  # TODO: replace without ops
+def add_plane(name, size, col=None):  # TODO: replace without ops
     bpy.ops.mesh.primitive_plane_add(size=size)
 
     obj = active_object()
@@ -67,10 +67,10 @@ def add_plane(name, size, collection=None):  # TODO: replace without ops
 
     obj.name = name
 
-    if collection:
+    if col:
         for c in obj.users_collection:
             c.objects.unlink(obj)
-        collection.objects.link(obj)
+        col.objects.link(obj)
     return obj
 
 

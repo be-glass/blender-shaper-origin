@@ -1,7 +1,7 @@
 import math
 
 from .__init__ import Shape
-from ..blender.collection import Collection
+from ..blender.compartment import Compartment
 from ..helper.other import length
 
 
@@ -13,7 +13,7 @@ class MeshShape(Shape):
     def update(self):
         if self.obj.soc_mesh_cut_type == 'Cutout':
 
-            perimeters = Collection.by_obj(self.obj).perimeter_objs()
+            perimeters = Compartment.by_obj(self.obj).perimeter_objs()
 
             if perimeters:
                 cutout_depth = perimeters[0].soc_cut_depth

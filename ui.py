@@ -16,7 +16,7 @@
 from bpy import utils
 from bpy.types import Panel
 
-from .lib.blender.collection import Collection
+from .lib.blender.compartment import Compartment
 
 
 def panels():
@@ -107,7 +107,7 @@ class BG_PT_SOC_select(Panel):
             layout.prop(obj, "soc_dogbone")
 
     def draw_align_with_perimeter(self, obj):
-        perimeters = Collection.by_obj(obj).perimeter_objs()
+        perimeters = Compartment.by_obj(obj).perimeter_objs()
         if obj.soc_mesh_cut_type != 'Perimeter' and perimeters:
             self.layout.operator("mesh.socut_align_object")
 

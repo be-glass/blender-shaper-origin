@@ -1,6 +1,6 @@
 import bpy
 
-from ..blender.collection import Collection, Collect
+from ..blender.compartment import Compartment, Collect
 from ..constant import PREFIX
 from ..helper.other import delete_obj
 from ..shape import Shape
@@ -15,7 +15,7 @@ class Body:
         # config
         self.cut_obj.soc_known_as = self.cut_obj.name
         self.name = PREFIX + self.cut_obj.name + ".body"
-        self.collection = Collection.by_enum(Collect.Solid)
+        self.compartment = Compartment.by_enum(Collect.Solid)
         self.shape = Shape.factory(cut_obj)
 
     @classmethod

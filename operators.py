@@ -18,14 +18,13 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
+from .lib.object_types.preview import Preview
 from .lib.blender.project import Project
-from .lib.blender.collection import Collection
+from .lib.blender.compartment import Compartment
 from .lib.object_types.cut import Cut
 from .lib.export import Export
 from .lib.helper.other import translate_local, store_selection, consistency_checks, reset_relations
-from .lib.projectpreview import ProjectPreview
 
-bl_info = None  # injected from init
 
 
 def operators():
@@ -78,7 +77,7 @@ class MESH_OT_socut_align_object(Operator):
     def execute(self, context):
         obj = context.object
 
-        perimeters = Collection.by_obj(obj).perimeter_objs()
+        perimeters = Compartment.by_obj(obj).perimeter_objs()
 
         if not perimeters:
             self.report({'ERROR'}, "No perimeter found.")
@@ -110,7 +109,7 @@ class MESH_OT_socut_rebuild(Operator):
             Cut(obj).reset()
 
         if preview:
-            ProjectPreview().create()
+            Preview.create()
             context.scene.so_cut['preview'] = True
 
         self.report({'INFO'}, "OK")

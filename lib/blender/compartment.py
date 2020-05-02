@@ -11,10 +11,10 @@ class Collect(Enum):
     Preview = 'Preview'
 
 
-class Collection:
+class Compartment:
 
     def __init__(self, collection_obj):
-        self.collection = collection_obj
+        self.col = collection_obj
 
     @classmethod
     def by_name(cls, name):
@@ -37,7 +37,7 @@ class Collection:
             if collect is Collect.Internal:
                 parent = bpy.context.scene.collection  # master scene
             else:
-                parent = Collection.by_enum(Collect.Internal).get()
+                parent = Compartment.by_enum(Collect.Internal).get()
 
             c = bpy.data.collections.new(name)
             parent.children.link(c)
@@ -45,10 +45,10 @@ class Collection:
         return cls(c)
 
     def objects(self):
-        return self.collection.objects
+        return self.col.objects
 
     def get(self):
-        return self.collection
+        return self.col
 
     def collect(self, obj, name):
 
@@ -57,15 +57,15 @@ class Collection:
 
         for c in obj.users_collection:
             c.objects.unlink(obj)
-        self.collection.objects.link(obj)
+        self.col.objects.link(obj)
 
     def perimeter_objs(self):
-        objs = self.collection.objects
+        objs = self.col.objects
         p_objs = [o for o in objs if o.soc_mesh_cut_type == 'Perimeter' and o.soc_object_type == 'Cut']
         return p_objs
 
     def subtrahend_objs(self):
-        objs = self.collection.objects
+        objs = self.col.objects
         s_objs = [o for o in objs if o.soc_mesh_cut_type != 'Perimeter' and o.soc_object_type == 'Cut']
         return s_objs
 
@@ -75,14 +75,21 @@ class Collection:
         if name in bpy.data.objects.keys():
             bpy.data.objects.remove(bpy.data.objects[name])
 
+    def link_obj(self, obj):
+        self.col.objects.link(obj)
+
+    def move(self, obj):
+        [c.objects.unlink(obj) for c in obj.users_collection]
+        self.col.objects.link(obj)
+
 
 def delete_solid_objects(obj):
-    for o in Collection.by_enum(Collect.Solid).objects():
+    for o in Compartment.by_enum(Collect.Solid).objects():
         if o.name == PREFIX + obj.name + ".fillets":
             bpy.data.objects.remove(o, do_unlink=True)
 
 
 def cleanup_meshes(mesh_name):
-    for o in Collection.by_enum(Collect.Solid).objects():
+    for o in Compartment.by_enum(Collect.Solid).objects():
         if o.name.startswith(mesh_name):
             bpy.data.objects.remove(o, do_unlink=True)

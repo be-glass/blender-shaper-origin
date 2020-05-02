@@ -1,13 +1,13 @@
 import bpy
 
-from ..blender.collection import Collection, Collect
+from ..blender.compartment import Compartment, Collect
 from ..constant import PREFIX
 
 
 class Reference:
 
-    def __init__(self, cut_obj):
-        self.cut_obj = cut_obj
+    def __init__(self, perimeter):
+        self.cut_obj = perimeter.obj
 
     def get(self):
         if self.name in bpy.data.objects.keys():
@@ -19,7 +19,7 @@ class Reference:
     def name(self):
         if not self.cut_obj.soc_reference_name:
             self.cut_obj.soc_reference_name = PREFIX + self.cut_obj.users_collection[0].name + '.reference'
-        return self.obj.soc_reference_name
+        return self.cut_obj.soc_reference_name
 
     def matrix(self):
         return self.get().matrix_world.copy()
@@ -28,16 +28,16 @@ class Reference:
 
     def create(self):
 
-        collection = Collection.by_enum(Collect.Reference)
+        compartment = Compartment.by_enum(Collect.Reference)
 
-        reference = bpy.data.objects.new(self.name, None)
-        reference.location = self.cut_obj.location
-        reference.matrix_world = self.cut_obj.matrix_world
-        reference.matrix_world.identity()
-        collection.objects.link(reference)
-        reference.empty_display_size = 5
-        reference.empty_display_type = 'PLAIN_AXES'
-        reference.soc_object_type = 'Reference'
-        reference.name = self.name
-        reference.hide_set(True)
-        return reference
+        ref_obj = bpy.data.objects.new(self.name, None)
+        ref_obj.location = self.cut_obj.location
+        ref_obj.matrix_world = self.cut_obj.matrix_world
+        ref_obj.matrix_world.identity()
+        compartment.link_obj(ref_obj)
+        ref_obj.empty_display_size = 5
+        ref_obj.empty_display_type = 'PLAIN_AXES'
+        ref_obj.soc_object_type = 'Reference'
+        ref_obj.name = self.name
+        ref_obj.hide_set(True)
+        return ref_obj

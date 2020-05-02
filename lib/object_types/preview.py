@@ -4,10 +4,10 @@ from mathutils import Vector, Matrix
 from .bounding import Bounding
 from .reference import Reference
 from ..constant import PREVIEW_STACK_DELTA, STACK_Z, FACE_COLOR, PREFIX
-from ..blender.collection import Collection, Collect
+from ..blender.compartment import Compartment, Collect
 from ..blender.project import Project
 from ..blender.fillet import Fillet
-from ..helper.other import length, warning_msg, move_object, remove_object, find_first_perimeter
+from ..helper.other import length, warning_msg, move_obj, remove_object, find_first_perimeter, set_viewport
 from ..shape.perimeter import Perimeter
 
 
@@ -15,7 +15,7 @@ class Preview:
 
     def __init__(self, obj=None):
         self.obj = obj
-        self.collection = Collection(Collect.Preview)
+        self.compartment = Compartment.by_enum(Collect.Preview)
         self.bounding = Bounding()
         self.cut_obj = None
         self.name = None
@@ -23,10 +23,14 @@ class Preview:
             self.cut_obj = self.find_cut_obj(obj.name)
             self.name = PREFIX + self.cut_obj.name + '.preview'
 
-    def setup(self, cut_obj):
+    @classmethod
+    def add(cls, cut_obj):
+        Preview().setup(cut_obj)
 
+    def setup(self, cut_obj):
         self.cut_obj = cut_obj
-        self.obj = self.add_object()
+        self.name = PREFIX + self.cut_obj.name + '.preview'
+        self.add_object()
         self.cut_obj.soc_preview_name = self.obj.name
 
     def transform_others(self, perimeter_mw_1, reference_mw, frame_mw):
@@ -77,15 +81,13 @@ class Preview:
             bounding.reset()  # TODO: should it go above?
 
     def add_object(self):
-
-        self.check_scale()
+        check_scale(self.cut_obj)
         remove_object(self.name)
+        self.obj = create_preview_object(self.cut_obj)
+        self.compartment.move(self.obj)
 
-        obj = self.create_preview_object()
-
-        move_object(obj, self.collection)
         if self.cut_obj.soc_mesh_cut_type != 'Perimeter':
-            obj.hide_select = True
+            self.obj.hide_select = True
 
         # apply_mesh_scale(self.preview_obj)    # TODO: is this needed? for mesh? for curve?
 
@@ -94,24 +96,8 @@ class Preview:
         self.transform_others(perimeter.matrix().inverted(), Reference(perimeter).matrix(), self.bounding.matrix())
         self.configure()
 
-        return obj
 
-    def create_preview_object(self):
-        if self.cut_obj.type == 'MESH':
-            is_perimeter = True if self.cut_obj.soc_mesh_cut_type == 'Perimeter' else False
-            fillet = Fillet(self.cut_obj)  # TODO: is this ok? what was cut_obj1 ? 
-            obj = fillet.create(reset=False, rounded=False, outside=is_perimeter)
 
-        else:
-            obj = self.cut_obj.copy()
-            obj.data = self.cut_obj.data.copy()
-            obj.soc_curve_cut_type = self.cut_obj.soc_curve_cut_type
-        return obj
-
-    def check_scale(self):
-        if self.cut_obj.scale != Vector([1, 1, 1]):
-            warning_msg(
-                f'Please apply scale to object "{self.cut_obj.name}" to avoid unexpected results in preview and export!')
 
     def configure(self):
         o = self.obj
@@ -126,7 +112,8 @@ class Preview:
 
         if mct != 'None':
             o.color = FACE_COLOR[mct]
-            o.soc_mesh_cut_type = mct
+            # o.soc_mesh_cut_type = mct   # TODO:   enable this line  (it's causing a recursion loop)
+            pass
 
         elif cct != 'None':
             o.color = FACE_COLOR[cct]
@@ -136,3 +123,53 @@ class Preview:
         obj = reference.get()
         obj.matrix_world = Bounding().matrix_inverted() @ self.obj.matrix_world
         obj.location.z = 0
+
+    @classmethod
+    def create(cls):
+        bounding = Bounding()
+        perimeters = Perimeter.all()
+        if perimeters:
+            bounding.reset()
+
+            for perimeter in perimeters:
+                for shape in perimeter.shapes():
+                    cls.add(shape.obj)
+
+            set_viewport()
+        else:
+            bounding.hide()
+
+    def delete(self):
+        for obj in self.compartment.objects:
+            bpy.data.objects.remove(obj)
+        bpy.data.collections.remove(self.compartment)
+        self.bounding.hide()
+    #
+    #
+    # def matrix_ref_bound(self, perimeter_mw, bounding_mw):
+    #
+    #     reference_mw = Reference(perimeter)
+    #
+    #     m3 = reference.matrix_world if reference else Matrix()
+    #     m4 = bounding_mw if bounding_mw else Matrix()
+    #
+    #     return m4 @ m3
+
+
+def check_scale(cut_obj):
+    if cut_obj.scale != Vector([1, 1, 1]):
+        warning_msg(
+            f'Please apply scale to object "{cut_obj.name}" to avoid unexpected results in preview and export!')
+
+
+def create_preview_object(cut_obj):
+    if cut_obj.type == 'MESH':
+        is_perimeter = True if cut_obj.soc_mesh_cut_type == 'Perimeter' else False
+        fillet = Fillet(cut_obj)  # TODO: is this ok? what was cut_obj1 ? 
+        obj = fillet.create(rounded=False, outside=is_perimeter)
+
+    else:
+        obj = cut_obj.copy()
+        obj.data = cut_obj.data.copy()
+        obj.soc_curve_cut_type = cut_obj.soc_curve_cut_type
+    return obj

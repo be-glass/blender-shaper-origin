@@ -1,5 +1,5 @@
 from .__init__ import Body
-from ..blender.collection import Collection
+from ..blender.compartment import Compartment
 from ..blender.fillet import Fillet
 from ..helper.other import length
 
@@ -11,13 +11,13 @@ class MeshBody(Body):
 
         if not self.shape.is_guide():
             self.obj = self.create_body_obj()
-            self.collection.collect(self.obj, self.name)
+            self.compartment.collect(self.obj, self.name)
 
             if self.shape.is_perimeter():
                 self.obj.display_type = 'TEXTURED'
             else:
                 self.obj.display_type = 'WIRE'
-                if Collection.by_obj(self.cut_obj).perimeter_objs():
+                if Compartment.by_obj(self.cut_obj).perimeter_objs():
                     self.obj.hide_set(True)
                 else:
                     self.obj.hide_set(False)
@@ -29,7 +29,7 @@ class MeshBody(Body):
     # private
 
     def create_body_obj(self):
-        body = Fillet(self.shape).create(self.shape.is_exterior(), rounded=True)
+        body = Fillet(self.shape.obj).create(self.shape.is_exterior(), rounded=True)
         body.matrix_world = self.cut_obj.matrix_world
         return body
 

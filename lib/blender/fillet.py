@@ -26,8 +26,8 @@ from ..helper.other import error_msg, warning_msg
 
 class Fillet:
 
-    def __init__(self, shape):
-        self.obj = shape.obj
+    def __init__(self, obj):  # should be shape, later
+        self.obj = obj
 
         # config
         self.radius = self.obj.soc_tool_diameter / 2

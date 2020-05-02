@@ -1,13 +1,11 @@
 from .__init__ import Shape
-from ..blender.collection import Collection, Collect, cleanup_meshes
+from ..blender.compartment import Compartment, Collect, cleanup_meshes
 from ..constant import PREFIX
 from ..helper.curve import face_is_down, add_nurbs_square, curve2mesh
 from ..helper.mesh_helper import shade_mesh_flat, repair_mesh
 from ..helper.other import get_object_safely, delete_object, hide_objects
 
 
-def get_solid_collection():
-    pass
 
 
 class Curve(Shape):
@@ -40,7 +38,7 @@ class Curve(Shape):
         solid_obj = self.update_mesh()
         self.obj.data.bevel_object = None
         self.obj.soc_solid_name = solid_obj.name
-        collections = self.obj.users_collection
+        collections = self.obj.users_collection  # TODO obsolete
         if collections:
             self.adjust_boolean_modifiers(collections[0])
 
@@ -52,7 +50,7 @@ class Curve(Shape):
 
         cleanup_meshes(mesh_name)
         mesh_obj = curve2mesh(self.obj, mesh_name)
-        get_solid_collection().objects.link(mesh_obj)
+        get_solid_collection().objects.link_obj(mesh_obj)
 
         shade_mesh_flat(mesh_obj)
         repair_mesh(mesh_obj)  # TODO: needed?
@@ -71,7 +69,7 @@ class Curve(Shape):
             if bevel_obj:
                 return bevel_obj
 
-        collection = Collection.by_enum(Collect.Helper)
+        collection = Compartment.by_enum(Collect.Helper)
 
         name = f'{PREFIX}{self.obj.name}.bevel'
         bevel_obj = add_nurbs_square(collection, name, self.obj.soc_curve_cut_type)

@@ -16,14 +16,14 @@
 # from ..blender.collection import Collection, Collect
 
 
-def find_siblings_by_type(cut_types, sibling=None, collection=None):
-    if not (sibling or collection):
+def find_siblings_by_type(cut_types, sibling=None, col=None):
+    if not (sibling or col):
         return []
 
-    if not collection:
-        collection = sibling.users_collection[0]
+    if not col:
+        col = sibling.users_collection[0]
 
-    cutables = [o for o in collection.objects if o.type in ['MESH', 'CURVE']]
+    cutables = [o for o in col.objects if o.type in ['MESH', 'CURVE']]
     return [o for o in cutables if (o.soc_mesh_cut_type in cut_types) or (o.soc_curve_cut_type in cut_types)]
 
 

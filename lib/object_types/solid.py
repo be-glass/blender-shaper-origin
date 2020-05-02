@@ -1,5 +1,5 @@
 from ..body import Body
-from ..blender.collection import Collection, Collect
+from ..blender.compartment import Compartment, Collect
 from ..constant import PREFIX
 from ..blender.modifier import Modifier
 
@@ -19,7 +19,7 @@ class Solid:
         self.body = None
 
     def setup(self):
-        self.collection = Collection.by_enum(Collect.Solid)
+        # self.compartment = Compartment.by_enum(Collect.Solid)
 
         self.body.setup()
 
@@ -53,13 +53,13 @@ class Solid:
     def subtract_from_perimeter(self):
         if self.body.shape:
             if self.body.shape.is_perimeter():
-                subtrahend_objs = Collection.by_obj(self.cut_obj).subtrahend_objs()
+                subtrahend_objs = Compartment.by_obj(self.cut_obj).subtrahend_objs()
                 for s_obj in subtrahend_objs:
                     solid = Solid(s_obj)
                     self.subtract(solid.body, solid.mod_boolean_name)
 
             else:
-                perimeter_objs = Collection.by_obj(obj=self.cut_obj).perimeter_objs()
+                perimeter_objs = Compartment.by_obj(obj=self.cut_obj).perimeter_objs()
                 if perimeter_objs:
                     Solid(perimeter_objs[0]).subtract(self.body, self.mod_boolean_name)
 

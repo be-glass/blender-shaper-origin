@@ -60,9 +60,8 @@ class Cut:
 
         # Preview
         if bpy.context.scene.so_cut.preview:
-            self.preview = Preview.setup(self.obj)
-            self.preview.config()
-            self.preview.setup()
+            self.preview = Preview()
+            self.preview.setup(self.obj)
 
 
     def update(self):
