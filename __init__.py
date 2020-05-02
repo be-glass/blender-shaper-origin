@@ -30,7 +30,7 @@ bl_info = {
 }
 
 files = [ui, properties, operators, handler]
-
+operators.bl_info = bl_info
 
 def register():
     [file.register() for file in files]

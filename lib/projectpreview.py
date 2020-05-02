@@ -17,7 +17,6 @@ import bpy
 from mathutils import Matrix
 
 from .collection import Collection, Collect
-from .object_types.preview import add_object
 from .object_types.bounding import Bounding
 from .object_types.reference import Reference
 

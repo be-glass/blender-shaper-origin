@@ -14,7 +14,6 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 import bpy
 import mathutils
-from bpy.props import BoolProperty
 from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
@@ -25,6 +24,8 @@ from .lib.object_types.cut import Cut
 from .lib.export import Export
 from .lib.helper.other import translate_local, store_selection, consistency_checks, reset_relations
 from .lib.projectpreview import ProjectPreview
+
+bl_info = None  # injected from init
 
 
 def operators():
