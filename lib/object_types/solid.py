@@ -1,6 +1,4 @@
 from ..body import Body
-from ..body.mesh_body import MeshBody
-from ..body.meshed_curve import MeshedCurve
 from ..collection import Collection, Collect
 from ..constant import PREFIX
 from ..modifier import Modifier
@@ -14,7 +12,7 @@ class Solid:
 
         self.mod_solidify_name = PREFIX + 'Solidify'
         self.mod_boolean_name = PREFIX + 'Boolean.' + self.cut_obj.name
-        self.body = self.body_factory(cut_obj)
+        self.body = Body.factory(cut_obj)
 
     def defaults(self):
         self.solidify_name = None
@@ -74,11 +72,3 @@ class Solid:
             Modifier(body_obj).set_thickness(self.mod_solidify_name,
                                              self.cut_obj.soc_cut_depth + self.body.thickness_delta())
 
-    def body_factory(_, cut_obj):
-        if cut_obj.soc_mesh_cut_type:
-            body = MeshBody
-        elif cut_obj.soc_curve_cut_type:
-            body = MeshedCurve
-        else:
-            return None
-        return body(cut_obj)

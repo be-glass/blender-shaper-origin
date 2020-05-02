@@ -15,10 +15,9 @@
 
 import bpy
 
-from .lib.preview import Preview
+from .lib.projectpreview import ProjectPreview
 from .lib.helper.other import consistency_checks, store_selection, restore_selection, minmax, initialize_object
 from .lib.object_types.cut import Cut
-from .lib.object_types.inactive import Inactive
 
 
 def register():
@@ -97,15 +96,7 @@ def update_cut_type(obj, context):
 
 def preview(scene_properties, context):
     if scene_properties.preview:
-        Preview().create()
+        ProjectPreview().create()
         pass
     else:
-        Preview().delete()
-
-
-def type_factory(obj):
-    if obj.soc_object_type in ['None', 'Cut']:
-        cls = Cut
-    else:
-        cls = Inactive
-    return cls
+        ProjectPreview().delete()

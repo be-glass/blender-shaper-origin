@@ -12,7 +12,10 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
+from . import Shape
 from .mesh_shape import MeshShape
+from ..object_types.preview import Preview
+from ..object_types.reference import Reference
 
 
 class Perimeter(MeshShape):
@@ -29,13 +32,28 @@ class Perimeter(MeshShape):
     def clean(self):
         pass
 
-        ### private
-
     def is_exterior(self):
         return True
 
     def is_perimeter(self):
         return True
+
+    def reference(self):
+        return Reference(self.obj)
+
+    def shapes(self):
+        objs = self.obj.users_collection[0].objects
+        return [Shape.factory(o) for o in objs if o.soc_object_type == 'Cut']
+
+    def others(self):
+        return [o for o in self.shapes() if o.soc_mesh_cut_type != 'Perimeter']
+
+    def previews(self):
+        objs = self.obj.users_collection[0].objects
+        return [Preview(o) for o in objs if o.soc_object_type == 'Cut']
+
+    def matrix(self):
+        return self.obj.matrix_world
 
 # from .fillet import Fillet
 # from ..helper.gen_helper import *

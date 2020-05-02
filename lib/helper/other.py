@@ -15,7 +15,7 @@
 
 import bpy
 
-from ..constant import PREFIX, SVG_COORD_FORMAT, DEFAULTS
+from ..constant import SVG_COORD_FORMAT, DEFAULTS
 
 
 def write(content, file_name):
@@ -26,12 +26,6 @@ def write(content, file_name):
         return str(err)
 
     return False  # no error
-
-
-def project_name():
-    name = (bpy.path.display_name_from_filepath(bpy.data.filepath))
-    name = name if name else "untitled"
-    return name
 
 
 def filter_valid(object_list, valid_types):
@@ -160,15 +154,6 @@ def check_duplication(obj):
             #     obj.soc_known_as = obj.name
 
 
-def find_cuts():
-    return [o for o in bpy.data.objects if o.soc_object_type == 'Cut']
-
-
-def filter_perimeters(objs):
-    per_objs = [o for o in objs if o.soc_mesh_cut_type == 'Perimeter']
-    return per_objs
-
-
 def find_first_perimeter(obj):
     perimeters = [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']
     if perimeters:
@@ -223,5 +208,10 @@ def active_object():
 
 
 def delete_obj(name):
+    if name in bpy.data.objects.keys():
+        bpy.data.objects.remove(bpy.data.objects[name])
+
+
+def remove_object(name):
     if name in bpy.data.objects.keys():
         bpy.data.objects.remove(bpy.data.objects[name])

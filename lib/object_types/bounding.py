@@ -2,17 +2,17 @@ import bpy
 from mathutils import Matrix, Vector
 
 from ..collection import Collection, Collect
-from ..helper.gen_helper import boundaries
+from ..constant import PREFIX
 from ..helper.mesh_helper import create_object
-from ..helper.other import get_object_safely, length, find_cuts, filter_perimeters
-from ..helper.preview_helper import transform_preview, BOUNDING_FRAME_NAME
+from ..helper.other import get_object_safely, length
+from ..project import Project
+
+BOUNDING_FRAME_NAME = PREFIX + 'Bounding Frame'
 
 
 class Bounding:
 
     def __init__(self):
-        self.cut_objs = find_cuts()
-        self.perimeters = filter_perimeters(self.cut_objs)
         self.collection = Collection.by_enum(Collect.Internal).get()
         self.frame = self.reset()
 
@@ -27,18 +27,18 @@ class Bounding:
 
     def transform(self):
 
-        for perimeter in self.perimeters:
-            for obj in perimeter.users_collection[0].objects:
+        frame_mw = Bounding().matrix()
 
-                if obj.soc_object_type == 'Cut':
-                    matrix = transform_preview(obj, perimeter, self.frame.matrix_world)
-                    preview_obj = get_object_safely(obj.soc_preview_name)
-                    preview_obj.matrix_world = matrix
+        for perimeter in Project.perimeters():
+
+            perimeter_mw_1 = perimeter.matrix().inverted()
+            reference_mw = perimeter.reference().matrix()
+
+            for preview in perimeter.previews():
+                preview.transform(perimeter_mw_1, reference_mw, frame_mw)
 
     def hide(self):
-        frame = self.get_bounding_frame()
-        if frame:
-            frame.hide_set(True)
+        self.frame.hide_set(True)
 
     def frame(self):
         return self.frame
@@ -68,3 +68,32 @@ class Bounding:
         m3 = Vector([c0.x - d, c0.y - d, z])
 
         return [m0, m1, m2, m3]
+
+
+# static
+
+def boundaries():
+    x = []
+    y = []
+    z = []
+
+    for perimeter in Project.perimeters():
+
+        reference = perimeter.reference()
+        user = reference.matrix()
+
+        scale = Matrix.Diagonal(perimeter.matrix().to_scale()).to_4x4()
+
+        bb = perimeter.obj.bound_box
+        for p in range(8):
+            v_local = Vector([bb[p][0], bb[p][1], bb[p][2]])
+
+            v = user @ scale @ v_local
+
+            x.append(v[0])
+            y.append(v[1])
+            z.append(v[2])
+
+    minimum = Vector([min(x), min(y), min(z)])
+    maximum = Vector([max(x), max(y), max(z)])
+    return minimum, maximum

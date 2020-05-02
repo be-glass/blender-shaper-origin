@@ -14,9 +14,10 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
 from .constant import SVG_HEADER_TEMPLATE
-from .helper.gen_helper import boundaries
-from .helper.other import project_name, write
+from .object_types.bounding import boundaries
+from .helper.other import write
 from .object_types.cut import Cut
+from .project import Project
 from ..__init__ import bl_info
 
 
@@ -39,7 +40,7 @@ class Export:
             for obj in items:
                 selection_set[obj.name] = [obj]
         else:
-            name = project_name()
+            name = Project.name()
             selection_set = {name: items}
 
         err = "no items"

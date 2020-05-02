@@ -40,9 +40,12 @@ class Collection:
                 parent = Collection.by_enum(Collect.Internal).get()
 
             c = bpy.data.collections.new(name)
-            parent.children.link(collection)
+            parent.children.link(c)
 
         return cls(c)
+
+    def objects(self):
+        return self.collection.objects
 
     def get(self):
         return self.collection

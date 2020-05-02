@@ -12,7 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
-
+import bpy
 
 from .solid import Solid
 
@@ -27,6 +27,7 @@ class Cut:
     def defaults(self):
         # self.obj.soc_object_type = 'None'
         self.solid = None
+        self.preview = None
 
     def reset(self):
         self.clean()
@@ -38,8 +39,9 @@ class Cut:
         Solid(self.obj).clean()
         # self.preview.cleanup()
 
-
     def setup(self):
+
+        from .preview import Preview
 
         if not self.valid:
             return
@@ -52,8 +54,8 @@ class Cut:
             self.solid.setup()
 
         # Preview
-        if False:
-            self.preview = Preview(obj)
+        if bpy.context.scene.so_cut.preview:
+            self.preview = Preview.setup(self.obj)
             self.preview.config()
             self.preview.setup()
 

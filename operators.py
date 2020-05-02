@@ -19,11 +19,12 @@ from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
 
+from .lib.project import Project
 from .lib.collection import Collection
 from .lib.object_types.cut import Cut
 from .lib.export import Export
-from .lib.helper.other import translate_local, find_cuts, store_selection, consistency_checks, reset_relations
-from .lib.preview import Preview
+from .lib.helper.other import translate_local, store_selection, consistency_checks, reset_relations
+from .lib.projectpreview import ProjectPreview
 
 
 def operators():
@@ -102,13 +103,13 @@ class MESH_OT_socut_rebuild(Operator):
         preview = context.scene.so_cut.preview
         context.scene.so_cut['preview'] = False
 
-        for obj in find_cuts():
+        for obj in Project.cut_objs():
             reset_relations(obj)
             consistency_checks(obj)
             Cut(obj).reset()
 
         if preview:
-            Preview().create()
+            ProjectPreview().create()
             context.scene.so_cut['preview'] = True
 
         self.report({'INFO'}, "OK")

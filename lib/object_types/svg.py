@@ -1,5 +1,4 @@
 from ..helper.other import vector2string
-from ..helper.preview_helper import transform_export
 
 
 def svg_object(self, content, attributes):
