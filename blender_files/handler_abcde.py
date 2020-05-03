@@ -58,6 +58,7 @@ def post_ob_updated(scene, depsgraph):
     restore_selection(obj, selection)
     obj.soc_suppress_next_update = False
 
+
 # Update handlers
 
 def update_cut_depth(obj, context):

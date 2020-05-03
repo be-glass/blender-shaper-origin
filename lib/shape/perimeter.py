@@ -48,9 +48,12 @@ class Perimeter(MeshShape):
     def others(self):
         return [o for o in self.shapes() if o.soc_mesh_cut_type != 'Perimeter']
 
-    def preview_objs(self):
+    def sibling_objs(self):
         objs = self.obj.users_collection[0].objects
-        return [o for o in objs if o.soc_object_type == 'Cut']
+        return [o for o in objs if o.soc_object_type == 'Cut' and o is not self.obj]
+
+    def objects(self):
+        return self.obj.users_collection[0].objects
 
     def matrix(self):
         return self.obj.matrix_world

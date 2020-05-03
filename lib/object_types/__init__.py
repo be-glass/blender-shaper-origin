@@ -1,10 +1,17 @@
-# from .cut import Cut
-# from .inactive import Inactive
+from .bounding import Bounding
+from .cut import Cut
+from .inactive import Inactive
+from .preview import Preview
 
 
-# def type_factory(obj):
-#     if obj.soc_object_type in ['None', 'Cut']:
-#         cls = Cut
-#     else:
-#         cls = Inactive
-#     return cls
+def type_factory(obj):
+    sot = obj.soc_object_type
+    if sot in ['None', 'Cut']:
+        item = Cut(obj)
+    elif sot == 'Preview':
+        item = Preview(obj)
+    elif sot == 'Bounding':
+        item = Bounding()
+    else:
+        item = Inactive()
+    return item

@@ -1,6 +1,5 @@
 from ..blender.project import Project
 
-
 class Shape:
     def __init__(self, obj):
         self.obj = obj

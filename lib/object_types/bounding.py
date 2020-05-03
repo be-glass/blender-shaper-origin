@@ -5,21 +5,17 @@ from .reference import Reference
 from ..blender.compartment import Compartment, Collect
 from ..constant import PREFIX
 from ..helper.mesh_helper import create_object
-from ..helper.other import length, remove_object
+from ..helper.other import length, remove_object, get_object_safely
 from ..shape.perimeter import Perimeter
 
 BOUNDING_FRAME_NAME = PREFIX + 'Bounding Frame'
-
 
 class Bounding:
 
     def __init__(self):
         self.compartment = Compartment.by_enum(Collect.Internal)
-        self.compartment = Compartment.by_enum(Collect.Internal)
-        self.frame = self.reset()
 
     def reset(self):
-
         mw = self.old_matrix()
         remove_object(BOUNDING_FRAME_NAME)
         quad = self.boundary_quad()
@@ -32,26 +28,26 @@ class Bounding:
         from .preview import Preview
 
         frame_mw = Bounding().matrix()
-
+        self.reset()
         for perimeter in Perimeter.all():
 
-            perimeter_mw_1 = perimeter.matrix().inverted()
-            reference_mw = Reference(perimeter).matrix()
+            reference = Reference(perimeter)
 
-            for preview_obj in perimeter.preview_objs():
-                Preview(preview_obj).transform(perimeter_mw_1, reference_mw, frame_mw)
+            for preview_obj in perimeter.objects():
+                preview = Preview.find(preview_obj, bounding=self)
+                preview.transform_others(perimeter.matrix().inverted(), reference.matrix(), self.matrix())
 
     def hide(self):
         self.frame.hide_set(True)
 
     def frame(self):
-        return self.frame
+        return get_object_safely(BOUNDING_FRAME_NAME)
 
     def matrix_inverted(self):
-        return self.frame.matrix_world.inverted()
+        return self.frame().matrix_world.inverted()
 
     def matrix(self):
-        return self.frame.matrix_world.copy()
+        return self.frame().matrix_world.copy()
 
     # private
 

@@ -13,15 +13,30 @@ from ..shape.perimeter import Perimeter
 
 class Preview:
 
-    def __init__(self, obj=None):
+    def __init__(self, obj=None, bounding=None):
         self.obj = obj
         self.compartment = Compartment.by_enum(Collect.Preview)
-        self.bounding = Bounding()
+        self.bounding = bounding if bounding else Bounding()
         self.cut_obj = None
         self.name = None
         if obj:
             self.cut_obj = self.find_cut_obj(obj.name)
             self.name = self.get_name()
+
+    def setup(self, cut_obj):
+        self.cut_obj = cut_obj
+        self.name = self.get_name()
+        self.add_object()
+        self.cut_obj.soc_preview_name = self.obj.name
+
+    @classmethod
+    def find(cls, cut_obj, bounding=None):
+        name = cut_obj.soc_preview_name
+        if name:
+            if name in bpy.data.objects.keys():
+                obj = bpy.data.objects[name]
+                return cls(obj, bounding=bounding)
+        return None
 
     @classmethod
     def add(cls, cut_obj):
@@ -30,11 +45,6 @@ class Preview:
     def get_name(self):
         return PREFIX + self.cut_obj.name + '.preview'
 
-    def setup(self, cut_obj):
-        self.cut_obj = cut_obj
-        self.name = self.get_name()
-        self.add_object()
-        self.cut_obj.soc_preview_name = self.obj.name
 
     def transform_others(self, perimeter_mw_1, reference_mw, frame_mw):
         if self.obj:
@@ -75,11 +85,12 @@ class Preview:
             perimeter = Perimeter(self.cut_obj)
 
             reference = Reference(perimeter)
-            transform_reference(reference)
+            self.transform_reference(reference)
             bounding = Bounding()
 
             for shape in perimeter.others():
-                shape.transform_others(perimeter.matrix().inverted(), reference.matrix(), bounding.matrix())
+                shape.transform_others(perimeter.matrix().inverted(), reference.matrix(),
+                                       bounding.matrix())  # TODO: wrong type
 
             bounding.reset()  # TODO: should it go above?
 

@@ -26,7 +26,6 @@ from .lib.export import Export
 from .lib.helper.other import translate_local, store_selection, consistency_checks, reset_relations
 
 
-
 def operators():
     return (
         MESH_OT_socut_export_cuts,
