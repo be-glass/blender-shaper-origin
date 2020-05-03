@@ -67,7 +67,7 @@ class Cut:
 
     def update(self):
         Solid(self.obj).update()
-        # self.preview.update()
+        # self.preview.update()     #?
         pass
 
     def svg(self):

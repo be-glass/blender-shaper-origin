@@ -38,9 +38,6 @@ class Curve(Shape):
         solid_obj = self.update_mesh()
         self.obj.data.bevel_object = None
         self.obj.soc_solid_name = solid_obj.name
-        collections = self.obj.users_collection  # TODO obsolete
-        if collections:
-            self.adjust_boolean_modifiers(collections[0])
 
     # private
 
@@ -50,7 +47,9 @@ class Curve(Shape):
 
         cleanup_meshes(mesh_name)
         mesh_obj = curve2mesh(self.obj, mesh_name)
-        get_solid_collection().objects.link_obj(mesh_obj)
+        mesh_obj.soc_object_type = 'Solid'
+
+        Compartment.by_enum(Collect.Solid).link(mesh_obj)
 
         shade_mesh_flat(mesh_obj)
         repair_mesh(mesh_obj)  # TODO: needed?

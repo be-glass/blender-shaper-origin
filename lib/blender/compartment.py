@@ -9,6 +9,7 @@ class Collect(Enum):
     Solid = 'Solid'
     Reference = 'Reference'
     Preview = 'Preview'
+    Helper = 'Helper'
 
 
 class Compartment:
@@ -50,9 +51,14 @@ class Compartment:
     def get(self):
         return self.col
 
-    def collect(self, obj, name):
+    def link(self, obj):
+        self.col.objects.link(obj)
 
-        self.remove(name)
+    def collect(self, obj, name, reset=True):
+
+        if reset:
+            self.remove(name)
+
         obj.name = name
 
         for c in obj.users_collection:

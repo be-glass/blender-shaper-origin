@@ -5,7 +5,6 @@ from ..blender.compartment import Compartment
 from ..blender.fillet import Fillet
 from ..blender.svg import SVG
 from ..helper.other import length, z_lift, find_first_perimeter, svg_material_attributes, get_object_safely
-from ..object_types.reference import Reference  # !
 
 
 class MeshShape(Shape):

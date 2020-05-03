@@ -24,9 +24,9 @@ class Body:
         from .mesh_body import MeshBody
         from .meshed_curve import MeshedCurve
 
-        if cut_obj.soc_mesh_cut_type:
+        if cut_obj.soc_mesh_cut_type != 'None':
             body = MeshBody
-        elif cut_obj.soc_curve_cut_type:
+        elif cut_obj.soc_curve_cut_type != 'None':
             body = MeshedCurve
         else:
             return None

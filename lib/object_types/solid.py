@@ -29,7 +29,8 @@ class Solid:
 
     def update(self):
         self.body.update()
-        self.set_thickness()
+        if self.cut_obj.type == 'MESH':
+            self.set_thickness()
 
     def clean(self):
         self.body.clean()
@@ -71,4 +72,3 @@ class Solid:
         if body_obj:
             Modifier(body_obj).set_thickness(self.mod_solidify_name,
                                              self.cut_obj.soc_cut_depth + self.body.thickness_delta())
-

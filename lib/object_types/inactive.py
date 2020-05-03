@@ -9,3 +9,6 @@ class Inactive:
 
     def transform(self):
         pass
+
+    def reset(self):
+        pass

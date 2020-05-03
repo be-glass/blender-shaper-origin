@@ -20,10 +20,10 @@ from .mesh_helper import fill_polygon
 from .other import error_msg
 
 
-def add_nurbs_square(col, name, curve_cut_type):
+def add_nurbs_square(collection, name, curve_cut_type):
     curve = bpy.data.curves.new(name, 'CURVE')
     obj = bpy.data.objects.new(name, curve)
-    col.objects.link(obj)
+    collection.link(obj)
     curve.dimensions = "2D"
 
     square = [(0, 0), (1, 0), (1, 1), (0, 1)]
