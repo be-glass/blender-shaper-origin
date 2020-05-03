@@ -19,6 +19,7 @@ from .helper.other import write
 from .object_types.cut import Cut
 from .blender.project import Project
 
+from ..__init__ import bl_info
 
 class Export:
 
@@ -69,7 +70,7 @@ class Export:
     def svg_header(self, selection):
         version = '.'.join([str(i) for i in bl_info['version']])
 
-        (x0, y0, _), (x1, y1, _) = boundaries(self.context)  # TODO: respect selection
+        (x0, y0, _), (x1, y1, _) = boundaries()  # TODO: respect selection
 
         scale = self.context.scene.unit_settings.scale_length
         w = (x1 - x0) * scale
@@ -107,7 +108,8 @@ class Export:
 
     def svg_perimeter_group(self, name_and_group):
         name, objs = name_and_group
-        cuts = [Cut(self.obj) for obj in objs]
+        cuts = [Cut(obj) for obj in objs]
         content = [cut.svg() for cut in cuts]
-        content_sorted = [item[1] for item in sorted(content, reverse=False)]
+        valid_content = [c for c in content if c]
+        content_sorted = [item[1] for item in sorted(valid_content, reverse=False) if item]
         return f'<g class="Collection" id="{name}">' + ''.join(content_sorted) + '</g>'

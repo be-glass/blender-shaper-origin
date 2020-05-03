@@ -17,6 +17,7 @@ import bpy
 from . import Bounding
 from .solid import Solid
 from ..blender.project import Project
+from ..shape import Shape
 
 
 class Cut:
@@ -64,14 +65,13 @@ class Cut:
             self.preview = Preview()
             self.preview.setup(self.obj)
 
-
     def update(self):
         Solid(self.obj).update()
-            # self.preview.update()
+        # self.preview.update()
         pass
 
     def svg(self):
-        pass
+        return Shape.factory(self.obj).svg()
 
     def update_hide_state(self):
         hidden = self.obj.hide_get()  # or self.obj.users_collection[0].hide_viewport   # collection cannot work

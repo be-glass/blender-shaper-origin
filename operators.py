@@ -55,7 +55,7 @@ class MESH_OT_socut_export_cuts(Operator):
 
     def execute(self, context):
 
-        result = Export().run()
+        result = Export(context).run()
 
         if result == False:
             self.report({'INFO'}, 'Export done')

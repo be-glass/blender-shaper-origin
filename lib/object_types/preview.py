@@ -7,7 +7,7 @@ from ..constant import PREVIEW_STACK_DELTA, STACK_Z, FACE_COLOR, PREFIX
 from ..blender.compartment import Compartment, Collect
 from ..blender.project import Project
 from ..blender.fillet import Fillet
-from ..helper.other import length, warning_msg, move_obj, remove_object, find_first_perimeter, set_viewport
+from ..helper.other import length, warning_msg, move_obj, remove_object, find_first_perimeter, set_viewport, z_lift
 from ..shape.perimeter import Perimeter
 
 
@@ -68,15 +68,8 @@ class Preview:
             return None
 
     def lift(self):
-
-        if self.cut_obj.soc_mesh_cut_type != 'None':
-            z = STACK_Z[self.cut_obj.soc_mesh_cut_type]
-        elif self.cut_obj.soc_curve_cut_type != 'None':
-            z = STACK_Z[self.cut_obj.soc_curve_cut_type]
-        else:
-            z = 0
-
-        lift = Vector([0, 0, z * length(PREVIEW_STACK_DELTA)])
+        zlift = z_lift(self.cut_obj)
+        lift = Vector([0, 0, zlift * length(PREVIEW_STACK_DELTA)])
         return Matrix.Translation(lift)
 
     def transform(self):

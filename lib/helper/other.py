@@ -15,7 +15,7 @@
 
 import bpy
 
-from ..constant import SVG_COORD_FORMAT, DEFAULTS
+from ..constant import SVG_COORD_FORMAT, DEFAULTS, STACK_Z, SO_CUT_ENCODING
 
 
 def write(content, file_name):
@@ -224,3 +224,30 @@ def set_viewport():
                 if space.type == 'VIEW_3D':
                     space.shading.type = 'SOLID'
                     space.shading.color_type = 'OBJECT'
+
+
+def z_lift(obj):
+    if obj.soc_mesh_cut_type != 'None':
+        z = STACK_Z[obj.soc_mesh_cut_type]
+    elif obj.soc_curve_cut_type != 'None':
+        z = STACK_Z[obj.soc_curve_cut_type]
+    else:
+        z = 0
+    return z
+
+
+def svg_material_attributes(key):
+    style_map = {
+        'Exterior': 'Exterior',
+        'Interior': 'Interior',
+        'Online': 'Online',
+        'Pocket': 'Pocket',
+        'Cutout': 'Pocket',
+        'Perimeter': 'Exterior',
+        'GuideArea': 'Guide',
+        'GuidePath': 'Guide',
+    }
+
+    style = style_map[key]
+    (stroke, fill) = SO_CUT_ENCODING[style]
+    return f'stroke="{stroke}" fill="{fill}"'
