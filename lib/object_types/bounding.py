@@ -48,7 +48,7 @@ class Bounding:
 
 
     def matrix_inverted(self):
-        return self.frame().matrix_world.inverted()
+        return self.frame.matrix_world.inverted()
 
     def matrix(self):
         return self.frame.matrix_world.copy()
@@ -86,17 +86,19 @@ def boundaries():
         reference = Reference(perimeter)
         user = reference.matrix()
 
-        scale = Matrix.Diagonal(perimeter.matrix().to_scale()).to_4x4()
+        for obj in perimeter.objects():
 
-        bb = perimeter.obj.bound_box
-        for p in range(8):
-            v_local = Vector([bb[p][0], bb[p][1], bb[p][2]])
+            scale = Matrix.Diagonal(perimeter.matrix().to_scale()).to_4x4()
 
-            v = user @ scale @ v_local
+            bb = obj.bound_box
+            for p in range(8):
+                v_local = perimeter.matrix_1() @ obj.matrix_world @ Vector([bb[p][0], bb[p][1], bb[p][2]])
 
-            x.append(v[0])
-            y.append(v[1])
-            z.append(v[2])
+                v = user @ scale @ v_local
+
+                x.append(v[0])
+                y.append(v[1])
+                z.append(v[2])
 
     minimum = Vector([min(x), min(y), min(z)])
     maximum = Vector([max(x), max(y), max(z)])

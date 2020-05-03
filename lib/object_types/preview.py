@@ -88,9 +88,14 @@ class Preview:
             self.transform_reference(reference)
             bounding = Bounding()
 
-            for shape in perimeter.others():
-                shape.transform_others(perimeter.matrix().inverted(), reference.matrix(),
-                                       bounding.matrix())  # TODO: wrong type
+            for obj in perimeter.sibling_objs():
+                preview = Preview()
+                preview.setup(obj)
+                preview.transform_others(
+                    perimeter.matrix().inverted(),
+                    reference.matrix(),
+                    bounding.matrix()
+                )
 
             bounding.reset()  # TODO: should it go above?
 

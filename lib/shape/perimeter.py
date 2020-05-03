@@ -58,6 +58,9 @@ class Perimeter(MeshShape):
     def matrix(self):
         return self.obj.matrix_world
 
+    def matrix_1(self):
+        return self.obj.matrix_world.inverted()
+
 #
 # class Perimeter(Generator):
 #
