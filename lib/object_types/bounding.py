@@ -4,7 +4,7 @@ from mathutils import Matrix, Vector
 from .reference import Reference
 from ..blender.compartment import Compartment, Collect
 from ..constant import PREFIX
-from ..helper.mesh_helper import create_object
+from ..helper.mesh_helper import create_object, polygon2mesh
 from ..helper.other import length, remove_object, get_object_safely
 from ..shape.perimeter import Perimeter
 
@@ -14,15 +14,21 @@ class Bounding:
 
     def __init__(self):
         self.compartment = Compartment.by_enum(Collect.Internal)
+        self.name = BOUNDING_FRAME_NAME
+        self.frame = bpy.data.objects[self.name] if self.name in bpy.data.objects.keys() else None
 
     def reset(self):
-        mw = self.old_matrix()
-        remove_object(BOUNDING_FRAME_NAME)
         quad = self.boundary_quad()
-        frame = create_object(quad, self.compartment.get(), BOUNDING_FRAME_NAME)
-        frame.matrix_world = mw
-        frame.soc_object_type = "Bounding"
-        return frame
+        mesh = polygon2mesh(quad)
+
+        if self.frame:
+            self.frame.data = mesh
+        else:
+            self.frame = bpy.data.objects.new(self.name, mesh)
+            self.compartment.link_obj(self.frame)
+            self.frame.soc_object_type = "Bounding"
+
+        self.frame.hide_set(False)
 
     def transform(self):
         from .preview import Preview
@@ -40,14 +46,12 @@ class Bounding:
     def hide(self):
         self.frame.hide_set(True)
 
-    def frame(self):
-        return get_object_safely(BOUNDING_FRAME_NAME)
 
     def matrix_inverted(self):
         return self.frame().matrix_world.inverted()
 
     def matrix(self):
-        return self.frame().matrix_world.copy()
+        return self.frame.matrix_world.copy()
 
     # private
 

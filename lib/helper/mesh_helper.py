@@ -40,13 +40,18 @@ def shade_mesh_flat(obj):
         f.use_smooth = False
 
 
-def create_object(polygon, col=None, name=''):
+def polygon2mesh(polygon):
     bm = bmesh.new()
     [bm.verts.new(v) for v in polygon]
     bm.faces.new(bm.verts)
     bm.normal_update()
     me = bpy.data.meshes.new("")
     bm.to_mesh(me)
+    return me
+
+
+def create_object(polygon, col=None, name=''):
+    me = polygon2mesh(polygon)
     obj = bpy.data.objects.new(name, me)
     if col:
         col.objects.link(obj)
