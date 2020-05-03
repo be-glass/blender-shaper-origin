@@ -14,6 +14,7 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 import bpy
 
+from . import Bounding
 from .solid import Solid
 from ..blender.project import Project
 
@@ -79,6 +80,7 @@ class Cut:
     def transform(self):
         if self.obj:
             Solid(self.obj).transform()
+            Bounding().transform()
 
     # private
 
