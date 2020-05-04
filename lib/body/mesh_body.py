@@ -37,3 +37,9 @@ class MeshBody(Body):
 
     def outside(self) -> bool:
         return self.shape.is_exterior()
+
+    def thickness_delta(self) -> float:
+        if self.cut_obj.soc_mesh_cut_type == 'Cutout':
+            return 0.2
+        else:
+            return 0.0

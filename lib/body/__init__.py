@@ -57,3 +57,6 @@ class Body:
         obj = self.get()
         if obj:
             obj.matrix_world = matrix
+
+    def thickness_delta(self) -> float:
+        return 0.0
