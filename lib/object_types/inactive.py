@@ -1,3 +1,4 @@
+
 class Inactive:
 
     def update(self) -> None:

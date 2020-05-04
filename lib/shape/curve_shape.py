@@ -12,17 +12,6 @@ class Curve(Shape):
     def setup(self) -> None:
         self.obj.display_type = 'WIRE'
 
-    # def svg(self):
-    #
-    #     mesh_obj = curve2mesh(self.self.obj, add_face=True)
-    #     proxy = Proxy(self.mesh_obj)
-    #     proxy.setup_proxy(self.obj)
-    #
-    #     content = proxy.svg_mesh()
-    #     attributes = svg_material_attributes(self.obj.soc_curve_cut_type)
-    #     z = lift_z(self.self.obj)
-    #
-    #     return z, self.svg_object(content, attributes)
 
     def transform(self) -> None:
         solid_obj = get_object_safely(self.obj.soc_solid_name, report_error=False)
@@ -44,3 +33,15 @@ class Curve(Shape):
         self.obj.soc_bevel_name = bevel_obj.name
 
         return bevel_obj
+
+# def svg(self):
+#
+#     mesh_obj = curve2mesh(self.self.obj, add_face=True)
+#     proxy = Proxy(self.mesh_obj)
+#     proxy.setup_proxy(self.obj)
+#
+#     content = proxy.svg_mesh()
+#     attributes = svg_material_attributes(self.obj.soc_curve_cut_type)
+#     z = lift_z(self.self.obj)
+#
+#     return z, self.svg_object(content, attributes)

@@ -20,21 +20,6 @@ from bpy.types import Mesh, Object
 from .other import select_active, active_object
 
 
-def repair_mesh(obj) -> None:  # TODO: needed?
-    active = active_object()
-    select_active(obj)
-
-    bpy.ops.object.mode_set(mode='EDIT')
-    bpy.ops.mesh.select_all(action='SELECT')
-
-    bpy.ops.mesh.separate(type='LOOSE')
-
-    bpy.ops.object.editmode_toggle()
-    bpy.ops.object.mode_set(mode='OBJECT')
-
-    if active:
-        select_active(active)
-
 
 def shade_mesh_flat(obj) -> None:
     for f in obj.data.polygons:
@@ -80,9 +65,9 @@ def add_plane(name, size, col=None) -> Object:  # TODO: replace without ops
     return obj
 
 
-def fill_polygon(obj) -> None:
+def fill_polygon(mesh) -> None:
     bm = bmesh.new()
-    bm.from_mesh(obj.data)
+    bm.from_mesh(mesh)
     bm.faces.new(bm.verts)
-    bm.to_mesh(obj.data)
+    bm.to_mesh(mesh)
     bm.free()

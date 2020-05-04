@@ -16,6 +16,8 @@
 
 import bpy
 
+import cProfile
+
 from .lib.helper.other import consistency_checks, store_selection, restore_selection, minmax, initialize_object
 from .lib.object_types.cut import Cut
 from .lib.object_types.preview import Preview
@@ -47,10 +49,14 @@ def post_ob_updated(scene, depsgraph) -> None:
 
                     if not obj.soc_suppress_next_update:  # extinguish interrupt chain
                         obj.soc_suppress_next_update = True
+
                         item.reset()
 
                 elif u.is_updated_transform:
-                    item.transform()
+                    if not obj.soc_suppress_next_update:  # extinguish interrupt chain
+                        obj.soc_suppress_next_update = True
+
+                        item.transform()
                 else:
                     # cut.update_hide_state()   #TMP
                     pass

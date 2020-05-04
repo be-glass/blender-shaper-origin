@@ -28,9 +28,11 @@ class Solid:
             self.subtract_from_perimeter()
 
     def update(self) -> None:
+        # self.body.setup()
         self.body.update()
-        if self.cut_obj.type == 'MESH':
-            self.set_thickness()
+        self.set_thickness()
+        if self.cut_obj.type == 'CURVE':
+            self.subtract_from_perimeter()
 
     def clean(self) -> None:
         self.body.clean()
@@ -65,10 +67,12 @@ class Solid:
                     Solid(perimeter_objs[0]).subtract(self.body, self.mod_boolean_name)
 
     def solidify(self) -> None:
-        self.body.obj.modifiers.new(self.mod_solidify_name, 'SOLIDIFY')
+        if self.cut_obj.type == 'MESH':
+            self.body.obj.modifiers.new(self.mod_solidify_name, 'SOLIDIFY')
 
     def set_thickness(self) -> None:
-        body_obj = self.body.get()
-        if body_obj:
-            Modifier(body_obj).set_thickness(self.mod_solidify_name,
-                                             self.cut_obj.soc_cut_depth + self.body.thickness_delta())
+        if self.cut_obj.type == 'MESH':
+            body_obj = self.body.get()
+            if body_obj:
+                Modifier(body_obj).set_thickness(self.mod_solidify_name,
+                                                 self.cut_obj.soc_cut_depth + self.body.thickness_delta())

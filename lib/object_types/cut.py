@@ -83,7 +83,8 @@ class Cut:
     def transform(self) -> None:
         if self.obj:
             Solid(self.obj).transform()
-            Bounding().transform()
+            if bpy.context.scene.so_cut.preview:
+                Bounding().transform()
 
     # private
 
