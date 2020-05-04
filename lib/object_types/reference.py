@@ -1,4 +1,6 @@
 import bpy
+from bpy.types import Object, BlendDataObjects
+from mathutils import Matrix
 
 from ..blender.compartment import Compartment, Collect
 from ..constant import PREFIX
@@ -6,27 +8,27 @@ from ..constant import PREFIX
 
 class Reference:
 
-    def __init__(self, perimeter):
+    def __init__(self, perimeter) -> None:
         self.cut_obj = perimeter.obj
 
-    def get(self):
+    def get(self) -> BlendDataObjects:
         if self.name in bpy.data.objects.keys():
             return bpy.data.objects[self.name]
         else:
             return self.create()
 
     @property
-    def name(self):
+    def name(self) -> str:
         if not self.cut_obj.soc_reference_name:
             self.cut_obj.soc_reference_name = PREFIX + self.cut_obj.users_collection[0].name + '.reference'
         return self.cut_obj.soc_reference_name
 
-    def matrix(self):
+    def matrix(self) -> Matrix:
         return self.get().matrix_world.copy()
 
     # private
 
-    def create(self):
+    def create(self) -> Object:
 
         compartment = Compartment.by_enum(Collect.Reference)
 

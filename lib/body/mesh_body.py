@@ -1,3 +1,5 @@
+from bpy.types import Object
+
 from .__init__ import Body
 from ..blender.compartment import Compartment
 from ..blender.fillet import Fillet
@@ -6,7 +8,7 @@ from ..helper.other import length
 
 class MeshBody(Body):
 
-    def setup(self):
+    def setup(self) -> None:
         self.shape.setup()
 
         if not self.shape.is_guide():
@@ -23,21 +25,15 @@ class MeshBody(Body):
                     self.obj.hide_set(False)
             self.obj.hide_select = True
 
-    def is_solid(self):
+    def is_solid(self) -> bool:
         return not self.shape.is_guide()
 
     # private
 
-    def create_body_obj(self):
+    def create_body_obj(self) -> Object:
         body = Fillet(self.shape.obj).create(self.shape.is_exterior(), rounded=True)
         body.matrix_world = self.cut_obj.matrix_world
         return body
 
-    def outside(self):
+    def outside(self) -> bool:
         return self.shape.is_exterior()
-
-    def thickness_delta(self):
-        if self.cut_obj.soc_mesh_cut_type == 'Cutout':
-            return length('1 mm')
-        else:
-            return length('0.1 mm')

@@ -1,5 +1,7 @@
 import math
 
+from typing import Tuple
+
 from .__init__ import Shape
 from ..blender.compartment import Compartment
 from ..blender.fillet import Fillet
@@ -9,10 +11,10 @@ from ..helper.other import length, z_lift, find_first_perimeter, svg_material_at
 
 class MeshShape(Shape):
 
-    def setup(self):
+    def setup(self) -> None:
         self.obj.display_type = 'WIRE'
 
-    def update(self):
+    def update(self) -> None:
         if self.obj.soc_mesh_cut_type == 'Cutout':
 
             perimeters = Compartment.by_obj(self.obj).perimeter_objs()
@@ -23,7 +25,7 @@ class MeshShape(Shape):
                 if not math.isclose(self.obj.soc_cut_depth, cutout_depth, abs_tol=length('0.01mm')):
                     self.obj.soc_cut_depth = cutout_depth
 
-    def svg(self):
+    def svg(self) -> Tuple[float, str]:
 
         fillet_obj = Fillet(self.obj).create()
         fillet_obj.matrix_world = self.obj.matrix_world
@@ -43,7 +45,7 @@ class MeshShape(Shape):
 
         return z, contents
 
-    def svg_object(self, content, attributes):
+    def svg_object(self, content, attributes) -> str:
         return \
             f'<g id="{self.obj.name_full}" class="{self.obj.type}" {attributes}>' + \
             ''.join(content) + \

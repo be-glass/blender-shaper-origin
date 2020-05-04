@@ -31,11 +31,12 @@ bl_info = {
 
 files = [ui, properties, operators, handler]
 
-def register():
+
+def register() -> None:
     [file.register() for file in files]
     handler.register()
 
 
-def unregister():
+def unregister() -> None:
     [file.unregister() for file in files]
     handler.unregister()

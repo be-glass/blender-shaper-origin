@@ -12,6 +12,9 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
+from typing import Union, List, Tuple, Set
+
+from bpy.types import Object
 
 from .constant import SVG_HEADER_TEMPLATE
 from .object_types.bounding import boundaries
@@ -21,12 +24,13 @@ from .blender.project import Project
 
 from ..__init__ import bl_info
 
+
 class Export:
 
-    def __init__(self, context):
+    def __init__(self, context) -> None:
         self.context = context
 
-    def run(self):
+    def run(self) -> Union[str, bool]:
 
         items = self.list_export_items()
 
@@ -54,20 +58,20 @@ class Export:
         else:
             return False  # no error
 
-    def list_export_items(self):
+    def list_export_items(self) -> List[Object]:
         if self.context.scene.so_cut.selected_only:
             items = self.context.selected_objects
         else:
             items = self.context.scene.objects
         return [o for o in items if o.soc_object_type == 'Cut']
 
-    def svg_content(self, selection):
+    def svg_content(self, selection) -> None:
         return \
             self.svg_header(selection) + \
             self.svg_body(selection) + \
             self.svg_footer()
 
-    def svg_header(self, selection):
+    def svg_header(self, selection) -> None:
         version = '.'.join([str(i) for i in bl_info['version']])
 
         (x0, y0, _), (x1, y1, _) = boundaries()  # TODO: respect selection
@@ -82,15 +86,15 @@ class Export:
             version=version, author=bl_info['author'],
         )
 
-    def svg_footer(self):
+    def svg_footer(self) -> str:
         return '</svg>\n'
 
-    def svg_body(self, selection):
+    def svg_body(self, selection) -> str:
         groups = self.perimeter_groups(selection)
         content = [self.svg_perimeter_group(name_and_group) for name_and_group in groups]
         return '<g transform="scale(1,-1)">' + ''.join(content) + '</g>'
 
-    def perimeter_groups(self, selection):
+    def perimeter_groups(self, selection) -> List[Tuple[str, Set[Object]]]:
         orphans = set(selection)
         perimeter_objs = [o for o in selection if o.soc_mesh_cut_type == 'Perimeter']
 
@@ -101,15 +105,15 @@ class Export:
             group = siblings & orphans
             orphans -= group
             if group:
-                groups.append([collection_name, group])
+                groups.append((collection_name, group))
         if orphans:
             groups.append(['orphans', orphans])
         return groups
 
-    def svg_perimeter_group(self, name_and_group):
+    def svg_perimeter_group(self, name_and_group) -> str:
         name, objs = name_and_group
         cuts = [Cut(obj) for obj in objs]
         content = [cut.svg() for cut in cuts]
         valid_content = [c for c in content if c]
-        content_sorted = [item[1] for item in sorted(valid_content, reverse=False) if item]
+        content_sorted = [item[1] for item in sorted(valid_content, reverse=False) if item]  # !!!
         return f'<g class="Collection" id="{name}">' + ''.join(content_sorted) + '</g>'

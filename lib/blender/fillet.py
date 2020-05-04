@@ -17,7 +17,9 @@ import math
 from math import pi
 
 import mathutils
+from bpy.types import Object, MeshPolygon
 from mathutils import Vector, Matrix
+from typing import List
 
 from ..constant import FILLET_RESOLUTION
 from ..helper.mesh_helper import create_object
@@ -26,7 +28,7 @@ from ..helper.other import error_msg, warning_msg
 
 class Fillet:
 
-    def __init__(self, obj):  # should be shape, later
+    def __init__(self, obj) -> None:
         self.obj = obj
 
         # config
@@ -34,14 +36,14 @@ class Fillet:
         self.polygon = self.get_polygon_safely()
         self.resolution = FILLET_RESOLUTION
 
-    def create(self, outside=False, rounded=True):
+    def create(self, outside=False, rounded=True) -> Object:
         fillet = []
         for shift in range(self.corner_count()):
             corner = self.corner_vectors(shift)
             fillet += self.corner_fillet(corner, outside, rounded)
-        return create_object(fillet)  # , collection, self.name)
+        return create_object(fillet)
 
-    def get_polygon_safely(self):
+    def get_polygon_safely(self) -> MeshPolygon:
         polygons = self.obj.data.polygons
         n = len(polygons)
         if n == 0:
@@ -51,10 +53,10 @@ class Fillet:
             warning_msg(f'Object "{self.obj.name}" has more than 1 faces! Using the first one.')
         return self.obj.data.polygons[0]
 
-    def corner_count(self):
+    def corner_count(self) -> int:
         return len(self.polygon.vertices)
 
-    def corner_vectors(self, shift=0):
+    def corner_vectors(self, shift=0) -> List[Vector]:
         m = self.obj.data
         n = self.corner_count()
         if n < 3:
@@ -66,18 +68,17 @@ class Fillet:
         y = x[0:3]
         return y
 
-    def is_inside(self, corner):
+    def is_inside(self, corner) -> bool:
         A, B, C = corner
         abc_normal = (B - A).cross(C - B)
         d = abc_normal.dot(self.polygon.normal)
         return d > 0  # > 0 if inside, = 0 if straight
 
-
-    def corner_angle(self, corner):
+    def corner_angle(self, corner) -> float:
         A, B, C = corner
         return (B - A).angle(C - B)
 
-    def rounded(self, corner):
+    def rounded(self, corner) -> List[float]:
         A, B, C = corner
 
         abc_normal = mathutils.geometry.normal([C, B, A])
@@ -94,7 +95,7 @@ class Fillet:
             P.append(M + self.radius * rotation @ MB1)
         return P
 
-    def corner_fillet(self, corner, outside, rounded):
+    def corner_fillet(self, corner, outside, rounded) -> List[float]:
         corner_point = corner[1:2]
 
         if self.corner_angle(corner) < math.radians(5):
@@ -110,7 +111,7 @@ class Fillet:
         else:
             return corner_point
 
-    def dogbone(self, corner):
+    def dogbone(self, corner) -> List[float]:
         A, B, C = corner
 
         abc_normal = mathutils.geometry.normal([A, B, C])
@@ -146,7 +147,7 @@ class Fillet:
             pass
         return p
 
-    def intersection_tangent_with_segment(self, A, B, M):
+    def intersection_tangent_with_segment(self, A, B, M) -> Vector:
         AB1 = (A - B).normalized()
         ang_ABM = (A - B).angle(M - B)
         r = (M - B).length
@@ -155,7 +156,7 @@ class Fillet:
 
         return X
 
-    def intersection_circle_with_segment(self, A, B, M):
+    def intersection_circle_with_segment(self, A, B, M) -> Vector:
         BA1 = (A - B).normalized()
         ang_ABM = (A - B).angle(M - B)
         r = (M - B).length
@@ -164,12 +165,15 @@ class Fillet:
 
         return B + length * BA1
 
-    def regular_polygon_radius_factor(self):
+    def regular_polygon_radius_factor(self) -> float:
         a_step = 2 * pi / (self.resolution * 4)
         a_offset = a_step / 2
         return 1.0 / math.cos(a_offset)
 
-    def half_circle(self, center_point, center_of_first_segment, corner_point, normal, boundary_axis, start_angle=0.0):
+    def half_circle(
+            self, center_point, center_of_first_segment,
+            corner_point, normal, boundary_axis, start_angle=0.0) -> List[Vector]:
+
         a_step = 2 * pi / (self.resolution * 4)
         r_polygon = self.regular_polygon_radius_factor()
         p = []

@@ -14,13 +14,14 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
 import bpy
+from bpy.types import Object
 from mathutils import Vector
 
 from .mesh_helper import fill_polygon
 from .other import error_msg
 
 
-def add_nurbs_square(collection, name, curve_cut_type):
+def add_nurbs_square(collection, name, curve_cut_type) -> Object:
     curve = bpy.data.curves.new(name, 'CURVE')
     obj = bpy.data.objects.new(name, curve)
     collection.link(obj)
@@ -47,17 +48,17 @@ def add_nurbs_square(collection, name, curve_cut_type):
     return obj
 
 
-def face_normal(obj):
+def face_normal(obj) -> Vector:
     mesh_obj = curve2mesh(obj, add_face=True)
     normal = mesh_obj.data.polygons[0].normal
     return normal
 
 
-def face_is_down(obj):
-    return face_normal(obj).dot(Vector([0, 0, 1])) < 0
+def face_is_down(obj) -> bool:
+    return face_normal(obj).dot(Vector([0, 0, 1])).length < 0
 
 
-def curve2mesh(obj, name='', add_face=False):
+def curve2mesh(obj, name='', add_face=False) -> Object:
     context = bpy.context
     depsgraph = context.evaluated_depsgraph_get()
     object_evaluated = obj.evaluated_get(depsgraph)
@@ -70,6 +71,6 @@ def curve2mesh(obj, name='', add_face=False):
 
     mesh_obj.data.update()
     if mesh_obj.data.validate():
-        error_msg('Curve to mesh conversion yielded invalid data!', context)
+        error_msg('Curve to mesh conversion yielded invalid data!')
 
     return mesh_obj

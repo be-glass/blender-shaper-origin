@@ -23,7 +23,7 @@ from . import handler
 # Initialization
 
 
-def register():
+def register() -> None:
     bpy.utils.register_class(SceneProperties)
 
     bpy.types.Scene.so_cut = PointerProperty(type=SceneProperties)
@@ -47,7 +47,7 @@ def register():
     btO.soc_suppress_next_update = oP.suppress_next_update
 
 
-def unregister():
+def unregister() -> None:
     bpy.utils.unregister_class(SceneProperties)
     btO = bpy.types.Object
 

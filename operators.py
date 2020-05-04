@@ -17,6 +17,7 @@ import mathutils
 from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
+from typing import List, Type, Set
 
 from .lib.object_types.preview import Preview
 from .lib.blender.project import Project
@@ -26,22 +27,22 @@ from .lib.export import Export
 from .lib.helper.other import translate_local, store_selection, consistency_checks, reset_relations
 
 
-def operators():
-    return (
+def operators() -> List[Type[Operator]]:
+    return [
         MESH_OT_socut_export_cuts,
         MESH_OT_socut_align_object,
         MESH_OT_socut_rebuild,
-    )
+    ]
 
 
-def register():
+def register() -> None:
     for widget in operators():
         register_class(widget)
 
     bpy.utils.register_class(delete_override)
 
 
-def unregister():
+def unregister() -> None:
     for widget in operators():
         unregister_class(widget)
 
@@ -53,7 +54,7 @@ class MESH_OT_socut_export_cuts(Operator):
     bl_label = "SO Cuts Export"
     bl_description = "Export shapes to SVG for cutting with SO"
 
-    def execute(self, context):
+    def execute(self, context) -> Set[str]:
 
         result = Export(context).run()
 
@@ -73,7 +74,7 @@ class MESH_OT_socut_align_object(Operator):
     bl_label = "Align with Perimeter"
     bl_description = "Align a cut with the perimeter"
 
-    def execute(self, context):
+    def execute(self, context) -> Set[str]:
         obj = context.object
 
         perimeters = Compartment.by_obj(obj).perimeter_objs()
@@ -96,7 +97,7 @@ class MESH_OT_socut_rebuild(Operator):
     bl_label = "Rebuild everything"
     bl_description = "Rebuild all objects"
 
-    def execute(self, context):
+    def execute(self, context) -> Set[str]:
         _, selection = store_selection()
 
         preview = context.scene.so_cut.preview
@@ -124,10 +125,10 @@ class delete_override(bpy.types.Operator):
     bl_label = "Object Delete Operator"
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context) -> None:
         return context.active_object is not None
 
-    def execute(self, context):
+    def execute(self, context) -> Set[str]:
         for obj in context.selected_objects:
             Cut(obj).clean()
             bpy.data.objects.remove(obj)

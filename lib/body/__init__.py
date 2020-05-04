@@ -1,16 +1,21 @@
+from typing import TypeVar, Union
+
 import bpy
+from bpy.types import Object, BlendDataObjects
 
 from ..blender.compartment import Compartment, Collect
 from ..constant import PREFIX
-from ..helper.other import delete_obj
+from ..helper.other import remove_object
 from ..shape import Shape
 
+T = TypeVar('T', bound='Body')
 
 class Body:
 
-    def __init__(self, cut_obj):
+    def __init__(self, cut_obj) -> None:
         self.cut_obj = cut_obj
         self.defaults()
+        self.obj = None
 
         # config
         self.cut_obj.soc_known_as = self.cut_obj.name
@@ -19,7 +24,7 @@ class Body:
         self.shape = Shape.factory(cut_obj)
 
     @classmethod
-    def factory(_, cut_obj):
+    def factory(_, cut_obj) -> Union[T, None]:
 
         from .mesh_body import MeshBody
         from .meshed_curve import MeshedCurve
@@ -32,24 +37,23 @@ class Body:
             return None
         return body(cut_obj)
 
-    def defaults(self):
+    def defaults(self) -> None:
         self.shape = None
 
-    def clean(self):
-        delete_obj(self.name)
+    def clean(self) -> None:
+        remove_object(self.name)
         Shape(self.cut_obj).clean()
 
-    def update(self):
+    def update(self) -> None:
         self.shape.update()
 
-    def get(self):
+    def get(self) -> Union[BlendDataObjects, None]:
         if self.name in bpy.data.objects.keys():
             return bpy.data.objects[self.name]
         else:
             return None
 
-    def transform(self, matrix):
+    def transform(self, matrix) -> None:
         obj = self.get()
         if obj:
             obj.matrix_world = matrix
-

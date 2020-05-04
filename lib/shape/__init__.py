@@ -1,12 +1,17 @@
+from typing import TypeVar, List
+
 from ..blender.project import Project
 
+T = TypeVar('T', bound='Shape')
+
+
 class Shape:
-    def __init__(self, obj):
+    def __init__(self, obj) -> None:
         self.obj = obj
         self.obj.soc_known_as = self.obj.name
 
     @classmethod
-    def factory(_, cut_obj):
+    def factory(_, cut_obj) -> T:
 
         from .mesh_guide import MeshGuide
         from .mesh_shape import MeshShape
@@ -30,28 +35,27 @@ class Shape:
         return shape(cut_obj)
 
     @classmethod
-    def all(self):
+    def all(self) -> List[T]:
         return [Shape.factory(o) for o in Project.cut_objs()]
 
-    def setup(self):
+    def setup(self) -> None:
         self.obj.display_type = 'TEXTURED'
         pass
 
-    def update(self):
+    def update(self) -> None:
         pass
 
-    def clean(self):
+    def clean(self) -> None:
         self.obj.display_type = 'TEXTURED'
         pass
 
     ### private
 
-    def is_exterior(self):
+    def is_exterior(self) -> bool:
         return False
 
-    def is_perimeter(self):
+    def is_perimeter(self) -> bool:
         return False
 
-    def is_guide(self):
+    def is_guide(self) -> bool:
         return False
-

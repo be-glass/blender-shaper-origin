@@ -13,40 +13,43 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 import bpy
+from typing import List, TypeVar
 
 from . import Bounding
 from .solid import Solid
 from ..blender.project import Project
 from ..shape import Shape
 
+T = TypeVar('T', bound='Cut')
+
 
 class Cut:
 
     @classmethod
-    def all(cls):
+    def all(cls) -> List[T]:
         return [cls(o) for o in Project.cut_objs()]
 
-    def __init__(self, obj):
+    def __init__(self, obj) -> None:
         self.obj = obj
         self.defaults()
         self.valid = self.check()
 
-    def defaults(self):
+    def defaults(self) -> None:
         # self.obj.soc_object_type = 'None'
         self.solid = None
         self.preview = None
 
-    def reset(self):
+    def reset(self) -> None:
         self.clean()
         self.defaults()
         self.setup()
         self.update()
 
-    def clean(self):
+    def clean(self) -> None:
         Solid(self.obj).clean()
         # self.preview.cleanup()
 
-    def setup(self):
+    def setup(self) -> None:
 
         from .preview import Preview
 
@@ -65,26 +68,26 @@ class Cut:
             self.preview = Preview()
             self.preview.setup(self.obj)
 
-    def update(self):
+    def update(self) -> None:
         Solid(self.obj).update()
         # self.preview.update()     #?
         pass
 
-    def svg(self):
+    def svg(self) -> Shape:
         return Shape.factory(self.obj).svg()
 
-    def update_hide_state(self):
+    def update_hide_state(self) -> None:
         hidden = self.obj.hide_get()  # or self.obj.users_collection[0].hide_viewport   # collection cannot work
         self.solid.hide_set(hidden)
 
-    def transform(self):
+    def transform(self) -> None:
         if self.obj:
             Solid(self.obj).transform()
             Bounding().transform()
 
     # private
 
-    def check(self):
+    def check(self) -> bool:
         if self.obj.type == 'MESH' and self.obj.soc_mesh_cut_type != 'None':
             return True
         elif self.obj.type == 'CURVE' and self.obj.soc_curve_cut_type != 'None':

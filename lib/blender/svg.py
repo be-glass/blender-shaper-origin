@@ -19,16 +19,16 @@ from ..helper.other import vector2string
 
 class SVG:
 
-    def __init__(self, obj, perimeter_obj, reference_obj):
+    def __init__(self, obj, perimeter_obj, reference_obj) -> None:
         self.obj = obj
         self.perimeter_mw_1 = perimeter_obj.matrix_world.inverted()
         self.reference_mw = reference_obj.matrix_world
 
-    def svg_polygon(self, polygon):
+    def svg_polygon(self, polygon) -> str:
         points = [self.obj.data.vertices[i] for i in polygon.vertices]
         return self.svg_path(points, is_closed=True)
 
-    def svg_path(self, points, is_closed):
+    def svg_path(self, points, is_closed) -> str:
         source = ''
         path_cmd = 'M'
         for point in points:
@@ -39,13 +39,13 @@ class SVG:
             source += 'Z'
         return f'<path d="{source}"/>'
 
-    def svg_mesh(self):
+    def svg_mesh(self) -> str:
         content = ''
         for polygon in self.obj.data.polygons:
             c = self.svg_polygon(polygon)
             content += c
         return content
 
-    def clean(self):
+    def clean(self) -> None:
         if self.obj:
             bpy.data.objects.remove(self.obj)

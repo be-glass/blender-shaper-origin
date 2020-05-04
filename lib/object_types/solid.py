@@ -6,7 +6,7 @@ from ..blender.modifier import Modifier
 
 class Solid:
 
-    def __init__(self, cut_obj):
+    def __init__(self, cut_obj) -> None:
         self.cut_obj = cut_obj
         self.defaults()
 
@@ -14,11 +14,11 @@ class Solid:
         self.mod_boolean_name = PREFIX + 'Boolean.' + self.cut_obj.name
         self.body = Body.factory(cut_obj)
 
-    def defaults(self):
+    def defaults(self) -> None:
         self.solidify_name = None
         self.body = None
 
-    def setup(self):
+    def setup(self) -> None:
         # self.compartment = Compartment.by_enum(Collect.Solid)
 
         self.body.setup()
@@ -27,21 +27,21 @@ class Solid:
             self.solidify()
             self.subtract_from_perimeter()
 
-    def update(self):
+    def update(self) -> None:
         self.body.update()
         if self.cut_obj.type == 'MESH':
             self.set_thickness()
 
-    def clean(self):
+    def clean(self) -> None:
         self.body.clean()
         self.defaults()
 
-    def transform(self):
+    def transform(self) -> None:
         if self.cut_obj:
             matrix = self.cut_obj.matrix_world
             self.body.transform(matrix)
 
-    def subtract(self, other_body, modifier_name):
+    def subtract(self, other_body, modifier_name) -> None:
         minuend = self.body.get()
         subtrahend = other_body.get()
         if minuend and subtrahend:
@@ -51,7 +51,7 @@ class Solid:
 
     # private
 
-    def subtract_from_perimeter(self):
+    def subtract_from_perimeter(self) -> None:
         if self.body.shape:
             if self.body.shape.is_perimeter():
                 subtrahend_objs = Compartment.by_obj(self.cut_obj).subtrahend_objs()
@@ -64,10 +64,10 @@ class Solid:
                 if perimeter_objs:
                     Solid(perimeter_objs[0]).subtract(self.body, self.mod_boolean_name)
 
-    def solidify(self):
+    def solidify(self) -> None:
         self.body.obj.modifiers.new(self.mod_solidify_name, 'SOLIDIFY')
 
-    def set_thickness(self):
+    def set_thickness(self) -> None:
         body_obj = self.body.get()
         if body_obj:
             Modifier(body_obj).set_thickness(self.mod_solidify_name,

@@ -4,7 +4,7 @@ from .__init__ import Shape
 class MeshGuide(Shape):
 
 
-    def is_guide(self):
+    def is_guide(self) -> bool:
         return True
 
     # def svg(self):

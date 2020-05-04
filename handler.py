@@ -22,17 +22,17 @@ from .lib.object_types.preview import Preview
 from .lib.object_types import type_factory
 
 
-def register():
+def register() -> None:
     bpy.app.handlers.depsgraph_update_post.clear()
     bpy.app.handlers.depsgraph_update_post.append(post_ob_updated)
 
 
-def unregister():
+def unregister() -> None:
     bpy.app.handlers.depsgraph_update_post.clear()
 
 
 @bpy.app.handlers.persistent
-def post_ob_updated(scene, depsgraph):
+def post_ob_updated(scene, depsgraph) -> None:
     obj, selection = store_selection(reset=True)
 
     if obj is None:
@@ -60,7 +60,7 @@ def post_ob_updated(scene, depsgraph):
 
 # Update handlers
 
-def update_cut_depth(obj, context):
+def update_cut_depth(obj, context) -> None:
     minimum, maximum = minmax('cut_depth')
 
     if obj.soc_initialized:
@@ -72,7 +72,7 @@ def update_cut_depth(obj, context):
             Cut(obj).update()
 
 
-def update_tool_diameter(obj, context):
+def update_tool_diameter(obj, context) -> None:
     minimum, maximum = minmax('tool_diameter')
 
     if obj.soc_initialized:
@@ -84,7 +84,7 @@ def update_tool_diameter(obj, context):
             Cut(obj).reset()
 
 
-def update_cut_type(obj, context):
+def update_cut_type(obj, context) -> None:
     _, selection = store_selection(reset=True)
     if not obj.soc_initialized:
         initialize_object(obj)
@@ -94,7 +94,7 @@ def update_cut_type(obj, context):
     restore_selection(obj, selection)
 
 
-def preview(scene_properties, context):
+def preview(scene_properties, context) -> None:
     if scene_properties.preview:
         Preview.create()
         pass

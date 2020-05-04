@@ -1,5 +1,6 @@
 import bpy
 from mathutils import Matrix, Vector
+from typing import List, Tuple
 
 from .reference import Reference
 from ..blender.compartment import Compartment, Collect
@@ -10,14 +11,15 @@ from ..shape.perimeter import Perimeter
 
 BOUNDING_FRAME_NAME = PREFIX + 'Bounding Frame'
 
+
 class Bounding:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.compartment = Compartment.by_enum(Collect.Internal)
         self.name = BOUNDING_FRAME_NAME
         self.frame = bpy.data.objects[self.name] if self.name in bpy.data.objects.keys() else None
 
-    def reset(self):
+    def reset(self) -> None:
         quad = self.boundary_quad()
         mesh = polygon2mesh(quad)
 
@@ -30,7 +32,7 @@ class Bounding:
 
         self.frame.hide_set(False)
 
-    def transform(self):
+    def transform(self) -> None:
         from .preview import Preview
 
         frame_mw = Bounding().matrix()
@@ -43,25 +45,24 @@ class Bounding:
                 preview = Preview.find(preview_obj, bounding=self)
                 preview.transform_others(perimeter.matrix().inverted(), reference.matrix(), self.matrix())
 
-    def hide(self):
+    def hide(self) -> None:
         self.frame.hide_set(True)
 
-
-    def matrix_inverted(self):
+    def matrix_inverted(self) -> Matrix:
         return self.frame.matrix_world.inverted()
 
-    def matrix(self):
+    def matrix(self) -> Matrix:
         return self.frame.matrix_world.copy()
 
     # private
 
-    def old_matrix(self):
+    def old_matrix(self) -> Matrix:
         if BOUNDING_FRAME_NAME in bpy.data.objects.keys():
             return bpy.data.objects[BOUNDING_FRAME_NAME].matrix_world.copy()
         else:
             return Matrix()
 
-    def boundary_quad(self):
+    def boundary_quad(self) -> List[Vector]:
         z = -0.1
         d = length('10mm')  # margin of preview sheet
         c0, c1 = boundaries()
@@ -76,7 +77,7 @@ class Bounding:
 
 # static
 
-def boundaries():
+def boundaries() -> Tuple[Vector, Vector]:
     x = []
     y = []
     z = []

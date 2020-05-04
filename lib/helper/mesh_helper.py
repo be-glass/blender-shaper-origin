@@ -15,11 +15,12 @@
 
 import bmesh
 import bpy
+from bpy.types import Mesh, Object
 
 from .other import select_active, active_object
 
 
-def repair_mesh(obj):  # TODO: needed?
+def repair_mesh(obj) -> None:  # TODO: needed?
     active = active_object()
     select_active(obj)
 
@@ -35,12 +36,12 @@ def repair_mesh(obj):  # TODO: needed?
         select_active(active)
 
 
-def shade_mesh_flat(obj):
+def shade_mesh_flat(obj) -> None:
     for f in obj.data.polygons:
         f.use_smooth = False
 
 
-def polygon2mesh(polygon):
+def polygon2mesh(polygon) -> Mesh:
     bm = bmesh.new()
     [bm.verts.new(v) for v in polygon]
     bm.faces.new(bm.verts)
@@ -50,7 +51,7 @@ def polygon2mesh(polygon):
     return me
 
 
-def create_object(polygon, col=None, name=''):
+def create_object(polygon, col=None, name='') -> Object:
     me = polygon2mesh(polygon)
     obj = bpy.data.objects.new(name, me)
     if col:
@@ -58,7 +59,7 @@ def create_object(polygon, col=None, name=''):
     return obj
 
 
-def add_plane(name, size, col=None):  # TODO: replace without ops
+def add_plane(name, size, col=None) -> Object:  # TODO: replace without ops
     bpy.ops.mesh.primitive_plane_add(size=size)
 
     obj = active_object()
@@ -79,7 +80,7 @@ def add_plane(name, size, col=None):  # TODO: replace without ops
     return obj
 
 
-def fill_polygon(obj):
+def fill_polygon(obj) -> None:
     bm = bmesh.new()
     bm.from_mesh(obj.data)
     bm.faces.new(bm.verts)
