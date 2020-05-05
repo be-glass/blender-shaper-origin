@@ -42,7 +42,7 @@ class MeshedCurve(Body):
         remove_doubles(self.obj)
 
         self.obj.soc_solid_name = self.name
-        self.obj.soc_object_type = 'Body'
+        self.obj.soc_object_type = 'Solid'
 
         shade_mesh_flat(self.obj)
         hide_objects(self.obj.name)
@@ -51,11 +51,12 @@ class MeshedCurve(Body):
         return not self.shape.is_guide()
 
 
-def remove_doubles(obj):
-    # obj = bpy.data.objects['Perimeter']
+def remove_doubles(obj) -> None:
     select_active(obj)
     obj.data.update()
-    bpy.ops.object.mode_set(mode='EDIT')
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.mesh.remove_doubles(threshold=0.01)
-    bpy.ops.object.mode_set(mode='OBJECT')
+
+    # TODO: next line crashes. Why?
+    # bpy.ops.object.mode_set(mode='EDIT')
+    # bpy.ops.mesh.select_all(action='SELECT')
+    # bpy.ops.mesh.remove_doubles(threshold=0.01)
+    # bpy.ops.object.mode_set(mode='OBJECT')
