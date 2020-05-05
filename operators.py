@@ -130,7 +130,7 @@ class delete_override(bpy.types.Operator):
 
     def execute(self, context) -> Set[str]:
         for obj in context.selected_objects:
-            if obj.soc_object_type != 'None':
+            if obj.soc_object_type == 'Cut':
                 Cut(obj).clean()
             bpy.data.objects.remove(obj)
         return {'FINISHED'}
