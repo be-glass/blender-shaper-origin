@@ -35,7 +35,7 @@ class Solid:
             self.subtract_from_perimeter()
 
     def clean(self) -> None:
-        self.body.clean()
+        Body.factory(self.cut_obj).clean()
         self.defaults()
 
     def transform(self) -> None:

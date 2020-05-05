@@ -33,6 +33,7 @@ class MeshBody(Body):
     def create_body_obj(self) -> Object:
         body = Fillet(self.shape.obj).create(self.shape.is_exterior(), rounded=True)
         body.matrix_world = self.cut_obj.matrix_world
+        body.soc_object_type = 'Body'
         return body
 
     def outside(self) -> bool:

@@ -12,10 +12,13 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
+import math
 
 import bpy
+import mathutils
 from bpy.types import Object, Mesh
 from mathutils import Vector
+from mathutils.interpolate import poly_3d_calc
 
 from .mesh_helper import fill_polygon
 from .other import error_msg
@@ -55,11 +58,6 @@ def face_normal(obj) -> Vector:
 
 
 def face_is_down(obj) -> bool:
-    n = face_normal(obj)
-    v = Vector([0, 0, 1])
-    d = n.dot(v)
-    b = d < 0
-
     return face_normal(obj).dot(Vector([0, 0, 1])) < 0
 
 

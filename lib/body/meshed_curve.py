@@ -3,7 +3,7 @@ import bpy
 from .__init__ import Body
 from ..helper.curve import face_is_down, curve2mesh
 from ..helper.mesh_helper import shade_mesh_flat
-from ..helper.other import remove_object, hide_objects
+from ..helper.other import remove_object, hide_objects, select_active
 
 
 class MeshedCurve(Body):
@@ -39,11 +39,23 @@ class MeshedCurve(Body):
             self.obj.matrix_world = self.cut_obj.matrix_world
             self.compartment.link(self.obj)
 
+        remove_doubles(self.obj)
+
         self.obj.soc_solid_name = self.name
-        self.obj.soc_object_type = 'Solid'
+        self.obj.soc_object_type = 'Body'
 
         shade_mesh_flat(self.obj)
         hide_objects(self.obj.name)
 
     def is_solid(self) -> bool:
         return not self.shape.is_guide()
+
+
+def remove_doubles(obj):
+    # obj = bpy.data.objects['Perimeter']
+    select_active(obj)
+    obj.data.update()
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.remove_doubles(threshold=0.01)
+    bpy.ops.object.mode_set(mode='OBJECT')
