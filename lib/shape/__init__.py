@@ -59,3 +59,9 @@ class Shape:
 
     def is_guide(self) -> bool:
         return False
+
+    def svg_object(self, content, attributes) -> str:
+        return \
+            f'<g id="{self.obj.name_full}" class="{self.obj.type}" {attributes}>' + \
+            ''.join(content) + \
+            '</g>'

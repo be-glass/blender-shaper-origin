@@ -5,7 +5,8 @@ from .__init__ import Shape
 from ..blender.compartment import Compartment, Collect
 from ..blender.svg import SVG
 from ..constant import PREFIX
-from ..helper.curve import add_nurbs_square, curve2mesh
+from ..helper.curve import add_nurbs_square, curve2mesh, curve2mesh_fill_obj
+from ..helper.mesh_helper import fill_polygon
 from ..helper.other import get_object_safely, remove_object, find_first_perimeter, svg_material_attributes, z_lift
 
 
@@ -38,7 +39,7 @@ class Curve(Shape):
 
     def svg(self) -> Tuple[float, str]:
 
-        export_obj = curve2mesh(self.obj)
+        export_obj = curve2mesh_fill_obj(self.obj)
 
         perimeter_obj = find_first_perimeter(self.obj)
         reference_obj = get_object_safely(perimeter_obj.soc_reference_name)

@@ -27,7 +27,9 @@ class MeshShape(Shape):
 
     def svg(self) -> Tuple[float, str]:
 
-        fillet_obj = Fillet(self.obj).create()
+        is_outside = bool(self.obj.soc_mesh_cut_type in ['Perimeter', 'Exterior'])
+
+        fillet_obj = Fillet(self.obj).create(rounded=False, outside=is_outside)
         fillet_obj.matrix_world = self.obj.matrix_world
 
         perimeter_obj = find_first_perimeter(self.obj)
@@ -45,8 +47,3 @@ class MeshShape(Shape):
 
         return z, contents
 
-    def svg_object(self, content, attributes) -> str:
-        return \
-            f'<g id="{self.obj.name_full}" class="{self.obj.type}" {attributes}>' + \
-            ''.join(content) + \
-            '</g>'
