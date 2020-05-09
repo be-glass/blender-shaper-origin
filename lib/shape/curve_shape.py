@@ -1,17 +1,18 @@
 from bpy.types import Object
+from typing import Tuple
 
 from .__init__ import Shape
 from ..blender.compartment import Compartment, Collect
+from ..blender.svg import SVG
 from ..constant import PREFIX
-from ..helper.curve import add_nurbs_square
-from ..helper.other import get_object_safely, remove_object
+from ..helper.curve import add_nurbs_square, curve2mesh
+from ..helper.other import get_object_safely, remove_object, find_first_perimeter, svg_material_attributes, z_lift
 
 
 class Curve(Shape):
 
     def setup(self) -> None:
         self.obj.display_type = 'WIRE'
-
 
     def transform(self) -> None:
         solid_obj = get_object_safely(self.obj.soc_solid_name, report_error=False)
@@ -35,14 +36,21 @@ class Curve(Shape):
 
         return bevel_obj
 
-# def svg(self):
-#
-#     mesh_obj = curve2mesh(self.self.obj, add_face=True)
-#     proxy = Proxy(self.mesh_obj)
-#     proxy.setup_proxy(self.obj)
-#
-#     content = proxy.svg_mesh()
-#     attributes = svg_material_attributes(self.obj.soc_curve_cut_type)
-#     z = lift_z(self.self.obj)
-#
-#     return z, self.svg_object(content, attributes)
+    def svg(self) -> Tuple[float, str]:
+
+        export_obj = curve2mesh(self.obj)
+
+        perimeter_obj = find_first_perimeter(self.obj)
+        reference_obj = get_object_safely(perimeter_obj.soc_reference_name)
+
+        svg = SVG(export_obj, perimeter_obj, reference_obj)
+        attributes = svg_material_attributes(self.obj.soc_curve_cut_type)
+
+        content = svg.svg_mesh()
+        contents = self.svg_object(content, attributes)
+
+        svg.clean()
+
+        z = z_lift(self.obj)
+
+        return z, contents
