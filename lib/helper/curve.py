@@ -52,7 +52,7 @@ def add_nurbs_square(collection, name, curve_cut_type) -> Object:
 
 
 def face_normal(obj) -> Vector:
-    mesh_obj = curve2mesh_fill_obj(obj)
+    mesh_obj = curve2mesh2obj(obj)
     normal = mesh_obj.data.polygons[0].normal
     return normal
 
@@ -61,9 +61,10 @@ def face_is_down(obj) -> bool:
     return face_normal(obj).dot(Vector([0, 0, 1])) < 0
 
 
-def curve2mesh_fill_obj(obj) -> Object:
+def curve2mesh2obj(obj, fill=True) -> Object:
     mesh = curve2mesh(obj)
-    fill_polygon(mesh)
+    if fill:
+        fill_polygon(mesh)
     remove_object('tmp_obj')
     mesh_obj = bpy.data.objects.new('tmp_obj', mesh)
     mesh_obj.matrix_world = obj.matrix_world

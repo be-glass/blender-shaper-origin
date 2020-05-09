@@ -40,11 +40,18 @@ class SVG:
         return f'<path d="{source}"/>'
 
     def svg_mesh(self) -> str:
-        content = ''
-        for polygon in self.obj.data.polygons:
-            c = self.svg_polygon(polygon)
-            content += c
-        return content
+
+        if self.obj.data.polygons:
+
+            content = ''
+            for polygon in self.obj.data.polygons:
+                c = self.svg_polygon(polygon)
+                content += c
+            return content
+
+        else:
+            points = self.obj.data.vertices
+            return self.svg_path(points, is_closed=False)
 
     def clean(self) -> None:
         if self.obj:

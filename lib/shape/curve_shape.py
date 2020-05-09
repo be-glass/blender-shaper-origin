@@ -5,7 +5,7 @@ from .__init__ import Shape
 from ..blender.compartment import Compartment, Collect
 from ..blender.svg import SVG
 from ..constant import PREFIX
-from ..helper.curve import add_nurbs_square, curve2mesh, curve2mesh_fill_obj
+from ..helper.curve import add_nurbs_square, curve2mesh, curve2mesh2obj
 from ..helper.mesh_helper import fill_polygon
 from ..helper.other import get_object_safely, remove_object, find_first_perimeter, svg_material_attributes, z_lift
 
@@ -39,7 +39,12 @@ class Curve(Shape):
 
     def svg(self) -> Tuple[float, str]:
 
-        export_obj = curve2mesh_fill_obj(self.obj)
+        if self.obj.data.splines:
+            is_closed = self.obj.data.splines[0].use_cyclic_u
+        else:
+            is_closed = False
+
+        export_obj = curve2mesh2obj(self.obj, fill=is_closed)
 
         perimeter_obj = find_first_perimeter(self.obj)
         reference_obj = get_object_safely(perimeter_obj.soc_reference_name)
@@ -50,7 +55,7 @@ class Curve(Shape):
         content = svg.svg_mesh()
         contents = self.svg_object(content, attributes)
 
-        svg.clean()
+        # svg.clean()
 
         z = z_lift(self.obj)
 
