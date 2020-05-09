@@ -92,12 +92,14 @@ def update_tool_diameter(obj, context) -> None:
 
 def update_cut_type(obj, context) -> None:
     _, selection = store_selection(reset=True)
-    if not obj.soc_initialized:
-        initialize_object(obj)
 
-    Cut(obj).reset()
+    if obj.soc_object_type in ['None', 'Cut']:
+        if not obj.soc_initialized:
+            initialize_object(obj)
 
-    restore_selection(obj, selection)
+        Cut(obj).reset()
+
+        restore_selection(obj, selection)
 
 
 def preview(scene_properties, context) -> None:

@@ -181,5 +181,6 @@ def create_preview_object(cut_obj) -> Object:
     else:
         obj = cut_obj.copy()
         obj.data = cut_obj.data.copy()
+        obj.soc_object_type = 'Preview'
         obj.soc_curve_cut_type = cut_obj.soc_curve_cut_type
     return obj

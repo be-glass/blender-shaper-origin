@@ -55,7 +55,6 @@ def remove_doubles(obj) -> None:
     select_active(obj)
     obj.data.update()
 
-    # TODO: next line crashes. Why?
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.mesh.remove_doubles(threshold=0.01)
