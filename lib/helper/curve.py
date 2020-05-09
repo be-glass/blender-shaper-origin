@@ -21,7 +21,7 @@ from mathutils import Vector
 from mathutils.interpolate import poly_3d_calc
 
 from .mesh_helper import fill_polygon
-from .other import error_msg
+from .other import error_msg, remove_object
 
 
 def add_nurbs_square(collection, name, curve_cut_type) -> Object:
@@ -64,6 +64,7 @@ def face_is_down(obj) -> bool:
 def curve2mesh_fill_obj(obj) -> Object:
     mesh = curve2mesh(obj)
     fill_polygon(mesh)
+    remove_object('tmp_obj')
     mesh_obj = bpy.data.objects.new('tmp_obj', mesh)
     mesh_obj.matrix_world = obj.matrix_world
 

@@ -44,8 +44,6 @@ class Body:
         remove_object(self.name)
         Shape(self.cut_obj).clean()
 
-    def update(self) -> None:
-        self.shape.update()
 
     def get(self) -> Union[BlendDataObjects, None]:
         if self.name in bpy.data.objects.keys():

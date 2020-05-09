@@ -21,7 +21,7 @@ from typing import List, Type, Set
 
 from .lib.object_types.preview import Preview
 from .lib.blender.project import Project
-from .lib.blender.compartment import Compartment
+from .lib.blender.compartment import Compartment, Collect
 from .lib.object_types.cut import Cut
 from .lib.export import Export
 from .lib.helper.other import translate_local, store_selection, consistency_checks, reset_relations
@@ -99,6 +99,8 @@ class MESH_OT_socut_rebuild(Operator):
 
     def execute(self, context) -> Set[str]:
         _, selection = store_selection()
+
+        Compartment.by_enum(Collect.Internal).delete_all()
 
         preview = context.scene.so_cut.preview
         context.scene.so_cut['preview'] = False

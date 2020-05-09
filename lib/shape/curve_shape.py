@@ -4,7 +4,7 @@ from .__init__ import Shape
 from ..blender.compartment import Compartment, Collect
 from ..constant import PREFIX
 from ..helper.curve import add_nurbs_square
-from ..helper.other import get_object_safely
+from ..helper.other import get_object_safely, remove_object
 
 
 class Curve(Shape):
@@ -27,6 +27,7 @@ class Curve(Shape):
         collection = Compartment.by_enum(Collect.Helper)
 
         name = f'{PREFIX}{self.obj.name}.bevel'
+        remove_object(name)
         bevel_obj = add_nurbs_square(collection, name, self.obj.soc_curve_cut_type)
         bevel_obj.soc_object_type = 'Helper'
         bevel_obj.hide_set(True)

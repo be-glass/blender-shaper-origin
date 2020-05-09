@@ -231,3 +231,4 @@ def svg_material_attributes(key) -> str:
     style = style_map[key]
     (stroke, fill) = SO_CUT_ENCODING[style]
     return f'stroke="{stroke}" fill="{fill}"'
+

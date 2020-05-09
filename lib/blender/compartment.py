@@ -6,6 +6,7 @@ from typing import Type, TypeVar, List
 from bpy.types import Object, Collection
 
 from ..constant import PREFIX
+from ..helper.other import remove_object
 
 
 class Collect(Enum):
@@ -94,6 +95,17 @@ class Compartment:
     def move(self, obj) -> None:
         [c.objects.unlink(obj) for c in obj.users_collection]
         self.col.objects.link(obj)
+
+    def delete_all(self) -> None:
+        delete_collection(self.col)
+
+
+def delete_collection(col) -> None:
+    for child in col.children:
+        delete_collection(child)
+    for obj in col.objects:
+        remove_object(obj)
+    bpy.data.collections.remove(col)
 
 
 def delete_solid_objects(obj) -> None:

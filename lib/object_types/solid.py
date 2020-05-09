@@ -28,18 +28,19 @@ class Solid:
             self.subtract_from_perimeter()
 
     def update(self) -> None:
-        # self.body.setup()
-        self.body.update()
-        self.set_thickness()
-        if self.cut_obj.type == 'CURVE':
-            self.subtract_from_perimeter()
+        body = Body.factory(self.cut_obj)
+        if body:
+            body.update()
+            self.set_thickness()
+            if self.cut_obj.type == 'CURVE':
+                self.subtract_from_perimeter()
 
     def clean(self) -> None:
-        Body.factory(self.cut_obj).clean()
+        Body(self.cut_obj).clean()
         self.defaults()
 
     def transform(self) -> None:
-        if self.cut_obj:
+        if self.cut_obj and self.body:
             matrix = self.cut_obj.matrix_world
             self.body.transform(matrix)
 
@@ -54,7 +55,10 @@ class Solid:
     # private
 
     def subtract_from_perimeter(self) -> None:
-        if self.body.shape:
+        if not self.cut_obj:
+            return
+
+        if self.body and self.body.shape:
             if self.body.shape.is_perimeter():
                 subtrahend_objs = Compartment.by_obj(self.cut_obj).subtrahend_objs()
                 for s_obj in subtrahend_objs:
@@ -71,7 +75,7 @@ class Solid:
             self.body.obj.modifiers.new(self.mod_solidify_name, 'SOLIDIFY')
 
     def set_thickness(self) -> None:
-        if self.cut_obj.type == 'MESH':
+        if self.cut_obj.type == 'MESH' and self.body:
             body_obj = self.body.get()
             if body_obj:
                 Modifier(body_obj).set_thickness(self.mod_solidify_name,
