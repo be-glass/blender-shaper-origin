@@ -1,0 +1,2 @@
+class CurveGuide:
+    pass

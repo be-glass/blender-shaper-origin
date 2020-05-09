@@ -12,36 +12,41 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
-
-
+import bpy
 import mathutils
 from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
 from mathutils.geometry import distance_point_to_plane
+from typing import List, Type, Set
 
+from .lib.object_types.preview import Preview
+from .lib.blender.project import Project
+from .lib.blender.compartment import Compartment, Collect
+from .lib.object_types.cut import Cut
 from .lib.export import Export
-from .lib.generator import create_cut
-from .lib.helper.gen_helper import find_perimeters
-from .lib.helper.other import translate_local, find_cuts, store_selection, consistency_checks, reset_relations
-from .lib.preview import Preview
+from .lib.helper.other import translate_local, store_selection, consistency_checks, reset_relations
 
 
-def operators():
-    return (
+def operators() -> List[Type[Operator]]:
+    return [
         MESH_OT_socut_export_cuts,
         MESH_OT_socut_align_object,
         MESH_OT_socut_rebuild,
-    )
+    ]
 
 
-def register():
+def register() -> None:
     for widget in operators():
         register_class(widget)
 
+    bpy.utils.register_class(delete_override)
 
-def unregister():
+
+def unregister() -> None:
     for widget in operators():
         unregister_class(widget)
+
+    bpy.utils.unregister_class(delete_override)
 
 
 class MESH_OT_socut_export_cuts(Operator):
@@ -49,7 +54,7 @@ class MESH_OT_socut_export_cuts(Operator):
     bl_label = "SO Cuts Export"
     bl_description = "Export shapes to SVG for cutting with SO"
 
-    def execute(self, context):
+    def execute(self, context) -> Set[str]:
 
         result = Export(context).run()
 
@@ -69,10 +74,10 @@ class MESH_OT_socut_align_object(Operator):
     bl_label = "Align with Perimeter"
     bl_description = "Align a cut with the perimeter"
 
-    def execute(self, context):
+    def execute(self, context) -> Set[str]:
         obj = context.object
-        collection = obj.users_collection[0]
-        perimeters = find_perimeters(collection)
+
+        perimeters = Compartment.by_obj(obj).perimeter_objs()
 
         if not perimeters:
             self.report({'ERROR'}, "No perimeter found.")
@@ -92,20 +97,42 @@ class MESH_OT_socut_rebuild(Operator):
     bl_label = "Rebuild everything"
     bl_description = "Rebuild all objects"
 
-    def execute(self, context):
-        _, selection = store_selection(context)
+    def execute(self, context) -> Set[str]:
+        _, selection = store_selection()
+
+        Compartment.by_enum(Collect.Internal).delete_all()
 
         preview = context.scene.so_cut.preview
         context.scene.so_cut['preview'] = False
 
-        for obj in find_cuts():
+        for obj in Project.cut_objs():
             reset_relations(obj)
             consistency_checks(obj)
-            create_cut(context, obj).reset()
+            Cut(obj).reset()
 
         if preview:
-            Preview(context).create()
+            Preview.create()
             context.scene.so_cut['preview'] = True
 
         self.report({'INFO'}, "OK")
+        return {'FINISHED'}
+
+
+# delete override
+
+
+class delete_override(bpy.types.Operator):
+    """delete objects and their derivatives"""
+    bl_idname = "object.delete"
+    bl_label = "Object Delete Operator"
+
+    @classmethod
+    def poll(cls, context) -> None:
+        return context.active_object is not None
+
+    def execute(self, context) -> Set[str]:
+        for obj in context.selected_objects:
+            if obj.soc_object_type == 'Cut':
+                Cut(obj).clean()
+            bpy.data.objects.remove(obj)
         return {'FINISHED'}

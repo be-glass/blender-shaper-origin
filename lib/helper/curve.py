@@ -12,17 +12,22 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
+import math
 
 import bpy
+import mathutils
+from bpy.types import Object, Mesh
 from mathutils import Vector
+from mathutils.interpolate import poly_3d_calc
 
-from .mesh import curve2mesh
+from .mesh_helper import fill_polygon
+from .other import error_msg, remove_object
 
 
-def add_nurbs_square(collection, name, curve_cut_type):
+def add_nurbs_square(collection, name, curve_cut_type) -> Object:
     curve = bpy.data.curves.new(name, 'CURVE')
     obj = bpy.data.objects.new(name, curve)
-    collection.objects.link(obj)
+    collection.link(obj)
     curve.dimensions = "2D"
 
     square = [(0, 0), (1, 0), (1, 1), (0, 1)]
@@ -46,11 +51,34 @@ def add_nurbs_square(collection, name, curve_cut_type):
     return obj
 
 
-def face_normal(context, obj):
-    mesh_obj = curve2mesh(context, obj, add_face=True)
+def face_normal(obj) -> Vector:
+    mesh_obj = curve2mesh2obj(obj)
     normal = mesh_obj.data.polygons[0].normal
     return normal
 
 
-def face_is_down(context, obj):
-    return face_normal(context, obj).dot(Vector([0, 0, 1])) < 0
+def face_is_down(obj) -> bool:
+    return face_normal(obj).dot(Vector([0, 0, 1])) < 0
+
+
+def curve2mesh2obj(obj, fill=True) -> Object:
+    mesh = curve2mesh(obj)
+    if fill:
+        fill_polygon(mesh)
+    remove_object('tmp_obj')
+    mesh_obj = bpy.data.objects.new('tmp_obj', mesh)
+    mesh_obj.matrix_world = obj.matrix_world
+
+    mesh_obj.data.update()
+    if mesh_obj.data.validate():
+        error_msg('Curve to mesh conversion yielded invalid data!')
+
+    return mesh_obj
+
+
+def curve2mesh(obj) -> Mesh:
+    context = bpy.context
+    depsgraph = context.evaluated_depsgraph_get()
+    object_evaluated = obj.evaluated_get(depsgraph)
+    mesh = bpy.data.meshes.new_from_object(object_evaluated)
+    return mesh

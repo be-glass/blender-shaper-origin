@@ -16,25 +16,23 @@
 
 import bpy
 
-import cProfile
-
 from .lib.helper.other import consistency_checks, store_selection, restore_selection, minmax, initialize_object
 from .lib.object_types.cut import Cut
 from .lib.object_types.preview import Preview
 from .lib.object_types import type_factory
 
 
-def register() -> None:
+def register():
     bpy.app.handlers.depsgraph_update_post.clear()
     bpy.app.handlers.depsgraph_update_post.append(post_ob_updated)
 
 
-def unregister() -> None:
+def unregister():
     bpy.app.handlers.depsgraph_update_post.clear()
 
 
 @bpy.app.handlers.persistent
-def post_ob_updated(scene, depsgraph) -> None:
+def post_ob_updated(scene, depsgraph):
     obj, selection = store_selection(reset=True)
 
     if obj is None:
@@ -49,14 +47,10 @@ def post_ob_updated(scene, depsgraph) -> None:
 
                     if not obj.soc_suppress_next_update:  # extinguish interrupt chain
                         obj.soc_suppress_next_update = True
-
                         item.reset()
 
                 elif u.is_updated_transform:
-                    if not obj.soc_suppress_next_update:  # extinguish interrupt chain
-                        obj.soc_suppress_next_update = True
-
-                        item.transform()
+                    item.transform()
                 else:
                     # cut.update_hide_state()   #TMP
                     pass
@@ -64,9 +58,10 @@ def post_ob_updated(scene, depsgraph) -> None:
     restore_selection(obj, selection)
     obj.soc_suppress_next_update = False
 
+
 # Update handlers
 
-def update_cut_depth(obj, context) -> None:
+def update_cut_depth(obj, context):
     minimum, maximum = minmax('cut_depth')
 
     if obj.soc_initialized:
@@ -78,7 +73,7 @@ def update_cut_depth(obj, context) -> None:
             Cut(obj).update()
 
 
-def update_tool_diameter(obj, context) -> None:
+def update_tool_diameter(obj, context):
     minimum, maximum = minmax('tool_diameter')
 
     if obj.soc_initialized:
@@ -90,19 +85,17 @@ def update_tool_diameter(obj, context) -> None:
             Cut(obj).reset()
 
 
-def update_cut_type(obj, context) -> None:
+def update_cut_type(obj, context):
     _, selection = store_selection(reset=True)
+    if not obj.soc_initialized:
+        initialize_object(obj)
 
-    if obj.soc_object_type in ['None', 'Cut']:
-        if not obj.soc_initialized:
-            initialize_object(obj)
+    Cut(obj).reset()
 
-        Cut(obj).reset()
-
-        restore_selection(obj, selection)
+    restore_selection(obj, selection)
 
 
-def preview(scene_properties, context) -> None:
+def preview(scene_properties, context):
     if scene_properties.preview:
         Preview.create()
         pass
