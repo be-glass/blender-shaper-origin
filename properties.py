@@ -15,7 +15,7 @@
 
 import bpy
 from bpy.props import FloatProperty, BoolProperty, StringProperty, EnumProperty, PointerProperty
-from bpy.types import PropertyGroup
+from bpy.types import PropertyGroup, Object
 
 from . import handler
 
@@ -23,7 +23,7 @@ from . import handler
 # Initialization
 
 
-def register():
+def register() -> None:
     bpy.utils.register_class(SceneProperties)
 
     bpy.types.Scene.so_cut = PointerProperty(type=SceneProperties)
@@ -33,7 +33,6 @@ def register():
 
     btO.soc_cut_depth = oP.cut_depth
     btO.soc_tool_diameter = oP.tool_diameter
-    btO.soc_reference_frame = oP.reference_frame
     btO.soc_mesh_cut_type = oP.mesh_cut_type
     btO.soc_curve_cut_type = oP.curve_cut_type
     btO.soc_object_type = oP.object_type
@@ -45,15 +44,15 @@ def register():
     btO.soc_preview_name = oP.preview_name
     btO.soc_bevel_name = oP.bevel_name
     btO.soc_known_as = oP.known_as
+    btO.soc_suppress_next_update = oP.suppress_next_update
 
 
-def unregister():
+def unregister() -> None:
     bpy.utils.unregister_class(SceneProperties)
     btO = bpy.types.Object
 
     del btO.soc_cut_depth
     del btO.soc_tool_diameter
-    del btO.soc_reference_frame
     del btO.soc_mesh_cut_type
     del btO.soc_curve_cut_type
     del btO.soc_object_type
@@ -65,6 +64,7 @@ def unregister():
     del btO.soc_preview_name
     del btO.soc_bevel_name
     del btO.soc_known_as
+    del btO.soc_suppress_next_udate
 
 
 # Definition
@@ -102,12 +102,12 @@ class ObjectProperties(PropertyGroup):
 
     curve_cut_type = EnumProperty(
         name="Cut Type",
-        description="SO cut type",
+        description="SO curve cut type",
         items=[('None', 'None', 'No Cut', '', 0),
                ('Exterior', 'Exterior', 'Exterior Cut', '', 2),
                ('Interior', 'Interior', 'Interior Cut', '', 4),
                ('Online', 'On Line', 'On Line Cut', '', 6),
-               ('GuidePath', 'Guide Path', '', 'Guide Line', 7),
+               ('GuidePath', 'Guide Path', '', 'Guide Path', 7),
                ],
 
         default='None',
@@ -116,12 +116,12 @@ class ObjectProperties(PropertyGroup):
     )
     mesh_cut_type = EnumProperty(
         name="Cut Type",
-        description="SO cut type",
+        description="SO mesh cut type",
         items=[('None', 'None', 'No Cut', '', 0),
                ('Perimeter', 'Perimeter', "Defines the outer perimeter of work piece", 1),
                ('Cutout', 'Cutout', 'Cutout', 3),
                ('Pocket', 'Pocketing', 'Pocketing', '', 5),
-               ('GuideArea', 'Guide Area', '', 'Guide Line', 7),
+               ('GuideArea', 'Guide Area', '', 'Guide Area', 7),
                ],
 
         default='None',
@@ -156,6 +156,11 @@ class ObjectProperties(PropertyGroup):
         description="Object is initialized (for internal use)",
         default=False,
         options={'HIDDEN'},
+    )
+    suppress_next_update = BoolProperty(
+        name="Suppress next update",
+        description="Inhibits next update interrupt (for internal use)",
+        default=False,
     )
     dogbone = BoolProperty(
         name="Dogbone Fillets",
@@ -192,12 +197,6 @@ class ObjectProperties(PropertyGroup):
 
 
 class SceneProperties(PropertyGroup):
-    use_transformations: BoolProperty(
-        name="Apply transformations",
-        description="Apply object transformations during export",
-        default=True,
-        options={'HIDDEN'},
-    )
     selected_only: BoolProperty(
         name="Selected Only",
         description="Export only selected objects",
@@ -223,5 +222,16 @@ class SceneProperties(PropertyGroup):
         default="//",
         maxlen=1024,
         subtype="DIR_PATH",
+        options={'HIDDEN'},
+    )
+    pre_obj: PointerProperty(
+        name="Pre Update Object",
+        description="Last active object when depsgraph_pre_update was called",
+        options={'HIDDEN'},
+        type=Object,
+    )
+    pre_obj_name: StringProperty(
+        name="Pre Update Object Name",
+        description="Name of last active object when depsgraph_pre_update was called",
         options={'HIDDEN'},
     )

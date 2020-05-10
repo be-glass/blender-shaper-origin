@@ -1,4 +1,3 @@
-PREFIX = "SOC_"
 
 #  This file is part of Blender_Shaper_Origin.
 #
@@ -19,29 +18,31 @@ FACE_COLOR = {
     'Cutout': (1, 1, 1, 1),
     'Perimeter': (0, 0, 0, 1),
     'Pocket': (.5, .5, .5, 1),
-    'Guide': (0, 0, 1, 1),
+    'GuideArea': (0, 0, 1, 1),
+    'GuidePath': (0, 0, 1, 1),
     'Exterior': (0, 1, 1, 1),
     'Online': (1, 0, 1, 1),
     'Interior': (1, 1, 0, 1),
 }
 
 STACK_Z = {
-    'Guide': 6,
-    'Cutout': 5,
-    'Pocket': 4,
-    'Interior': 3,
-    'Exterior': 2,
-    'Online': 1,
+    'GuidePath': 7,
+    'Interior': 6,
+    'Exterior': 5,
+    'Online': 4,
+    'Cutout': 3,
+    'Pocket': 2,
+    'GuideArea': 1,
     'Perimeter': 0,
 }
 PREVIEW_STACK_DELTA = "0.1 mm"
 
-CUT_ENCODING = {'Interior': ('black', 'white'),
-                'Exterior': ('black', 'black'),
-                'Online': ('grey', 'none'),
-                'Pocket': ('none', 'grey'),
-                'Guide': ('blue', 'none')
-                }
+SO_CUT_ENCODING = {'Interior': ('black', 'white'),
+                   'Exterior': ('black', 'black'),
+                   'Online': ('grey', 'none'),
+                   'Pocket': ('none', 'grey'),
+                   'Guide': ('blue', 'blue')
+                   }
 
 SVG_COORD_FORMAT = '{:.2f} {:.2f}'
 
@@ -60,3 +61,5 @@ xml:space="preserve" style="background-color:#d0d0d0" stroke-width="5%"
 width="{width:.2f}{unit}" height="{height:.2f}{unit}"          
 viewBox="{x0:.2f} {y0:.2f} {w:.2f} {h:.2f}">
 '''
+
+PREFIX = "SOC_"

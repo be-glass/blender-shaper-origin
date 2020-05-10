@@ -14,48 +14,25 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
 import bpy
-import itertools
+from typing import List, Tuple
 
-from ..constant import PREFIX, SVG_COORD_FORMAT
+from bpy.types import Object
 
-
-def write(content, file_name):
-    file = open(file_name, 'w')
-    if file:
-        if file.writelines(content):
-            file.close()
-            return True
-        else:
-            file.close()
-    return False
+from ..constant import SVG_COORD_FORMAT, DEFAULTS, STACK_Z, SO_CUT_ENCODING
 
 
-def write_nested_list(nested_list, file_name):
-    content = list(itertools.chain(*nested_list))
-    return write(content, file_name)
+def write(content, file_name) -> str:
+    try:
+        with open(file_name, 'w') as file:
+            file.writelines(content)
+    except IOError as err:
+        return str(err)
+
+    return False  # no error
 
 
-def project_name():
-    name = (bpy.path.display_name_from_filepath(bpy.data.filepath))
-    name = name if name else "untitled"
-    return name
-
-
-def filter_valid(object_list, valid_types):
-    return [obj for obj in object_list if obj.type in valid_types]
-
-
-def check_type(obj, valid_types):
-    remain = filter_valid([obj], valid_types)
-    return True if remain else False
-
-
-def move_object(obj, collection):
-    [c.objects.unlink(obj) for c in obj.users_collection]
-    collection.objects.link(obj)
-
-
-def select_active(context, obj):
+def select_active(obj) -> None:
+    context = bpy.context
     for o in context.selected_objects:
         o.select_set(False)
 
@@ -63,7 +40,9 @@ def select_active(context, obj):
     context.view_layer.objects.active = obj
 
 
-def error_msg(message, context=bpy.context):
+def error_msg(message) -> None:
+    context = bpy.context
+
     def msg(self, text):
         self.layout.label(text=message)
 
@@ -71,19 +50,15 @@ def error_msg(message, context=bpy.context):
     raise Exception(message)
 
 
-def warning_msg(message, context=bpy.context):
+def warning_msg(message) -> None:
     def msg(self, text):
         self.layout.label(text=message)
 
-    context.window_manager.popup_menu(msg, title="Warning", icon='ERROR')
+    bpy.context.window_manager.popup_menu(msg, title="Warning", icon='ERROR')
     # raise Exception(message)
 
 
-def err_implementation(context=bpy.context):
-    error_msg("missing implementation", context)
-
-
-def get_object_safely(obj_name, report_error=True):
+def get_object_safely(obj_name, report_error=True) -> Object:
     if obj_name in bpy.data.objects.keys():
         return bpy.data.objects[obj_name]
     elif report_error:
@@ -91,65 +66,36 @@ def get_object_safely(obj_name, report_error=True):
     return None
 
 
-def delete_object(obj_name):
+def delete_object(obj_name) -> None:
     if obj_name in bpy.data.objects:
         obj = bpy.data.objects[obj_name]
         bpy.data.objects.remove(obj, do_unlink=True)
 
 
-def hide_objects(name):
+def remove_object(name) -> None:
+    if name in bpy.data.objects.keys():
+        bpy.data.objects.remove(bpy.data.objects[name])
+
+
+def hide_objects(name) -> None:
     for obj in bpy.data.objects:
         if obj.name.startswith(name):
             obj.hide_set(True)
 
 
-def length(context, quantity_with_unit):
-    return bpy.utils.units.to_value('METRIC', 'LENGTH', quantity_with_unit) / context.scene.unit_settings.scale_length
+def length(quantity_with_unit) -> float:
+    return bpy.utils.units.to_value('METRIC', 'LENGTH',
+                                    quantity_with_unit) / bpy.context.scene.unit_settings.scale_length
 
 
-def translate_local(obj, vector):
+def translate_local(obj, vector) -> None:
     rotation = obj.rotation_euler.to_matrix()
     rotation.invert()
     global_translation = vector @ rotation
     obj.location += global_translation
 
 
-def get_collection(name, parent):
-    if name in bpy.data.collections.keys():
-        return bpy.data.collections[name]
-    else:
-        collection = bpy.data.collections.new(name)
-        parent.children.link(collection)
-        return collection
-
-
-def get_soc_collection(context):
-    return get_collection("SOC", context.scene.collection)
-
-
-def get_preview_collection(context):
-    soc = get_soc_collection(context)
-    return get_collection(PREFIX + "Preview", soc)
-
-
-def get_solid_collection(context):
-    soc = get_soc_collection(context)
-    return get_collection(PREFIX + "Solid", soc)
-
-
-def get_reference_collection(context):
-    soc = get_soc_collection(context)
-    collection = get_collection(PREFIX + "Reference", soc)
-    return collection
-
-
-def get_helper_collection(context):
-    soc = get_soc_collection(context)
-    collection = get_collection(PREFIX + "Helper", soc)
-    return collection
-
-
-def consistency_checks(obj):
+def consistency_checks(obj) -> None:
     if obj.soc_object_type is None:
         obj.soc_object_type = 'None'
     elif obj.soc_object_type == 'Cut':
@@ -158,21 +104,25 @@ def consistency_checks(obj):
         check_open_curves(obj)
 
 
-def check_open_curves(obj):
+def check_open_curves(obj) -> None:
     if obj.soc_curve_cut_type in ['Exterior', 'Interior']:
         if not obj.data.splines[0].use_cyclic_u:
             obj.soc_curve_cut_type = 'Online'
 
 
-def check_state(obj):
+def check_state(obj) -> None:
     if obj.soc_mesh_cut_type == 'None' and obj.soc_curve_cut_type == 'None':
         reset_obj(obj)
 
 
-def reset_obj(obj):
+def reset_obj(obj) -> None:
     obj.soc_object_type = 'None'
     obj.soc_mesh_cut_type = 'None'
     obj.soc_curve_cut_type = 'None'
+    reset_relations(obj)
+
+
+def reset_relations(obj) -> None:
     obj.soc_reference_name = ""
     obj.soc_preview_name = ""
     obj.soc_solid_name = ""
@@ -180,46 +130,105 @@ def reset_obj(obj):
     obj.soc_known_as = ""
 
 
-def check_duplication(obj):
+def check_duplication(obj) -> None:
     if not obj.soc_known_as:
         obj.soc_known_as = obj.name
     else:
         if obj.soc_known_as != obj.name:
-            if obj.soc_known_as in bpy.data.objects.keys():
-                reset_obj(obj)
-            else:  # obj appears to be renamed
-                obj.soc_known_as = obj.name
+            reset_obj(obj)
+
+            # TODO: handle object renaming:
+            # if obj.soc_known_as in bpy.data.objects.keys():
+            #     reset_obj(obj)
+            # else:  # obj appears to be renamed
+            #     obj.soc_known_as = obj.name
 
 
-def find_cuts():
-    return [o for o in bpy.data.objects if o.soc_object_type == 'Cut']
-
-
-def find_first_perimeter(obj):
+def find_first_perimeter(obj) -> List[Object]:
     perimeters = [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']
     if perimeters:
         return perimeters[0]
     else:
-        return None
+        return []
 
 
-def store_selection(context, reset=False):
+def store_selection(reset=False) -> Tuple[Object, List[Object]]:
+    context = bpy.context
     active_object = context.object
     selected_objects = context.selected_objects
     context.view_layer.objects.active = None
     if reset:
-        for o in bpy.context.selected_objects:
+        for o in context.selected_objects:
             o.select_set(False)
     return active_object, selected_objects
 
 
-def restore_selection(active_object, selected_objects):
-    bpy.context.view_layer.objects.active = active_object
-    for o in bpy.context.selected_objects:
+def restore_selection(active_object, selected_objects) -> None:
+    c = bpy.context
+    c.view_layer.objects.active = active_object
+    for o in c.selected_objects:
         o.select_set(False)
     for o in selected_objects:
         o.select_set(True)
 
 
-def vector2string(vector):
+def vector2string(vector) -> str:
     return SVG_COORD_FORMAT.format(vector[0], vector[1])
+
+
+def minmax(property_name) -> Tuple[float, float]:
+    d0, dd, d1 = DEFAULTS[property_name]
+    return length(d0), \
+           length(d1)
+
+
+def default(property_name) -> float:
+    d0, dd, d1 = DEFAULTS[property_name]
+    return length(dd)
+
+
+def initialize_object(obj) -> None:
+    obj.soc_cut_depth = default('cut_depth')
+    obj.soc_tool_diameter = default('tool_diameter')
+    obj.soc_initialized = True
+
+
+def active_object() -> None:
+    bpy.context.object
+
+
+def set_viewport() -> None:
+    for area in bpy.context.screen.areas:
+        if area.type == 'VIEW_3D':
+            for space in area.spaces:
+                if space.type == 'VIEW_3D':
+                    space.shading.type = 'SOLID'
+                    space.shading.color_type = 'OBJECT'
+
+
+def z_lift(obj) -> float:
+    if obj.soc_mesh_cut_type != 'None':
+        z = STACK_Z[obj.soc_mesh_cut_type]
+    elif obj.soc_curve_cut_type != 'None':
+        z = STACK_Z[obj.soc_curve_cut_type]
+    else:
+        z = 0
+    return z
+
+
+def svg_material_attributes(key) -> str:
+    style_map = {
+        'Exterior': 'Exterior',
+        'Interior': 'Interior',
+        'Online': 'Online',
+        'Pocket': 'Pocket',
+        'Cutout': 'Pocket',
+        'Perimeter': 'Exterior',
+        'GuideArea': 'Guide',
+        'GuidePath': 'Guide',
+    }
+
+    style = style_map[key]
+    (stroke, fill) = SO_CUT_ENCODING[style]
+    return f'stroke="{stroke}" fill="{fill}"'
+
