@@ -63,3 +63,5 @@ viewBox="{x0:.2f} {y0:.2f} {w:.2f} {h:.2f}">
 '''
 
 PREFIX = "SOC_"
+
+ALIGNMENT_Z_OFFSET = 0.1

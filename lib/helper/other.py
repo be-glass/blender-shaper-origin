@@ -14,7 +14,7 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
 import bpy
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from bpy.types import Object
 
@@ -144,12 +144,12 @@ def check_duplication(obj) -> None:
             #     obj.soc_known_as = obj.name
 
 
-def find_first_perimeter(obj) -> List[Object]:
+def find_first_perimeter(obj) -> Union[Object, None]:
     perimeters = [o for o in obj.users_collection[0].objects if o.soc_mesh_cut_type == 'Perimeter']
     if perimeters:
         return perimeters[0]
     else:
-        return []
+        return None
 
 
 def store_selection(reset=False) -> Tuple[Object, List[Object]]:

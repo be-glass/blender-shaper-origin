@@ -13,18 +13,21 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 import bpy
-import mathutils
 from bpy.types import Operator
 from bpy.utils import register_class, unregister_class
-from mathutils.geometry import distance_point_to_plane
+from mathutils import Matrix
 from typing import List, Type, Set
 
-from .lib.object_types.preview import Preview
-from .lib.blender.project import Project
+from .lib.constant import ALIGNMENT_Z_OFFSET
 from .lib.blender.compartment import Compartment, Collect
-from .lib.object_types.cut import Cut
+from .lib.blender.project import Project
 from .lib.export import Export
-from .lib.helper.other import translate_local, store_selection, consistency_checks, reset_relations
+from .lib.helper.curve import curve2mesh
+from .lib.helper.mesh_helper import fill_polygon
+from .lib.helper.other import store_selection, consistency_checks, reset_relations, \
+    find_first_perimeter
+from .lib.object_types.cut import Cut
+from .lib.object_types.preview import Preview
 
 
 def operators() -> List[Type[Operator]]:
@@ -77,16 +80,44 @@ class MESH_OT_socut_align_object(Operator):
     def execute(self, context) -> Set[str]:
         obj = context.object
 
-        perimeters = Compartment.by_obj(obj).perimeter_objs()
+        perimeter = find_first_perimeter(obj)
 
-        if not perimeters:
-            self.report({'ERROR'}, "No perimeter found.")
-            return {'CANCELLED'}
+        if obj.type == 'CURVE':
+            mesh = curve2mesh(obj)
+            fill_polygon(mesh)
+        else:  # obj.type == 'MESH':
+            mesh = obj.data
 
-        obj.matrix_world = perimeters[0].matrix_world
-        d = distance_point_to_plane(obj.location, perimeters[0].location, perimeters[0].data.polygons[0].normal)
+        p_center = perimeter.data.polygons[0].center
+        p_normal = perimeter.data.polygons[0].normal
 
-        translate_local(obj, mathutils.Vector((0, 0, d + .001)))
+        o_center = mesh.polygons[0].center
+        o_normal = mesh.polygons[0].normal
+
+        o_quat = o_normal.to_track_quat('Z', 'Y')
+        o_matrix = o_quat.to_matrix().to_4x4()
+        o_matrix.translation = o_center
+
+        p_quat = p_normal.to_track_quat('Z', 'Y')
+        p_matrix = p_quat.to_matrix().to_4x4()
+        p_matrix.translation = p_center
+
+        margin = Matrix.Translation(p_normal.normalized() * ALIGNMENT_Z_OFFSET)
+
+        obj.matrix_world = perimeter.matrix_world @ margin @ p_matrix @ o_matrix.inverted()
+
+        #
+        # if obj.type == 'CURVE':
+        #     mesh = curve2mesh(obj)
+        # else: # obj.type == 'MESH':
+        #     mesh = obj.data
+        #
+        #
+        # p0: Vector = mesh.vertices[0].co
+        # p1: Vector = perimeter.data.vertices[0].co
+        #
+        # d = distance_point_to_plane(p0, p1, normal)
+        #
 
         self.report({'INFO'}, "OK")
         return {'FINISHED'}
