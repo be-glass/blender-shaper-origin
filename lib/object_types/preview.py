@@ -74,9 +74,6 @@ class Preview:
                                     @ perimeter_mw_1 \
                                     @ self.cut_obj.matrix_world
 
-        def clean(self):
-            if self.obj:
-                bpy.data.objects.remove(self.obj)
 
     # private
 

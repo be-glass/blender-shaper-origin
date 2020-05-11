@@ -61,7 +61,7 @@ class Perimeter(MeshShape):
         return [o for o in objs if o.soc_object_type == 'Cut' and o is not self.obj]
 
     def objects(self) -> List[Object]:
-        return self.obj.users_collection[0].objects
+        return [o for o in self.obj.users_collection[0].objects if o.soc_object_type != "None"]
 
     def matrix(self) -> Matrix:
         return self.obj.matrix_world
