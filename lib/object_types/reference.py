@@ -20,6 +20,7 @@ from mathutils import Matrix
 
 from ..blender.compartment import Compartment, Collect
 from ..constant import PREFIX
+from ..helper.other import align_to_face
 
 
 class Reference:
@@ -50,8 +51,9 @@ class Reference:
 
         ref_obj = bpy.data.objects.new(self.name, None)
         ref_obj.location = self.cut_obj.location
-        ref_obj.matrix_world = self.cut_obj.matrix_world
-        ref_obj.matrix_world.identity()
+
+        ref_obj.matrix_world = align_to_face(self.cut_obj.data.polygons[0]).inverted()
+
         compartment.link_obj(ref_obj)
         ref_obj.empty_display_size = 5
         ref_obj.empty_display_type = 'PLAIN_AXES'

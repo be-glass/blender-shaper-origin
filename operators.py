@@ -18,6 +18,7 @@ from bpy.utils import register_class, unregister_class
 from mathutils import Matrix
 from typing import List, Type, Set
 
+from .lib.helper.other import align_to_face
 from .lib.constant import ALIGNMENT_Z_OFFSET
 from .lib.blender.compartment import Compartment, Collect
 from .lib.blender.project import Project
@@ -88,36 +89,13 @@ class MESH_OT_socut_align_object(Operator):
         else:  # obj.type == 'MESH':
             mesh = obj.data
 
-        p_center = perimeter.data.polygons[0].center
         p_normal = perimeter.data.polygons[0].normal
-
-        o_center = mesh.polygons[0].center
-        o_normal = mesh.polygons[0].normal
-
-        o_quat = o_normal.to_track_quat('Z', 'Y')
-        o_matrix = o_quat.to_matrix().to_4x4()
-        o_matrix.translation = o_center
-
-        p_quat = p_normal.to_track_quat('Z', 'Y')
-        p_matrix = p_quat.to_matrix().to_4x4()
-        p_matrix.translation = p_center
-
         margin = Matrix.Translation(p_normal.normalized() * ALIGNMENT_Z_OFFSET)
 
-        obj.matrix_world = perimeter.matrix_world @ margin @ p_matrix @ o_matrix.inverted()
+        p_matrix = align_to_face(perimeter.data.polygons[0])
+        o_matrix = align_to_face(mesh.polygons[0])
 
-        #
-        # if obj.type == 'CURVE':
-        #     mesh = curve2mesh(obj)
-        # else: # obj.type == 'MESH':
-        #     mesh = obj.data
-        #
-        #
-        # p0: Vector = mesh.vertices[0].co
-        # p1: Vector = perimeter.data.vertices[0].co
-        #
-        # d = distance_point_to_plane(p0, p1, normal)
-        #
+        obj.matrix_world = perimeter.matrix_world @ margin @ p_matrix @ o_matrix.inverted()
 
         self.report({'INFO'}, "OK")
         return {'FINISHED'}

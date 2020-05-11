@@ -14,6 +14,7 @@
 #  along with Blender_Shaper_Origin.  If not, see <https://www.gnu.org/licenses/>.
 
 import bpy
+from mathutils import Matrix
 from typing import List, Tuple, Union
 
 from bpy.types import Object
@@ -232,3 +233,11 @@ def svg_material_attributes(key) -> str:
     (stroke, fill) = SO_CUT_ENCODING[style]
     return f'stroke="{stroke}" fill="{fill}"'
 
+
+def align_to_face(polygon) -> Matrix:
+    center = polygon.center
+    normal = polygon.normal
+    quat = normal.to_track_quat('Z', 'Y')
+    matrix = quat.to_matrix().to_4x4()
+    matrix.translation = center
+    return matrix
