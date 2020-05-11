@@ -66,6 +66,9 @@ class MeshedCurve(Body):
     def is_solid(self) -> bool:
         return not self.shape.is_guide()
 
+    def thickness_delta(self) -> float:
+        return 0.0
+
 
 def remove_doubles(obj) -> None:
     select_active(obj)

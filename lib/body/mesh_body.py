@@ -19,7 +19,7 @@ from bpy.types import Object
 from .__init__ import Body
 from ..blender.compartment import Compartment
 from ..blender.fillet import Fillet
-from ..helper.other import length
+from ..constant import ALIGNMENT_Z_OFFSET
 
 
 class MeshBody(Body):
@@ -60,6 +60,6 @@ class MeshBody(Body):
 
     def thickness_delta(self) -> float:
         if self.cut_obj.soc_mesh_cut_type == 'Cutout':
-            return 0.2
+            return ALIGNMENT_Z_OFFSET * 2
         else:
             return 0.0
