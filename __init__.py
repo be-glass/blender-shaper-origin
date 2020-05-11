@@ -21,7 +21,7 @@ bl_info = {
     "name": "Shaper Origin Toolbox",
     "author": "Be Glass",
     "blender": (2, 80, 0),
-    "version": (0, 2, 0),
+    "version": (0, 2, 1),
     "location": "3D View > Sidebar",
     "description": "SVG Export Utilities for cutting lines",
     # "wiki_url": "https://docs.blender.org/manual/en/dev/addons/mesh/3d_print_toolbox.html",
