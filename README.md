@@ -41,7 +41,9 @@ Blender, of course. This add-on was developed and tested on Blender v2.8.2.
 - In Blender
     - File > Edit > Preferences
     - Add-ons > Install
-        - Choose `__init__.py` inside the the downloaded/clones repository
+        - Choose 
+          - the downloaded zip file, *or* 
+          - `__init__.py` inside cloned repository
         - click \[Install Add-on]
         
       ![install addon in blender](doc/img/install.jpg?raw=true "Addon Dialog - install")
